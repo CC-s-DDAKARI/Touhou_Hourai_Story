@@ -4,7 +4,7 @@ using namespace SC::Game::UI;
 
 ComplexPage::ComplexPage() : BasePage()
 {
-
+	InitializeComponents();
 }
 
 void ComplexPage::Add( RefPtr<Element> page )
@@ -21,4 +21,6 @@ void ComplexPage::InitializeComponents()
 {
 	declare_element( FixedPanel, fixedPanel );
 	Content = fixedPanel;
+
+	this->fixedPanel = fixedPanel;
 }

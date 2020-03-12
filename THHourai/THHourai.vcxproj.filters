@@ -78,6 +78,9 @@
     <ClInclude Include="UITestPage.h">
       <Filter>Pages</Filter>
     </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>UIElement</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="UITestPage.cpp">
       <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
+      <Filter>UIElement</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,15 +2,9 @@
 
 namespace Touhou
 {
-	class GaugeBar : public UI::FixedPanel
+	class GaugeBar : public UI::RelativePanel
 	{
-		double maxValue = 0;
-		double currentValue = 0;
-
 	public:
-		GaugeBar();
-
-		vs_property_auto( double, MaxValue );
-		vs_property_auto( double, CurrentValue );
+		GaugeBar(String name);
 	};
 }

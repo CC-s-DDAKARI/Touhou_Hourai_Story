@@ -76,5 +76,9 @@ void Scene01::Load( RefPtr<IAsyncLoad> asyncLoad )
 
 void Scene01::LoadForUI()
 {
+	declare_element(GaugeBar, Gaugebar);
+
 	complexPage = new ComplexPage();
+	complexPage->Add(Gaugebar);
+
 }

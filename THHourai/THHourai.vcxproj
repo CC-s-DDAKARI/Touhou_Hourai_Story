@@ -177,6 +177,9 @@
     <ClInclude Include="DemoScene.h" />
     <ClInclude Include="GameVar.h" />
     <ClInclude Include="GaugeBar.h" />
+    <ClInclude Include="Interface.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Kaguya.h" />
     <ClInclude Include="KeyboardMovement.h" />
     <ClInclude Include="LoadingPage.h" />
@@ -205,6 +208,9 @@
     <ClCompile Include="DemoScene.cpp" />
     <ClCompile Include="GameVar.cpp" />
     <ClCompile Include="GaugeBar.cpp" />
+    <ClCompile Include="Interface.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Kaguya.cpp" />
     <ClCompile Include="KeyboardMovement.cpp" />
     <ClCompile Include="LoadingPage.cpp" />
