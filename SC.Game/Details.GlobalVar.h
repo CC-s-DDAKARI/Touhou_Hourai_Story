@@ -18,6 +18,14 @@ namespace SC::Game::Details
 
 		int frameIndex = 0;
 		int fixedFrameIndex = 0;
+
+		physx::PxDefaultAllocator pxDefaultAllocator;
+		physx::PxDefaultErrorCallback pxDefaultErrorCallback;
+
+		physx::PxFoundation* pxFoundation = nullptr;
+
+		void InitializeComponents();
+		void Release();
 	};
 
 	extern tag_GlobalVar GlobalVar;

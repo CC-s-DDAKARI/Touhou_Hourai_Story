@@ -132,6 +132,7 @@ int Application::Start( RefPtr<Application> app )
 	AppShutdown = true;
 
 	GC.CollectAll();
+	GlobalVar.Release();
 
 	return ret;
 }
@@ -166,11 +167,7 @@ void Application::AppName_set( String value )
 
 void Application::InitializeDevice()
 {
-	GlobalVar.factory = new IntegratedFactory();
-	GlobalVar.device = new CDevice( GlobalVar.factory->SearchHardwareAdapter().Get() );
-	GlobalVar.swapChain = new CSwapChain();
-	GlobalVar.gameLogic = new GameLogic();
-
+	GlobalVar.InitializeComponents();
 	ShaderBuilder::Initialize();
 
 	LoadSystemFont();

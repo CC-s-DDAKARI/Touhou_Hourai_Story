@@ -27,6 +27,8 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+#include "PhysX/PxPhysicsAPI.h"
+
 #undef LoadImage
 
 using Microsoft::WRL::ComPtr;
