@@ -219,7 +219,7 @@ void Animator::ReplaceToRoot()
 {
 	int fixedFrameIndex = GlobalVar.fixedFrameIndex;
 
-	for ( int i = 0, count = boneTransform.size(); i < count; ++i )
+	for ( int i = 0, count = ( int )boneTransform.size(); i < count; ++i )
 	{
 		auto& bt = boneTransform[i];
 		auto finalTransform = ( tag_BoneTransform* )finalTransformBuffer[fixedFrameIndex]->pBlock;

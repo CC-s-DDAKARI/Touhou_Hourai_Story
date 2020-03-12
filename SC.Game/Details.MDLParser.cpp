@@ -746,7 +746,7 @@ void MDLParser::LoadBones( String name, RefPtr<GameObject> head )
 	auto bone = root->AddComponent<Bone>();
 
 	bone->Name = "root";
-	bone->Index = bones.size();
+	bone->Index = ( int )bones.size();
 
 	for ( int i = 0, count = ( int )bones.size(); i < count; ++i )
 	{
@@ -786,7 +786,7 @@ void MDLParser::LoadBones( String name, RefPtr<GameObject> head )
 
 void MDLParser::LoadMeshes( String name, RefPtr<GameObject> head, const vector<RefPtr<Material>>& mtr )
 {
-	for ( int i = 0, count = geosets.size(); i < count; ++i )
+	for ( int i = 0, count = ( int )geosets.size(); i < count; ++i )
 	{
 		auto& geoset = geosets[i];
 

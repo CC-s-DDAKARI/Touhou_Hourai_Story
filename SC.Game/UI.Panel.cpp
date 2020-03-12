@@ -90,7 +90,7 @@ int Panel::IndexOf( RefPtr<Element> value )
 		}
 	);
 
-	return it - contents->begin();
+	return ( int )( it - contents->begin() );
 }
 
 void Panel::Insert( int index, RefPtr<Element> value )
@@ -148,7 +148,7 @@ int Panel::IndexOf( String name )
 
 	auto index = it - contents->begin();
 	if ( index >= ( ptrdiff_t )contents->size() ) return -1;
-	return index;
+	return ( int )index;
 }
 
 int Panel::Count_get()

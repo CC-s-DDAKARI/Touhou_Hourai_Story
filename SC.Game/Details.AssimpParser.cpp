@@ -487,7 +487,7 @@ void AssimpParser::AddJointIndex( SkinnedVertex& v, int jointIndex, float weight
 
 int AssimpParser::SearchJoint( const string_view& name )
 {
-	for ( int i = 0, count = joints.size(); i < count; ++i )
+	for ( int i = 0, count = ( int )joints.size(); i < count; ++i )
 	{
 		if ( joints[i].Name == name ) return i;
 	}

@@ -113,7 +113,7 @@ namespace SC::Game::Details
 
 			void Export( tag_Interval interval, tag_Keyframe<Vector3>& translation, tag_Keyframe<Vector3>& scale, tag_Keyframe<Quaternion>& rotation )
 			{
-				int numKeyf = Translation.Keyframes.size();
+				int numKeyf = ( int )Translation.Keyframes.size();
 				translation.Method = Translation.Method;
 				for ( int i = 0; i < numKeyf; ++i )
 				{
@@ -123,7 +123,7 @@ namespace SC::Game::Details
 					}
 				}
 
-				numKeyf = Scale.Keyframes.size();
+				numKeyf = ( int )Scale.Keyframes.size();
 				scale.Method = Scale.Method;
 				for ( int i = 0; i < numKeyf; ++i )
 				{
@@ -133,7 +133,7 @@ namespace SC::Game::Details
 					}
 				}
 
-				numKeyf = Rotation.Keyframes.size();
+				numKeyf = ( int )Rotation.Keyframes.size();
 				rotation.Method = Rotation.Method;
 				for ( int i = 0; i < numKeyf; ++i )
 				{
@@ -152,7 +152,7 @@ namespace SC::Game::Details
 
 			void Export( tag_Interval interval, tag_Keyframe<bool>& alpha )
 			{
-				int numKeyf = Keyframes.Keyframes.size();
+				int numKeyf = ( int )Keyframes.Keyframes.size();
 				Keyframes.Method = Keyframes.Method;
 				for ( int i = 0; i < numKeyf; ++i )
 				{

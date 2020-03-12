@@ -72,7 +72,7 @@ void AnimatorController::RemoveTransition( const wstring_view& from, const Anima
 	{
 		auto& vec = it->second;
 
-		for ( int i = 0, count = vec.size(); i < count; ++i )
+		for ( int i = 0, count = ( int )vec.size(); i < count; ++i )
 		{
 			auto& item = vec[i];
 			bool check = true;

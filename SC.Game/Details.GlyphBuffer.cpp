@@ -206,7 +206,7 @@ void GlyphBuffer::LockGlyphs()
 			glyphRun.glyphOffsets = glyphOffsets.data();
 			glyphRun.glyphIndices = glyphIndices.data();
 
-			for ( int i = 0, count = glyphQueue.size(); i < count; ++i )
+			for ( int i = 0, count = ( int )glyphQueue.size(); i < count; ++i )
 			{
 				auto glyph = glyphQueue.front();
 				glyphQueue.pop_front();

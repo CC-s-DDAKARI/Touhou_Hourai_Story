@@ -221,19 +221,19 @@ namespace SC::Game
 		{
 			double dur = 0;
 
-			for ( int i = 0, count = Translation.size(); i < count; ++i )
+			for ( int i = 0, count = ( int )Translation.size(); i < count; ++i )
 			{
 				auto& key = Translation[i].TimePos;
 				dur = std::max( dur, key );
 			}
 
-			for ( int i = 0, count = Scaling.size(); i < count; ++i )
+			for ( int i = 0, count = ( int )Scaling.size(); i < count; ++i )
 			{
 				auto& key = Scaling[i].TimePos;
 				dur = std::max( dur, key );
 			}
 
-			for ( int i = 0, count = Rotation.size(); i < count; ++i )
+			for ( int i = 0, count = ( int )Rotation.size(); i < count; ++i )
 			{
 				auto& key = Rotation[i].TimePos;
 				dur = std::max( dur, key );

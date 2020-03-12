@@ -87,7 +87,7 @@ int String::CompareTo( String right )
 
 RefPtr<IEnumerator<wchar_t>> String::GetEnumerator()
 {
-	return new StringEnumerator( Chars, ptr->length() );
+	return new StringEnumerator( Chars, ( int )ptr->length() );
 }
 
 object String::Clone()

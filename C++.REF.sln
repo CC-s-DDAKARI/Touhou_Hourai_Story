@@ -11,6 +11,36 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "THHourai", "THHourai\THHour
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SC.Game", "SC.Game\SC.Game.vcxproj", "{A71FA1E6-28DF-48F4-B70F-2AF2B2D51BEB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExternalLib", "ExternalLib", "{6F27048C-E8D3-4661-BA1C-9C8170683542}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Win32", "Win32", "{C3856FB0-F008-4AC5-8B98-A00AE700B90B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{1AD703F1-E788-4CA7-908D-189922A943C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{B41056E1-E259-4D08-A485-7EE694C2DA64}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalLib\Win32\Debug\assimp.dll = ExternalLib\Win32\Debug\assimp.dll
+		ExternalLib\Win32\Debug\assimp.lib = ExternalLib\Win32\Debug\assimp.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{364C9253-D211-4C41-A3E3-DDFE9FAF3FD6}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalLib\Win32\Release\assimp.dll = ExternalLib\Win32\Release\assimp.dll
+		ExternalLib\Win32\Release\assimp.lib = ExternalLib\Win32\Release\assimp.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{1B1ACB08-BCE3-44C9-8BF2-B6C6F26631D7}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalLib\x64\Debug\assimp.dll = ExternalLib\x64\Debug\assimp.dll
+		ExternalLib\x64\Debug\assimp.lib = ExternalLib\x64\Debug\assimp.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{A7E2376B-DAEA-4711-B5D0-E16619DE0795}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalLib\x64\Release\assimp.dll = ExternalLib\x64\Release\assimp.dll
+		ExternalLib\x64\Release\assimp.lib = ExternalLib\x64\Release\assimp.lib
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +114,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C3856FB0-F008-4AC5-8B98-A00AE700B90B} = {6F27048C-E8D3-4661-BA1C-9C8170683542}
+		{1AD703F1-E788-4CA7-908D-189922A943C4} = {6F27048C-E8D3-4661-BA1C-9C8170683542}
+		{B41056E1-E259-4D08-A485-7EE694C2DA64} = {C3856FB0-F008-4AC5-8B98-A00AE700B90B}
+		{364C9253-D211-4C41-A3E3-DDFE9FAF3FD6} = {C3856FB0-F008-4AC5-8B98-A00AE700B90B}
+		{1B1ACB08-BCE3-44C9-8BF2-B6C6F26631D7} = {1AD703F1-E788-4CA7-908D-189922A943C4}
+		{A7E2376B-DAEA-4711-B5D0-E16619DE0795} = {1AD703F1-E788-4CA7-908D-189922A943C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {07754B99-F569-4D76-A50E-4DB7F34A469E}
