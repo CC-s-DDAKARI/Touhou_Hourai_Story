@@ -2,6 +2,8 @@ using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
 
+using namespace physx;
+
 void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext )
 {
 	int frameIndex = GlobalVar.frameIndex;
@@ -36,20 +38,45 @@ object Transform::Clone()
 
 void Transform::LateUpdate( Time& time, Input& input )
 {
+	var rigid = GetComponent<Rigidbody>();
+	var staticRigid = GetComponent<StaticRigidbody>();
+
+	XMVECTOR pos;
+	XMVECTOR scale;
+	XMVECTOR quat;
+
+	if ( rigid )
+	{
+		auto gp = rigid->pxRigidbody->getGlobalPose();
+		pos = XMVectorSet( gp.p.x, gp.p.y, gp.p.z, 0 );
+		quat = XMVectorSet( gp.q.x, gp.q.y, gp.q.z, gp.q.w );
+		pHasRigid = rigid.Get();
+	}
+	else
+	{
+		pos = XMVectorSet( ( float )position.X, ( float )position.Y, ( float )position.Z, 0 );
+		quat = XMVectorSet( ( float )rotation.X, ( float )rotation.Y, ( float )rotation.Z, ( float )rotation.W );
+		pHasRigid = nullptr;
+	}
+	scale = XMVectorSet( ( float )this->scale.X, ( float )this->scale.Y, ( float )this->scale.Z, 0 );
+
 	int frameIndex = GlobalVar.frameIndex;
 	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
 
 	XMMATRIX worldPar = XMMatrixIdentity();
+	XMMATRIX worldParInv = XMMatrixIdentity();
 
 	if ( Linked->Parent )
 	{
 		auto& trp = *( Constants* )Linked->Parent->Transform->dynamicBuffer[frameIndex]->pBlock;
 		worldPar = XMLoadFloat4x4( &trp.World );
-	}
 
-	XMVECTOR pos = XMVectorSet( ( float )position.X, ( float )position.Y, ( float )position.Z, 0 );
-	XMVECTOR scale = XMVectorSet( ( float )this->scale.X, ( float )this->scale.Y, ( float )this->scale.Z, 0 );
-	XMVECTOR quat = XMVectorSet( ( float )rotation.X, ( float )rotation.Y, ( float )rotation.Z, ( float )rotation.W );
+		if ( rigid )
+		{
+			auto det = XMMatrixDeterminant( worldPar );
+			worldParInv = XMMatrixInverse( &det, worldPar );
+		}
+	}
 
 	XMMATRIX world =
 		XMMatrixScalingFromVector( scale ) *
@@ -60,6 +87,39 @@ void Transform::LateUpdate( Time& time, Input& input )
 	XMVECTOR deter = XMMatrixDeterminant( worldFinal );
 	XMStoreFloat4x4( &frameResource.World, worldFinal );
 	XMStoreFloat4x4( &frameResource.WorldInvTranspose, XMMatrixTranspose( XMMatrixInverse( &deter, worldFinal ) ) );
+
+	if ( rigid )
+	{
+		XMVECTOR descale, dequat, depos;
+		XMMatrixDecompose( &descale, &dequat, &depos, worldParInv );
+
+		pos += depos;
+		quat = XMQuaternionMultiply( quat, dequat );
+
+		this->position = Vector3( ( double )XMVectorGetX( pos ), ( double )XMVectorGetY( pos ), ( double )XMVectorGetZ( pos ) );
+		this->rotation = Quaternion( ( double )XMVectorGetX( quat ), ( double )XMVectorGetY( quat ), ( double )XMVectorGetZ( quat ), ( double )XMVectorGetW( quat ) );
+	}
+
+	if ( staticRigid )
+	{
+		XMVECTOR descale, dequat, depos;
+		XMMatrixDecompose( &descale, &dequat, &depos, worldParInv );
+
+		pos += depos;
+		quat = XMQuaternionMultiply( quat, dequat );
+
+		this->position = Vector3( ( double )XMVectorGetX( pos ), ( double )XMVectorGetY( pos ), ( double )XMVectorGetZ( pos ) );
+		this->rotation = Quaternion( ( double )XMVectorGetX( quat ), ( double )XMVectorGetY( quat ), ( double )XMVectorGetZ( quat ), ( double )XMVectorGetW( quat ) );
+
+		PxTransform gp;
+		gp.p = PxVec3( XMVectorGetX( pos ), XMVectorGetY( pos ), XMVectorGetZ( pos ) );
+		gp.q = PxQuat( XMVectorGetX( quat ), XMVectorGetY( quat ), XMVectorGetZ( quat ), XMVectorGetW( quat ) );
+
+		if ( !staticRigid->pxRigidbody )
+		{
+			staticRigid->pxRigidbody = GlobalVar.pxDevice->createRigidStatic( gp );
+		}
+	}
 }
 
 void Transform::LookAt( RefPtr<Transform> target, Vector3 up )
@@ -85,6 +145,12 @@ Vector3 Transform::Position_get()
 
 void Transform::Position_set( Vector3 value )
 {
+	if ( pHasRigid )
+	{
+		auto gp = pHasRigid->pxRigidbody->getGlobalPose();
+		gp.p = PxVec3( ( float )value.X, ( float )value.Y, ( float )value.Z );
+		pHasRigid->pxRigidbody->setGlobalPose( gp );
+	}
 	position = value;
 }
 
@@ -105,6 +171,12 @@ Quaternion Transform::Rotation_get()
 
 void Transform::Rotation_set( Quaternion value )
 {
+	if ( pHasRigid )
+	{
+		auto gp = pHasRigid->pxRigidbody->getGlobalPose();
+		gp.q = PxQuat( ( float )value.X, ( float )value.Y, ( float )value.Z, ( float )value.W );
+		pHasRigid->pxRigidbody->setGlobalPose( gp );
+	}
 	rotation = value;
 }
 

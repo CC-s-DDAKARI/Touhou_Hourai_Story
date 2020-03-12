@@ -328,6 +328,21 @@
     <ClInclude Include="Details.GarbageCollector.h">
       <Filter>Details</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\PhysicsMaterial.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Rigidbody.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Collider.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\BoxCollider.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\StaticRigidbody.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -600,6 +615,21 @@
     </ClCompile>
     <ClCompile Include="Details.GarbageCollector.cpp">
       <Filter>Details</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsMaterial.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Rigidbody.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticRigidbody.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,7 @@ namespace SC::Game
 		Quaternion rotation;
 
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
+		Rigidbody* pHasRigid = nullptr;
 
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );

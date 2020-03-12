@@ -14,6 +14,8 @@ namespace SC::Game
 		std::vector<RefPtr<GameObject>> gameObjects;
 		WeakPtr parent;
 
+		sc_game_export_object( physx::PxRigidStatic* ) pxRigidStatic = nullptr;
+
 	public:
 		/// <summary> <see cref="GameObject"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="name"> 개체 이름을 전달합니다. </param>
@@ -63,6 +65,18 @@ namespace SC::Game
 			).TryAs<T>();
 		}
 
+		/// <summary> 개체에 추가된 확장 컴포넌트를 가져옵니다. </summary>
+		template< class T >
+		T* GetRawComponent()
+		{
+			return dynamic_cast< T* >( GetRawComponent( typeid( T ).hash_code(), []( Component* ptr ) -> auto
+			{
+				T* dynamic = dynamic_cast< T* >( ptr );
+				return dynamic != nullptr;
+			}
+			) );
+		}
+
 		/// <summary> 개체에 추가된 확장 컴포넌트를 제거합니다. </summary>
 		template< class T >
 		void RemoveComponent()
@@ -90,6 +104,28 @@ namespace SC::Game
 			for ( int i = 0; i < NumChilds_get(); ++i )
 			{
 				auto vec = Childs_get( i )->GetComponentsInChildren<T>();
+				components.insert( components.end(), vec.begin(), vec.end() );
+			}
+
+			return move( components );
+		}
+
+		/// <summary> 자식 요소까지 포함하여 개체에 추가된 확장 컴포넌트 목록을 가져옵니다. </summary>
+		template< class T >
+		std::vector<T*> GetRawComponentsInChildren()
+		{
+			using namespace std;
+
+			vector<T*> components;
+			// for each childs.
+			if ( auto c = GetRawComponent<T>(); c )
+			{
+				components.push_back( c );
+			}
+
+			for ( int i = 0; i < NumChilds_get(); ++i )
+			{
+				auto vec = Childs_get( i )->GetRawComponentsInChildren<T>();
 				components.insert( components.end(), vec.begin(), vec.end() );
 			}
 
@@ -127,6 +163,7 @@ namespace SC::Game
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
 		void AddComponent( std::size_t type_hash, RefPtr<Component> component );
 		RefPtr<Component> GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
+		Component* GetRawComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		void RemoveComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 	};
 }

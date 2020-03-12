@@ -78,6 +78,12 @@
     <ClInclude Include="UITestPage.h">
       <Filter>Pages</Filter>
     </ClInclude>
+    <ClInclude Include="ColliderBoxVisualizer.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Rock1.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -154,6 +160,12 @@
     </ClCompile>
     <ClCompile Include="UITestPage.cpp">
       <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderBoxVisualizer.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Rock1.cpp">
+      <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

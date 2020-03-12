@@ -211,6 +211,39 @@ RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool
 	}
 }
 
+Component* GameObject::GetRawComponent( size_t type_hash, std::function<bool( Component* )> caster )
+{
+	int dynamic_index = -1;
+
+	if ( type_hash == typeid( Game::Transform ).hash_code() )
+	{
+		return transform.Get();
+	}
+
+	for ( size_t i = 0, count = components.size(); i < count; ++i )
+	{
+		auto& comp = components[i];
+		if ( comp.first == type_hash )
+		{
+			return comp.second.Get();
+		}
+
+		if ( dynamic_index == -1 && caster( comp.second.Get() ) )
+		{
+			dynamic_index = ( int )i;
+		}
+	}
+
+	if ( dynamic_index != -1 )
+	{
+		return components[dynamic_index].second.Get();
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
 void GameObject::RemoveComponent( size_t type_hash, function<bool( Component* )> caster )
 {
 	int dynamic_index = -1;

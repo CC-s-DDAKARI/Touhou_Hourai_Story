@@ -3,6 +3,8 @@ using namespace Touhou;
 PlayableCharacterBase::PlayableCharacterBase( String name, String filename ) : GameObject( name )
 	, filename( filename )
 {
+	IsLocked = true;
+
 	AddComponent<MouseEventDispatcher>();
 	AddComponent<Animator>();
 	{
@@ -12,6 +14,24 @@ PlayableCharacterBase::PlayableCharacterBase( String name, String filename ) : G
 		combat->CurrentHealthPoint = 500;
 		combat->MaxMagicPoint = 10;
 	}
+	var rigid = AddComponent<Rigidbody>();
+	{
+	}
+	var collider = AddComponent<BoxCollider>();
+	{
+		collider->Center = Vector3( 0, 1, 0 );
+		collider->Extent = Vector3( 1, 1, 1 );
+	}
+
+#if defined( _DEBUG )
+	var go = new ColliderBoxVisualizer( "debugVisualizer" );
+	go->Parent = this;
+
+	go->Transform->Scale = Vector3( 1, 1, 1 );
+	go->Transform->Position = Vector3( 0, 1, 0 );
+#endif
+
+	IsLocked = false;
 }
 
 void PlayableCharacterBase::LoadAnimatorController()

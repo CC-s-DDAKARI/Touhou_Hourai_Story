@@ -26,6 +26,7 @@ void Movement::FixedUpdate( Time& fixedTime )
 	auto deltaTime = fixedTime.FixedDeltaTimeInSeconds;
 	auto current = Transform->Position;
 	auto delta = moveTo - current;
+	delta.Y = 0;
 
 	if ( delta.Magnitude > 0.01 )
 	{

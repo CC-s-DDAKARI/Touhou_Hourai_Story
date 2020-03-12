@@ -23,6 +23,9 @@ namespace SC::Game::Details
 		physx::PxDefaultErrorCallback pxDefaultErrorCallback;
 
 		physx::PxFoundation* pxFoundation = nullptr;
+		physx::PxPvd* pxPvd = nullptr;
+		physx::PxPhysics* pxDevice = nullptr;
+		physx::PxCooking* pxCooking = nullptr;
 
 		void InitializeComponents();
 		void Release();

@@ -14,6 +14,7 @@
 #endif
 
 #include <map>
+#include <set>
 #include <string>
 #include <memory>
 #include <vector>
@@ -37,6 +38,7 @@ namespace SC::Game
 	class Texture2D;
 	class RenderTexture2D;
 	class Material;
+	class PhysicsMaterial;
 	class AnimationClip;
 	class AnimatorController;
 	class AnimationState;
@@ -54,6 +56,10 @@ namespace SC::Game
 	class DirectionalLight;
 	class Bone;
 	class Animator;
+	class Rigidbody;
+	class StaticRigidbody;
+	class Collider;
+	class BoxCollider;
 
 	namespace UI
 	{
@@ -139,6 +145,7 @@ namespace SC::Game
 #include "SC.Game/Texture2D.h"
 #include "SC.Game/RenderTexture2D.h"
 #include "SC.Game/Material.h"
+#include "SC.Game/PhysicsMaterial.h"
 #include "SC.Game/AnimationClip.h"
 #include "SC.Game/AnimatorController.h"
 #include "SC.Game/AnimationState.h"
@@ -156,6 +163,10 @@ namespace SC::Game
 #include "SC.Game/DirectionalLight.h"
 #include "SC.Game/Bone.h"
 #include "SC.Game/Animator.h"
+#include "SC.Game/Rigidbody.h"
+#include "SC.Game/StaticRigidbody.h"
+#include "SC.Game/Collider.h"
+#include "SC.Game/BoxCollider.h"
 #include "SC.Game/UI.EventDispatcher.h"
 #include "SC.Game/UI.DispatcherEventArgs.h"
 #include "SC.Game/UI.Brush.h"

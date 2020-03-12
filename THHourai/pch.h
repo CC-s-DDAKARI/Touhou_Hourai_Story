@@ -30,6 +30,8 @@ void varName ## _set( className value );
 #include "Kaguya.h"
 #include "Bee.h"
 #include "Scene0_Terrain.h"
+#include "ColliderBoxVisualizer.h"
+#include "Rock1.h"
 
 
 /* Components */

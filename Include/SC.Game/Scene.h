@@ -19,6 +19,11 @@ namespace SC::Game
 		Diagnostics::StepTimer timer;
 		Diagnostics::StepTimer fixedTimer;
 
+		sc_game_export_object( physx::PxScene* ) pxScene = nullptr;
+
+		std::list<Rigidbody*> appliedRigidbodies;
+		std::list<StaticRigidbody*> appliedStaticRigidbodies;
+
 		bool firstUpdate = false;
 
 	public:
@@ -123,5 +128,7 @@ namespace SC::Game
 
 	private:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
+		void UpdateRigidbodyPhysics();
+		void UpdateStaticRigidbodyPhysics();
 	};
 }
