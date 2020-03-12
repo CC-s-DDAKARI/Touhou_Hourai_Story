@@ -9,10 +9,6 @@ Rigidbody::Rigidbody() : Component()
 {
 	auto gp = PxTransform( PxVec3( 0.0f ) );
 	pxRigidbody = GlobalVar.pxDevice->createRigidDynamic( gp );
-
-	pxRigidbody->setRigidDynamicLockFlag( PxRigidDynamicLockFlag::eLOCK_ANGULAR_X, true );
-	pxRigidbody->setRigidDynamicLockFlag( PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y, true );
-	pxRigidbody->setRigidDynamicLockFlag( PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z, true );
 }
 
 Rigidbody::~Rigidbody()
