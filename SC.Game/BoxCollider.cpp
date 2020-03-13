@@ -40,18 +40,15 @@ object BoxCollider::Clone()
 
 void BoxCollider::Start()
 {
-	if ( started == false )
-	{
-		auto changeScale = Transform->Scale;
+	auto changeScale = Transform->Scale;
 
-		Vector3 extent = changeExtent * changeScale;
-		PxVec3 extent_ = PxVec3( ( float )extent.X, ( float )extent.Y, ( float )extent.Z );
-		PxBoxGeometry boxGeo;
-		boxGeo.halfExtents = extent_;
-		pxShape->setGeometry( boxGeo );
-		
-		started = true;
-	}
+	Vector3 extent = changeExtent * changeScale;
+	PxVec3 extent_ = PxVec3( ( float )extent.X, ( float )extent.Y, ( float )extent.Z );
+	PxBoxGeometry boxGeo;
+	boxGeo.halfExtents = extent_;
+	pxShape->setGeometry( boxGeo );
+
+	return Collider::Start();
 }
 
 Vector3 BoxCollider::Extent_get()

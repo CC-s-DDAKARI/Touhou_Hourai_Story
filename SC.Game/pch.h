@@ -121,5 +121,45 @@ inline physx::PxQuat ToPhysX( const SC::Game::Quaternion& quat )
 	return physx::PxQuat( ( float )quat.X, ( float )quat.Y, ( float )quat.Z, ( float )quat.W );
 }
 
+inline physx::PxVec3 ToPhysX3( FXMVECTOR vec3 )
+{
+	return physx::PxVec3( XMVectorGetX( vec3 ), XMVectorGetY( vec3 ), XMVectorGetZ( vec3 ) );
+}
+
+inline physx::PxQuat ToPhysX4( FXMVECTOR vec3 )
+{
+	return physx::PxQuat( XMVectorGetX( vec3 ), XMVectorGetY( vec3 ), XMVectorGetZ( vec3 ), XMVectorGetW( vec3 ) );
+}
+
+inline XMVECTOR ToXMVec( const physx::PxVec3& vec3 )
+{
+	return XMVectorSet( vec3.x, vec3.y, vec3.z, 1.0f );
+}
+
+inline XMVECTOR ToXMVec( const physx::PxQuat& vec4 )
+{
+	return XMVectorSet( vec4.x, vec4.y, vec4.z, vec4.w );
+}
+
+inline XMVECTOR ToXMVec( const SC::Game::Vector3& vec3 )
+{
+	return XMVectorSet( ( float )vec3.X, ( float )vec3.Y, ( float )vec3.Z, 1.0f );
+}
+
+inline XMVECTOR ToXMVec( const SC::Game::Quaternion& vec4 )
+{
+	return XMVectorSet( ( float )vec4.X, ( float )vec4.Y, ( float )vec4.Z, ( float )vec4.W );
+}
+
+inline SC::Game::Vector3 ToVector( FXMVECTOR vec )
+{
+	return SC::Game::Vector3( XMVectorGetX( vec ), XMVectorGetY( vec ), XMVectorGetZ( vec ) );
+}
+
+inline SC::Game::Quaternion ToQuat( FXMVECTOR vec )
+{
+	return SC::Game::Quaternion( XMVectorGetX( vec ), XMVectorGetY( vec ), XMVectorGetZ( vec ), XMVectorGetW( vec ) );
+}
+
 #include "GameObjectEnumerator.h"
 #include "UI.Panel.Enumerator.h"

@@ -23,6 +23,7 @@ namespace SC::Game
 		sc_game_export_object( physx::PxScene* ) pxScene = nullptr;
 
 		bool firstUpdate = false;
+		bool fetchResults = false;
 
 	public:
 		/// <summary> <see cref="Scene"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
@@ -126,7 +127,5 @@ namespace SC::Game
 
 	private:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
-		void UpdateRigidbodyPhysics();
-		void UpdateStaticRigidbodyPhysics();
 	};
 }

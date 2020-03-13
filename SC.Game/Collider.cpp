@@ -12,6 +12,7 @@ Collider::Collider() : Component()
 void Collider::Clone( Collider* already_object )
 {
 	already_object->changeCenter = changeCenter;
+	already_object->changeRotation = changeRotation;
 }
 
 Collider::~Collider()
@@ -21,17 +22,14 @@ Collider::~Collider()
 
 void Collider::Start()
 {
-	if ( started == false )
-	{
-		auto changeScale = Transform->Scale;
+	auto changeScale = Transform->Scale;
 
-		Vector3 center = changeCenter * changeScale;
-		PxVec3 center_ = PxVec3( ( float )center.X, ( float )center.Y, ( float )center.Z );
-		PxTransform lp = PxTransform( center_ );
-		pxShape->setLocalPose( lp );
+	Vector3 center = changeCenter * changeScale;
+	PxVec3 center_ = PxVec3( ( float )center.X, ( float )center.Y, ( float )center.Z );
+	PxTransform lp = PxTransform( center_ );
+	pxShape->setLocalPose( lp );
 
-		started = true;
-	}
+	Linked->AttachCollider( this );
 }
 
 Vector3 Collider::Center_get()

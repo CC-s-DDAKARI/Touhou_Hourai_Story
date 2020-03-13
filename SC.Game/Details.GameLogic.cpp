@@ -38,7 +38,7 @@ GameLogic::~GameLogic()
 void GameLogic::Update()
 {
 	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
-	if ( currentScene.Get() != SceneManager::currentScene.Get() )
+	if ( SceneManager::currentScene.Get() )
 	{
 		currentScene = move( SceneManager::currentScene );
 	}

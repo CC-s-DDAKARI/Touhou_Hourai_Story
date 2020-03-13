@@ -20,8 +20,6 @@ void Scene0_Terrain::InitializeComponents()
 
 	terrain->AddComponent<MeshRenderer>()->Material = terrain_material;
 	terrain->AddComponent<MeshFilter>()->Mesh = Mesh::CreatePlane( "Scene01_Terrain_Plane", 100.0f, 100.0f );
-	
-	var rigidbody = terrain->AddComponent<StaticRigidbody>();
 
 	var boxCollider = terrain->AddComponent<BoxCollider>();
 	boxCollider->Center = Vector3( 0, -1, 0 );
@@ -51,7 +49,9 @@ void Scene0_Terrain::InitializeComponents()
 	test01->Transform->Position = Vector3( 3, 1, 3 );
 	test01->Parent = this;
 
-	test01 = test01->Clone().As<GameObject>();
+	test01 = new ColliderBoxVisualizer( "test02" );
+	test01->AddComponent<Rigidbody>();
+	test01->AddComponent<BoxCollider>();
 	test01->Transform->Position = Vector3( 5, 1, 3 );
 	test01->Parent = this;
 

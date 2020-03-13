@@ -6,6 +6,8 @@ namespace SC::Game
 	class GameObject : public Assets, virtual public IEnumerable<RefPtr<GameObject>>, virtual public ICloneable
 	{
 		friend class Scene;
+		friend class Transform;
+		friend class Collider;
 
 		Scene* pScene = nullptr;
 
@@ -18,6 +20,8 @@ namespace SC::Game
 
 		sc_game_export_object( physx::PxRigidActor* ) pxRigidbody = nullptr;
 		bool isStaticRigid = false;
+
+		void AttachCollider( Collider* pCol );
 
 	protected:
 		/// <summary> 개체에서 컴포넌트가 추가되려고 합니다. </summary>
@@ -121,13 +125,9 @@ namespace SC::Game
 
 			vector<RefPtr<T>> components;
 			// for each childs.
-			while ( ( auto c = GetComponentIndex( typeid( T ).hash_code(), []( Component* ptr ) -> auto
+			if ( auto c = GetComponent<T>(); c )
 			{
-				T* dynamic = dynamic_cast< T* >( ptr );
-				return dynamic != nullptr;
-			} ) ) != -1 )
-			{
-				components.push_back( components[c] );
+				components.push_back( c );
 			}
 
 			for ( int i = 0; i < NumChilds_get(); ++i )

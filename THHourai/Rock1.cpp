@@ -9,7 +9,6 @@ Rock1::Rock1( String name ) : GameObject( name )
 	LoadAssets();
 	model->Clone().As<GameObject>()->Parent = this;
 
-	AddComponent<StaticRigidbody>();
 	var boxCol = AddComponent<BoxCollider>();
 	boxCol->Center = Vector3( 0, 1, 0 );
 	boxCol->Extent = Vector3( 2, 1, 2 );

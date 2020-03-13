@@ -38,95 +38,72 @@ object Transform::Clone()
 
 void Transform::Update( Time& time, Input& input )
 {
-	XMVECTOR pos;
-	XMVECTOR scale;
-	XMVECTOR quat;
-}
-
-void Transform::LateUpdate( Time& time, Input& input )
-{
-	var rigid = GetComponent<Rigidbody>();
-	var staticRigid = GetComponent<StaticRigidbody>();
+	XMMATRIX parent = XMMatrixIdentity();
+	XMMATRIX parentInv = XMMatrixIdentity();
 
 	XMVECTOR pos;
 	XMVECTOR scale;
 	XMVECTOR quat;
 
-	if ( rigid )
+	// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
+	if ( auto p = gameObject->Parent.Get(); p )
 	{
-		auto gp = rigid->pxRigidbody->getGlobalPose();
-		pos = XMVectorSet( gp.p.x, gp.p.y, gp.p.z, 0 );
-		quat = XMVectorSet( gp.q.x, gp.q.y, gp.q.z, gp.q.w );
-		pHasRigid = rigid.Get();
+		parent = XMLoadFloat4x4( &p->transform->world );
+		auto det = XMMatrixDeterminant( parent );
+		parentInv = XMMatrixInverse( &det, parent );
 	}
+
+	// 리지드바디가 존재할 경우 물리 계산이 완료된 리지드바디에서 위치와 회전 벡터를 가져옵니다.
+	if ( gameObject->pxRigidbody )
+	{
+		auto globalPose = gameObject->pxRigidbody->getGlobalPose();
+
+		pos = ToXMVec( globalPose.p );
+		quat = ToXMVec( globalPose.q );
+
+		// 글로벌 벡터에서 로컬 벡터로 변환합니다.
+		XMVECTOR depos, descale, dequat;
+		XMMatrixDecompose( &descale, &dequat, &depos, parentInv );
+
+		pos += depos;
+		quat = XMQuaternionMultiply( quat, dequat );
+
+		// 리지드바디의 정보를 트랜스폼 정보로 가져옵니다.
+		this->position = ToVector( pos );
+		this->rotation = ToQuat( quat );
+	}
+	// 그렇지 않을 경우 트랜스폼 개체에서 위치와 회전 벡터를 가져옵니다.
 	else
 	{
-		pos = XMVectorSet( ( float )position.X, ( float )position.Y, ( float )position.Z, 0 );
-		quat = XMVectorSet( ( float )rotation.X, ( float )rotation.Y, ( float )rotation.Z, ( float )rotation.W );
-		pHasRigid = nullptr;
+		pos = ToXMVec( position );
+		quat = ToXMVec( rotation );
 	}
-	scale = XMVectorSet( ( float )this->scale.X, ( float )this->scale.Y, ( float )this->scale.Z, 0 );
+	scale = ToXMVec( this->scale );
 
+	// 개체의 월드 행렬을 계산합니다.
+	auto world = XMMatrixTransformation(
+		XMVectorZero(),
+		XMQuaternionIdentity(),
+		scale,
+		XMQuaternionIdentity(),
+		quat,
+		pos
+	);
+
+	world = XMMatrixMultiply( world, parent );
+
+	// 노말 계산을 위한 역전치행렬을 계산합니다.
+	auto det = XMMatrixDeterminant( world );
+	auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
+
+	// 값을 저장합니다.
+	XMStoreFloat4x4( &this->world, world );
+
+	// 값을 GPU에 출력합니다.
 	int frameIndex = GlobalVar.frameIndex;
 	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
-
-	XMMATRIX worldPar = XMMatrixIdentity();
-	XMMATRIX worldParInv = XMMatrixIdentity();
-
-	if ( Linked->Parent )
-	{
-		auto& trp = *( Constants* )Linked->Parent->Transform->dynamicBuffer[frameIndex]->pBlock;
-		worldPar = XMLoadFloat4x4( &trp.World );
-
-		if ( rigid )
-		{
-			auto det = XMMatrixDeterminant( worldPar );
-			worldParInv = XMMatrixInverse( &det, worldPar );
-		}
-	}
-
-	XMMATRIX world =
-		XMMatrixScalingFromVector( scale ) *
-		XMMatrixRotationQuaternion( quat ) *
-		XMMatrixTranslationFromVector( pos );
-
-	XMMATRIX worldFinal = world * worldPar;
-	XMVECTOR deter = XMMatrixDeterminant( worldFinal );
-	XMStoreFloat4x4( &frameResource.World, worldFinal );
-	XMStoreFloat4x4( &frameResource.WorldInvTranspose, XMMatrixTranspose( XMMatrixInverse( &deter, worldFinal ) ) );
-
-	if ( rigid )
-	{
-		XMVECTOR descale, dequat, depos;
-		XMMatrixDecompose( &descale, &dequat, &depos, worldParInv );
-
-		pos += depos;
-		quat = XMQuaternionMultiply( quat, dequat );
-
-		this->position = Vector3( ( double )XMVectorGetX( pos ), ( double )XMVectorGetY( pos ), ( double )XMVectorGetZ( pos ) );
-		this->rotation = Quaternion( ( double )XMVectorGetX( quat ), ( double )XMVectorGetY( quat ), ( double )XMVectorGetZ( quat ), ( double )XMVectorGetW( quat ) );
-	}
-
-	if ( staticRigid )
-	{
-		XMVECTOR descale, dequat, depos;
-		XMMatrixDecompose( &descale, &dequat, &depos, worldParInv );
-
-		pos += depos;
-		quat = XMQuaternionMultiply( quat, dequat );
-
-		this->position = Vector3( ( double )XMVectorGetX( pos ), ( double )XMVectorGetY( pos ), ( double )XMVectorGetZ( pos ) );
-		this->rotation = Quaternion( ( double )XMVectorGetX( quat ), ( double )XMVectorGetY( quat ), ( double )XMVectorGetZ( quat ), ( double )XMVectorGetW( quat ) );
-
-		PxTransform gp;
-		gp.p = PxVec3( XMVectorGetX( pos ), XMVectorGetY( pos ), XMVectorGetZ( pos ) );
-		gp.q = PxQuat( XMVectorGetX( quat ), XMVectorGetY( quat ), XMVectorGetZ( quat ), XMVectorGetW( quat ) );
-
-		if ( !staticRigid->pxRigidbody )
-		{
-			staticRigid->pxRigidbody = GlobalVar.pxDevice->createRigidStatic( gp );
-		}
-	}
+	XMStoreFloat4x4( &frameResource.World, world );
+	XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
 }
 
 void Transform::LookAt( RefPtr<Transform> target, Vector3 up )
@@ -152,13 +129,28 @@ Vector3 Transform::Position_get()
 
 void Transform::Position_set( Vector3 value )
 {
-	if ( pHasRigid )
-	{
-		auto gp = pHasRigid->pxRigidbody->getGlobalPose();
-		gp.p = PxVec3( ( float )value.X, ( float )value.Y, ( float )value.Z );
-		pHasRigid->pxRigidbody->setGlobalPose( gp );
-	}
 	position = value;
+
+	if ( gameObject->pxRigidbody )
+	{
+		XMMATRIX parent = XMMatrixIdentity();
+		XMVECTOR pos;
+
+		// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
+		if ( auto p = gameObject->Parent.Get(); p )
+		{
+			parent = XMLoadFloat4x4( &p->transform->world );
+		}
+
+		// 위치를 글로벌 좌표로 변환합니다.
+		pos = ToXMVec( value );
+		pos = XMVector3Transform( pos, parent );
+
+		// 리지드바디의 위치를 설정합니다.
+		auto gp = gameObject->pxRigidbody->getGlobalPose();
+		gp.p = ToPhysX3( pos );
+		gameObject->pxRigidbody->setGlobalPose( gp );
+	}
 }
 
 Vector3 Transform::Scale_get()
@@ -178,13 +170,28 @@ Quaternion Transform::Rotation_get()
 
 void Transform::Rotation_set( Quaternion value )
 {
-	if ( pHasRigid )
-	{
-		auto gp = pHasRigid->pxRigidbody->getGlobalPose();
-		gp.q = PxQuat( ( float )value.X, ( float )value.Y, ( float )value.Z, ( float )value.W );
-		pHasRigid->pxRigidbody->setGlobalPose( gp );
-	}
 	rotation = value;
+
+	if ( gameObject->pxRigidbody )
+	{
+		XMMATRIX parent = XMMatrixIdentity();
+
+		// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
+		if ( auto p = gameObject->Parent.Get(); p )
+		{
+			parent = XMLoadFloat4x4( &p->transform->world );
+		}
+
+		// 위치를 글로벌 좌표로 변환합니다.
+		XMVECTOR scale, quat, pos;
+		XMMatrixDecompose( &scale, &quat, &pos, parent );
+		quat = XMQuaternionMultiply( ToXMVec( value ), quat );
+
+		// 리지드바디의 위치를 설정합니다.
+		auto gp = gameObject->pxRigidbody->getGlobalPose();
+		gp.q = ToPhysX4( quat );
+		gameObject->pxRigidbody->setGlobalPose( gp );
+	}
 }
 
 Vector3 Transform::Forward_get()
