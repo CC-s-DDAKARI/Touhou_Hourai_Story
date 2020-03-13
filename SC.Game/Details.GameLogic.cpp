@@ -78,7 +78,7 @@ void GameLogic::Update()
 	currentScene->LateUpdate();
 
 	// 매 프레임 업데이트가 끝난 후 스크롤 이동량을 초기화합니다.
-	//scrollDelta = { 0, 0 };
+	GlobalVar.scrollDelta = { 0, 0 };
 }
 
 void GameLogic::FixedUpdate()

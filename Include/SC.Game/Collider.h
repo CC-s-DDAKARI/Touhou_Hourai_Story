@@ -12,6 +12,7 @@ namespace SC::Game
 		Quaternion changeRotation;
 
 	protected:
+		static sc_game_export_object( physx::PxMaterial* ) pxDefaultMat;
 		sc_game_export_object( physx::PxShape* ) pxShape = nullptr;
 
 		Collider();

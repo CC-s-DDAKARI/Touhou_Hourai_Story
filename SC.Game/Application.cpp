@@ -229,7 +229,7 @@ void* __stdcall Application::WndProc( void* arg0, uint32 arg1, void* arg2, void*
 			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_MOUSEWHEEL:
-			//scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
+			GlobalVar.scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
 			break;
 		case WM_KEYDOWN:
 			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );

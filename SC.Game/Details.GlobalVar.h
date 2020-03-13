@@ -13,6 +13,7 @@ namespace SC::Game::Details
 		RefPtr<CDevice> device;
 		RefPtr<CSwapChain> swapChain;
 		RefPtr<GameLogic> gameLogic;
+		Drawing::Point<double> scrollDelta;
 
 		RefPtr<UI::TextFormat> defaultTextFormat;
 		std::set<GlyphBuffer*> glyphBuffers;

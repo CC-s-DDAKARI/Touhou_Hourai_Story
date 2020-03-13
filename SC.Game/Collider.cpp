@@ -4,9 +4,14 @@ using namespace SC::Game::Details;
 
 using namespace physx;
 
+PxMaterial* Collider::pxDefaultMat = nullptr;
+
 Collider::Collider() : Component()
 {
-
+	if ( !pxDefaultMat )
+	{
+		pxDefaultMat = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
+	}
 }
 
 void Collider::Clone( Collider* already_object )
@@ -25,8 +30,8 @@ void Collider::Start()
 	auto changeScale = Transform->Scale;
 
 	Vector3 center = changeCenter * changeScale;
-	PxVec3 center_ = PxVec3( ( float )center.X, ( float )center.Y, ( float )center.Z );
-	PxTransform lp = PxTransform( center_ );
+	PxTransform lp = PxTransform( ToPhysX( center ) );
+	lp.q = ToPhysX( changeRotation );
 	pxShape->setLocalPose( lp );
 
 	Linked->AttachCollider( this );

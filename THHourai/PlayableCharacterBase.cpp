@@ -16,11 +16,16 @@ PlayableCharacterBase::PlayableCharacterBase( String name, String filename ) : G
 	}
 	var rigid = AddComponent<Rigidbody>();
 	{
+		rigid->FreezeRotation[0] = true;
+		rigid->FreezeRotation[1] = true;
+		rigid->FreezeRotation[2] = true;
 	}
-	var collider = AddComponent<BoxCollider>();
+	var collider = AddComponent<CapsuleCollider>();
 	{
+		collider->Radius = 0.5;
+		collider->Height = 1.0;
 		collider->Center = Vector3( 0, 1, 0 );
-		collider->Extent = Vector3( 1, 1, 1 );
+		collider->Rotation = Quaternion::AngleAxis( 3.14 * 0.5, Vector3::Forward );
 	}
 
 #if defined( _DEBUG )

@@ -5,9 +5,6 @@ namespace SC::Game
 	/// <summary> 박스 형태의 기본 충돌체를 나타냅니다. </summary>
 	class BoxCollider : public Collider
 	{
-		static sc_game_export_object( physx::PxMaterial* ) pxDefaultMat;
-
-		bool started = false;
 		Vector3 changeExtent;
 
 	protected:

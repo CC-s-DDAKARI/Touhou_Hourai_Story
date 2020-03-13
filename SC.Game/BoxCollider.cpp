@@ -4,18 +4,11 @@ using namespace SC::Game::Details;
 
 using namespace physx;
 
-PxMaterial* BoxCollider::pxDefaultMat = nullptr;
-
 BoxCollider::BoxCollider() : Collider()
 {
-	if ( !pxDefaultMat )
-	{
-		pxDefaultMat = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
-	}
-
 	PxBoxGeometry boxGeo;
 	boxGeo.halfExtents = PxVec3( 1.0f, 1.0f, 1.0f );
-
+	
 	pxShape = GlobalVar.pxDevice->createShape( boxGeo, *pxDefaultMat );
 
 	changeExtent = 1.0f;

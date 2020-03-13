@@ -211,6 +211,7 @@
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
+    <ClCompile Include="CapsuleCollider.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Details.CBuffer.cpp" />
     <ClCompile Include="Details.CCommandQueue.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="..\Include\SC.Game\Light.h" />
     <ClInclude Include="..\Include\SC.Game\Material.h" />
     <ClInclude Include="..\Include\SC.Game\PhysicsMaterial.h" />
+    <ClInclude Include="..\Include\SC.Game\CapsuleCollider.h" />
     <ClInclude Include="..\Include\SC.Game\Ray.h" />
     <ClInclude Include="..\Include\SC.Game\RenderQueueLayer.h" />
     <ClInclude Include="..\Include\SC.Game\Rigidbody.h" />
