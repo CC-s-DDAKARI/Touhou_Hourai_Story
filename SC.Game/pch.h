@@ -111,5 +111,15 @@ inline void HR( HRESULT hr )
 	}
 }
 
+inline physx::PxVec3 ToPhysX( const SC::Game::Vector3& vec3 )
+{
+	return physx::PxVec3( ( float )vec3.X, ( float )vec3.Y, ( float )vec3.Z );
+}
+
+inline physx::PxQuat ToPhysX( const SC::Game::Quaternion& quat )
+{
+	return physx::PxQuat( ( float )quat.X, ( float )quat.Y, ( float )quat.Z, ( float )quat.W );
+}
+
 #include "GameObjectEnumerator.h"
 #include "UI.Panel.Enumerator.h"

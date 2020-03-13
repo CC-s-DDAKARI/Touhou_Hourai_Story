@@ -22,7 +22,7 @@ Application::Application( AppConfiguration appConfig )
 {
 #if defined( _DEBUG )
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	_CrtSetBreakAlloc( 165 );
+	_CrtSetBreakAlloc( 4191 );
 #endif
 
 	GlobalVar.pApp = this;
@@ -126,13 +126,13 @@ int Application::Start( RefPtr<Application> app )
 
 	// 앱이 종료될 때 모든 작업이 완료된 상태인지 검사합니다.
 	WaitAllQueues();
+	GlobalVar.Release();
 
 	// 앱 종료 요청을 수행합니다.
 	auto ret = app->OnExit();
 	AppShutdown = true;
 
 	GC.CollectAll();
-	GlobalVar.Release();
 
 	return ret;
 }

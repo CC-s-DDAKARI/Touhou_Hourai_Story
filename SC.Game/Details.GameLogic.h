@@ -27,6 +27,7 @@ namespace SC::Game::Details
 
 	public:
 		GameLogic();
+		~GameLogic();
 
 		void Update();
 		void FixedUpdate();

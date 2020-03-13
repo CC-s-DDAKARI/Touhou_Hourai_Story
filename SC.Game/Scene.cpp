@@ -19,16 +19,24 @@ Scene::Scene()
 
 	auto pxSceneDesc = PxSceneDesc( PxTolerancesScale() );
 	pxSceneDesc.gravity = PxVec3( 0.0f, -9.8f, 0.0f );
-	pxSceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate( 4 );
+	pxSceneDesc.cpuDispatcher = GlobalVar.pxDefaultDispatcher;
 	pxSceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
 	pxScene = GlobalVar.pxDevice->createScene( pxSceneDesc );
+
+	GlobalVar.globalMutex.lock();
+	GlobalVar.pxSceneList.insert( pxScene );
+	GlobalVar.globalMutex.unlock();
 }
 
 Scene::~Scene()
 {
 	if ( !AppShutdown && pxScene )
 	{
+		GlobalVar.globalMutex.lock();
+		GlobalVar.pxSceneList.erase( pxScene );
+		GlobalVar.globalMutex.unlock();
+
 		pxScene->release();
 		pxScene = nullptr;
 	}

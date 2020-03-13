@@ -340,9 +340,6 @@
     <ClInclude Include="..\Include\SC.Game\BoxCollider.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\SC.Game\StaticRigidbody.h">
-      <Filter>Components</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -626,9 +623,6 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="BoxCollider.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="StaticRigidbody.cpp">
       <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>

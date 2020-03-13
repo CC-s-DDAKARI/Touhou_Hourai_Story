@@ -57,7 +57,6 @@ namespace SC::Game
 	class Bone;
 	class Animator;
 	class Rigidbody;
-	class StaticRigidbody;
 	class Collider;
 	class BoxCollider;
 
@@ -164,7 +163,6 @@ namespace SC::Game
 #include "SC.Game/Bone.h"
 #include "SC.Game/Animator.h"
 #include "SC.Game/Rigidbody.h"
-#include "SC.Game/StaticRigidbody.h"
 #include "SC.Game/Collider.h"
 #include "SC.Game/BoxCollider.h"
 #include "SC.Game/UI.EventDispatcher.h"

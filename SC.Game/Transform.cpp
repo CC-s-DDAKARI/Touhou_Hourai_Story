@@ -36,6 +36,13 @@ object Transform::Clone()
 	return trans;
 }
 
+void Transform::Update( Time& time, Input& input )
+{
+	XMVECTOR pos;
+	XMVECTOR scale;
+	XMVECTOR quat;
+}
+
 void Transform::LateUpdate( Time& time, Input& input )
 {
 	var rigid = GetComponent<Rigidbody>();

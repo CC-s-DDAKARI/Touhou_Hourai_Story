@@ -3,11 +3,115 @@ using namespace SC::Game;
 using namespace SC::Game::Details;
 
 using namespace std;
+using namespace physx;
+
+bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
+{
+	if ( Collider* pIsCol = dynamic_cast< Collider* >( pComponent ); pIsCol )
+	{
+		if ( pxRigidbody )
+		{
+			pxRigidbody->attachShape( *pIsCol->pxShape );
+		}
+		else
+		{
+			auto pos = transform->position;
+			auto quat = transform->rotation;
+
+			PxTransform gp;
+			gp.p = ToPhysX( pos );
+			gp.q = ToPhysX( quat );
+
+			pxRigidbody = GlobalVar.pxDevice->createRigidStatic( gp );
+		}
+	}
+	else if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); pIsRigid )
+	{
+		if ( pxRigidbody )
+		{
+#if defined( _DEBUG )
+			if ( !isStaticRigid )
+			{
+				throw new Exception( "SC.Game.GameObject.OnAddComponent(): Rigidbody already added." );
+			}
+#endif
+
+			// 기존의 리지드바디를 제거합니다.
+			pxRigidbody->release();
+			pxRigidbody = nullptr;
+
+			// 새로운 Dynamic 리지드바디를 생성합니다.
+			auto pos = transform->position;
+			auto quat = transform->rotation;
+
+			PxTransform gp;
+			gp.p = ToPhysX( pos );
+			gp.q = ToPhysX( quat );
+
+			pxRigidbody = GlobalVar.pxDevice->createRigidDynamic( gp );
+
+			// 기존 충돌체 컴포넌트가 있을 경우 추가합니다.
+			auto colliders = GetComponentsInChildren<Collider>();
+			for ( int i = 0; i < colliders.size(); ++i )
+			{
+				pxRigidbody->attachShape( *colliders[i]->pxShape );
+			}
+
+			pIsRigid->pxRigidbody = pxRigidbody;
+			isStaticRigid = false;
+		}
+	}
+
+	return true;
+}
+
+bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
+{
+	if ( Collider* pIsCol = dynamic_cast< Collider* >( pComponent ); pIsCol )
+	{
+		pxRigidbody->detachShape( *pIsCol->pxShape );
+	}
+
+	return true;
+}
+
+void GameObject::OnSceneAttached( Scene* pScene )
+{
+
+}
+
+void GameObject::OnSceneDetached( Scene* pScene )
+{
+
+}
 
 GameObject::GameObject( String name ) : Assets( name )
 {
 	transform = new Game::Transform();
 	transform->gameObject = this;
+}
+
+GameObject::~GameObject()
+{
+	for ( size_t i = 0; i < components.size(); ++i )
+	{
+#if defined( _DEBUG )
+		auto ret =
+#endif
+		OnRemoveComponent( components[i].first, components[i].second.Get() );
+#if defined( _DEBUG )
+		if ( ret == false )
+		{
+			throw new Exception( "SC.Game.GameObject.~GameObject(): OnRemoveComponent() has return false." );
+		}
+#endif
+	}
+
+	if ( pxRigidbody )
+	{
+		pxRigidbody->release();
+		pxRigidbody = nullptr;
+	}
 }
 
 RefPtr<IEnumerator<RefPtr<GameObject>>> GameObject::GetEnumerator()
@@ -172,22 +276,26 @@ void GameObject::AddComponent( size_t type_hash, RefPtr<Component> component )
 	ComponentPair pair;
 	pair.first = type_hash;
 	pair.second = component;
-	components.push_back( pair );
-	component->gameObject = this;
 
-	component->Awake();
+	if ( OnAddComponent( pair.first, pair.second.Get() ) )
+	{
+		components.push_back( pair );
+		component->gameObject = this;
+
+		component->Awake();
+	}
 }
 
-RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool( Component* )> caster )
+size_t GameObject::GetComponentIndex( size_t beginIndex, size_t type_hash, function<bool( Component* )> caster )
 {
-	int dynamic_index = -1;
+	size_t dynamic_index = -1;
 
 	if ( type_hash == typeid( Game::Transform ).hash_code() )
 	{
 		return transform;
 	}
 
-	for ( size_t i = 0, count = components.size(); i < count; ++i )
+	for ( size_t i = beginIndex, count = components.size(); i < count; ++i )
 	{
 		auto& comp = components[i];
 		if ( comp.first == type_hash )
@@ -197,13 +305,18 @@ RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool
 
 		if ( dynamic_index == -1 && caster( comp.second.Get() ) )
 		{
-			dynamic_index = ( int )i;
+			dynamic_index = i;
 		}
 	}
 
-	if ( dynamic_index != -1 )
+	return dynamic_index;
+}
+
+RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool( Component* )> caster )
+{
+	if ( auto idx = GetComponentIndex( 0, type_hash, caster ); idx != -1 )
 	{
-		return components[dynamic_index].second;
+		return components[idx].second;
 	}
 	else
 	{
@@ -213,30 +326,9 @@ RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool
 
 Component* GameObject::GetRawComponent( size_t type_hash, std::function<bool( Component* )> caster )
 {
-	int dynamic_index = -1;
-
-	if ( type_hash == typeid( Game::Transform ).hash_code() )
+	if ( auto idx = GetComponentIndex( 0, type_hash, caster ); idx != -1 )
 	{
-		return transform.Get();
-	}
-
-	for ( size_t i = 0, count = components.size(); i < count; ++i )
-	{
-		auto& comp = components[i];
-		if ( comp.first == type_hash )
-		{
-			return comp.second.Get();
-		}
-
-		if ( dynamic_index == -1 && caster( comp.second.Get() ) )
-		{
-			dynamic_index = ( int )i;
-		}
-	}
-
-	if ( dynamic_index != -1 )
-	{
-		return components[dynamic_index].second.Get();
+		return components[idx].second.Get();
 	}
 	else
 	{
@@ -246,34 +338,13 @@ Component* GameObject::GetRawComponent( size_t type_hash, std::function<bool( Co
 
 void GameObject::RemoveComponent( size_t type_hash, function<bool( Component* )> caster )
 {
-	int dynamic_index = -1;
-
-	if ( type_hash == typeid( Game::Transform ).hash_code() )
+	if ( auto idx = GetComponentIndex( 0, type_hash, caster ); idx != -1 )
 	{
-		throw new Exception();
-	}
+		auto cmp = components[idx].second.Get();
 
-	for ( size_t i = 0, count = components.size(); i < count; ++i )
-	{
-		auto& comp = components[i];
-		if ( comp.first == type_hash )
+		if ( OnRemoveComponent( type_hash, cmp ) )
 		{
-			components.erase( components.begin() + i );
-			break;
+			components.erase( components.begin() + idx );
 		}
-	}
-
-	for ( size_t i = 0, count = components.size(); i < count; ++i )
-	{
-		auto& comp = components[i];
-		if ( dynamic_index == -1 && caster( comp.second.Get() ) )
-		{
-			dynamic_index = ( int )i;
-		}
-	}
-
-	if ( dynamic_index != -1 )
-	{
-		components.erase( components.begin() + dynamic_index );
 	}
 }

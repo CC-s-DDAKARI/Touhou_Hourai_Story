@@ -19,7 +19,8 @@ namespace SC::Game
 		Quaternion rotation;
 
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
-		Rigidbody* pHasRigid = nullptr;
+
+		sc_game_export_float( XMFLOAT4X4, 16 ) world;
 
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );
@@ -33,8 +34,13 @@ namespace SC::Game
 		object Clone() override;
 
 		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 변환 행렬을 생성합니다. 부모 변환의 영향을 받습니다. </summary>
-		/// <param name="time"> 게임 시간을 전달합니다. </param>
-		/// <param name="input"> 현재 프레임에서 입력 상태를 전달합니다. </param>
+		/// <param name="time"> (사용되지 않는 매개변수) 게임 시간을 전달합니다. </param>
+		/// <param name="input"> (사용되지 않는 매개변수) 현재 프레임에서 입력 상태를 전달합니다. </param>
+		virtual void Update( Time& time, Input& input );
+
+		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 최종 변환 행렬을 생성하고 GPU에 푸쉬합니다. </summary>
+		/// <param name="time"> (사용되지 않는 매개변수) 게임 시간을 전달합니다. </param>
+		/// <param name="input"> (사용되지 않는 매개변수) 현재 프레임에서 입력 상태를 전달합니다. </param>
 		virtual void LateUpdate( Time& time, Input& input );
 
 		/// <summary> 대상을 바라보도록 설정합니다. </summary>

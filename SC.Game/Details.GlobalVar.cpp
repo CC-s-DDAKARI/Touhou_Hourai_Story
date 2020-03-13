@@ -8,17 +8,17 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::InitializeComponents()
 	{
-		GlobalVar.factory = new IntegratedFactory();
-		GlobalVar.device = new CDevice( GlobalVar.factory->SearchHardwareAdapter().Get() );
-		GlobalVar.swapChain = new CSwapChain();
-		GlobalVar.gameLogic = new GameLogic();
+		// 기본 그래픽 디바이스를 생성합니다.
+		factory = new IntegratedFactory();
+		device = new CDevice( GlobalVar.factory->SearchHardwareAdapter().Get() );
+		swapChain = new CSwapChain();
 
-		bool recordMemoryAllocations = false;
 
 		// PhysX 파운데이션 개체를 초기화합니다.
 		pxFoundation = PxCreateFoundation( PX_PHYSICS_VERSION, pxDefaultAllocator, pxDefaultErrorCallback );
 		if ( !pxFoundation ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateFoundation failed." );
 
+		bool recordMemoryAllocations = false;
 #if defined( _DEBUG )
 		// 디버그 모드 빌드일 경우 Pvd 개체를 생성합니다.
 		pxPvd = PxCreatePvd( *pxFoundation );
@@ -42,10 +42,30 @@ namespace SC::Game::Details
 		// 컬라이더 개체를 베이킹하는 Cooking 개체를 생성합니다.
 		pxCooking = PxCreateCooking( PX_PHYSICS_VERSION, *pxFoundation, PxCookingParams( PxTolerancesScale() ) );
 		if ( !pxCooking ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateCooking failed." );
+
+		// 멀티 스레드를 사용하는 기본 PhysX 태스크 매니저 개체를 생성합니다.
+		pxDefaultDispatcher = PxDefaultCpuDispatcherCreate( 4 );
+
+		// 게임 논리를 수행하는 게임 논리 개체를 생성합니다.
+		gameLogic = new GameLogic();
 	}
 
 	void tag_GlobalVar::Release()
 	{
+		gameLogic = nullptr;
+
+		for ( auto i : pxSceneList )
+		{
+			i->release();
+		}
+		pxSceneList.clear();
+
+		if ( pxDefaultDispatcher )
+		{
+			pxDefaultDispatcher->release();
+			pxDefaultDispatcher = nullptr;
+		}
+
 		if ( pxCooking )
 		{
 			pxCooking->release();

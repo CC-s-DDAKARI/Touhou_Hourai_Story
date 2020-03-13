@@ -30,12 +30,17 @@ GameLogic::GameLogic() : Object()
 	hdrComputedBuffer = new HDRComputedBuffer( GlobalVar.device );
 }
 
+GameLogic::~GameLogic()
+{
+
+}
+
 void GameLogic::Update()
 {
 	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
 	if ( currentScene.Get() != SceneManager::currentScene.Get() )
 	{
-		currentScene = SceneManager::currentScene;
+		currentScene = move( SceneManager::currentScene );
 	}
 
 	// 타이머 상태를 갱신합니다.

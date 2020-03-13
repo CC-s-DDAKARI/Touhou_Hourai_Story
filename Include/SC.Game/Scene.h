@@ -11,6 +11,7 @@ namespace SC::Game
 	class Scene : virtual public Object, virtual public Collections::IList<RefPtr<GameObject>>
 	{
 		friend class Details::GameLogic;
+		friend class GameObject;
 
 		std::vector<RefPtr<GameObject>> gameObjects;
 
@@ -20,9 +21,6 @@ namespace SC::Game
 		Diagnostics::StepTimer fixedTimer;
 
 		sc_game_export_object( physx::PxScene* ) pxScene = nullptr;
-
-		std::list<Rigidbody*> appliedRigidbodies;
-		std::list<StaticRigidbody*> appliedStaticRigidbodies;
 
 		bool firstUpdate = false;
 

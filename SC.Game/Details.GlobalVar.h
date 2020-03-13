@@ -7,6 +7,7 @@ namespace SC::Game::Details
 		Application* pApp;
 		HWND hWnd;
 		String systemMessageFontName;
+		std::mutex globalMutex;
 
 		RefPtr<IntegratedFactory> factory;
 		RefPtr<CDevice> device;
@@ -26,6 +27,9 @@ namespace SC::Game::Details
 		physx::PxPvd* pxPvd = nullptr;
 		physx::PxPhysics* pxDevice = nullptr;
 		physx::PxCooking* pxCooking = nullptr;
+		physx::PxDefaultCpuDispatcher* pxDefaultDispatcher = nullptr;
+
+		std::set<physx::PxScene*> pxSceneList;
 
 		void InitializeComponents();
 		void Release();

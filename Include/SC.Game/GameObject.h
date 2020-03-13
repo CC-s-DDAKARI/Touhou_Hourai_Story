@@ -7,6 +7,8 @@ namespace SC::Game
 	{
 		friend class Scene;
 
+		Scene* pScene = nullptr;
+
 		using ComponentPair = std::pair<std::size_t, RefPtr<Component>>;
 		std::vector<ComponentPair> components;
 		RefPtr<Transform> transform;
@@ -14,12 +16,35 @@ namespace SC::Game
 		std::vector<RefPtr<GameObject>> gameObjects;
 		WeakPtr parent;
 
-		sc_game_export_object( physx::PxRigidStatic* ) pxRigidStatic = nullptr;
+		sc_game_export_object( physx::PxRigidActor* ) pxRigidbody = nullptr;
+		bool isStaticRigid = false;
+
+	protected:
+		/// <summary> 개체에서 컴포넌트가 추가되려고 합니다. </summary>
+		/// <param name="typeId"> 추가할 컴포넌트의 타입 ID(typeof(T))가 전달됩니다. </param>
+		/// <param name="pComponent"> 추가될 컴포넌트 개체가 전달됩니다. </param>
+		/// <returns> true를 반환할 경우 컴포넌트가 추가되며, false를 반환할 경우 컴포넌트가 추가되지 않습니다. </returns>
+		virtual bool OnAddComponent( size_t typeId, Component* pComponent );
+
+		/// <summary> 개체에서 컴포넌트가 제거되려고 합니다. </summary>
+		/// <param name="typeId"> 제거될 컴포넌트의 타입 ID(typeof(T))가 전달됩니다. </param>
+		/// <param name="pComponent"> 제거될 컴포넌트 개체가 전달됩니다. </param>
+		/// <returns> true를 반환할 경우 컴포넌트가 제거되며, false를 반환할 경우 컴포넌트가 제거되지 않습니다. </returns>
+		virtual bool OnRemoveComponent( size_t typeId, Component* pComponent );
+
+		/// <summary> 개체가 장면에 부착될 때 호출됩니다. </summary>
+		/// <param name="pScene"> 대상 장면 개체가 전달됩니다. </param>
+		virtual void OnSceneAttached( Scene* pScene );
+
+		/// <summary> 개체가 장면에서 제거될 때 호출됩니다. </summary>
+		/// <param name="pScene"> 대상 장면 개체가 전달됩니다. </param>
+		virtual void OnSceneDetached( Scene* pScene );
 
 	public:
 		/// <summary> <see cref="GameObject"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="name"> 개체 이름을 전달합니다. </param>
 		GameObject( String name = "SC.Game.GameObject" );
+		~GameObject() override;
 
 		/// <summary> (<see cref="IEnumerable"/> 인터페이스에서 구현 됨.) 자식 개체 전체를 반복하는 열거자를 반환합니다. </summary>
 		RefPtr<IEnumerator<RefPtr<GameObject>>> GetEnumerator() override;
@@ -96,9 +121,13 @@ namespace SC::Game
 
 			vector<RefPtr<T>> components;
 			// for each childs.
-			if ( auto c = GetComponent<T>(); c.IsValid )
+			while ( ( auto c = GetComponentIndex( typeid( T ).hash_code(), []( Component* ptr ) -> auto
 			{
-				components.push_back( c );
+				T* dynamic = dynamic_cast< T* >( ptr );
+				return dynamic != nullptr;
+			} ) ) != -1 )
+			{
+				components.push_back( components[c] );
 			}
 
 			for ( int i = 0; i < NumChilds_get(); ++i )
@@ -162,6 +191,7 @@ namespace SC::Game
 	private:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
 		void AddComponent( std::size_t type_hash, RefPtr<Component> component );
+		std::size_t GetComponentIndex( std::size_t beginIndex, std::size_t type_hash, std::function<bool( Component* )> caster );
 		RefPtr<Component> GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		Component* GetRawComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		void RemoveComponent( std::size_t type_hash, std::function<bool( Component* )> caster );

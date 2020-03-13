@@ -253,7 +253,6 @@
     <ClCompile Include="Rigidbody.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
-    <ClCompile Include="StaticRigidbody.cpp" />
     <ClCompile Include="UI.KeyboardEventArgs.cpp" />
     <ClCompile Include="UI.RevealBrush.cpp" />
     <ClCompile Include="UnhandledErrorDetectedEventArgs.cpp" />
@@ -294,7 +293,6 @@
     <ClInclude Include="..\Include\SC.Game\Rigidbody.h" />
     <ClInclude Include="..\Include\SC.Game\SceneManager.h" />
     <ClInclude Include="..\Include\SC.Game\SkinnedMeshRenderer.h" />
-    <ClInclude Include="..\Include\SC.Game\StaticRigidbody.h" />
     <ClInclude Include="..\Include\SC.Game\Trigger.h" />
     <ClInclude Include="..\Include\SC.Game\UI.KeyboardEventArgs.h" />
     <ClInclude Include="..\Include\SC.Game\UI.RevealBrush.h" />
