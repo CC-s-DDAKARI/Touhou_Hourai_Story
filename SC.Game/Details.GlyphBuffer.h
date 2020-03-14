@@ -2,36 +2,50 @@
 
 namespace SC::Game::Details
 {
+	struct tag_GlyphInfo
+	{
+		uint16 glyphIndex;
+		IDWriteFontFace* pFontFace;
+		float offsetX;
+		float width;
+
+		constexpr bool operator==( const tag_GlyphInfo& right ) const
+		{
+			return glyphIndex == right.glyphIndex
+				&& pFontFace == right.pFontFace;
+		}
+	};
+
+	struct tag_GlyphRunCache
+	{
+		int CacheVersion = -1;
+		std::vector<tag_ShaderInfo> CacheData;
+	};
+}
+
+namespace std
+{
+	template<> class hash<SC::Game::Details::tag_GlyphInfo>
+	{
+		inline static hash<SC::uint16> u16Hash;
+
+	public:
+		size_t operator() ( const SC::Game::Details::tag_GlyphInfo& right ) const
+		{
+			return u16Hash( right.glyphIndex ) ^ ( size_t )right.pFontFace;
+		}
+	};
+}
+
+namespace SC::Game::Details
+{
 	class GlyphBuffer : virtual public Object
 	{
+		friend class UI::TextFormat;
+
 		static constexpr const DXGI_FORMAT Format = DXGI_FORMAT_A8_UNORM;
 		static constexpr const float padding = 2.0f;
 
-		friend class UI::TextFormat;
-
-		struct tag_Range
-		{
-			int x;
-		};
-
-	public:
-		struct tag_GlyphInfo
-		{
-			uint16 glyphIndex;
-			IDWriteFontFace* pFontFace;
-			float offsetX;
-			float width;
-
-			bool operator<( const tag_GlyphInfo& right ) const
-			{
-				if ( glyphIndex < right.glyphIndex ) return true;
-				else if ( glyphIndex > right.glyphIndex ) return false;
-				else if ( pFontFace < right.pFontFace ) return true;
-				else return false;
-			}
-		};
-
-	private:
 		ComPtr<IDWriteTextFormat> pTextFormat;
 		ComPtr<IDWriteFont> pFont;
 		ComPtr<ID3D12CommandAllocator> pCommandAllocator;
@@ -51,10 +65,10 @@ namespace SC::Game::Details
 		RefPtr<CShaderResourceView> pShaderResourceView;
 		float lastGlyphOffset = 0;
 		
-		std::map<tag_GlyphInfo, float> allocated;
-		std::set<tag_GlyphInfo> locked;
+		std::unordered_map<tag_GlyphInfo, float> allocated;
+		std::unordered_set<tag_GlyphInfo> locked;
 		float lockedWidth = 0;
-		std::set<tag_GlyphInfo> added;
+		std::unordered_set<tag_GlyphInfo> added;
 		float appendWidth = 0;
 
 		uint64 lastPending = 0;
@@ -75,9 +89,4 @@ namespace SC::Game::Details
 	private:
 		void Expand();
 	};
-
-	inline bool operator<( uint16 left, const GlyphBuffer::tag_GlyphInfo& right )
-	{
-		return left < right.glyphIndex;
-	}
 }

@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <array>
 #include <variant>
+#include <unordered_set>
 
 namespace SC::Game
 {

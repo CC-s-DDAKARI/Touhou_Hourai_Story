@@ -13,10 +13,12 @@ struct Pixel
 };
 
 Texture2D gTexture : register( t0 );
-SamplerState gSampler : register( s0 );
 ConstantBuffer<Resolution> gResolution : register( b0 );
 ConstantBuffer<Resolution> gCursor : register( b1 );
 ConstantBuffer<Brush> gBrush : register( b2 );
+
+SamplerState gSamplerLinear : register( s0 );
+SamplerState gSamplerPoint : register( s1 );
 
 struct tag_RenderType
 {
@@ -33,7 +35,7 @@ Pixel main( Fragment fg )
 	if ( gRenderType.Type == 0 )
 	{
 		px.Color = GetBrushColor( gBrush, gResolution, gCursor, fg.PosH.xy );
-		px.Color.a *= gTexture.Sample( gSampler, fg.Tex ).a;
+		px.Color.a *= gTexture[uint2( ( uint )fg.Tex.x, ( uint )fg.Tex.y )].a;
 	}
 	else if ( gRenderType.Type == 1 )
 	{
@@ -41,7 +43,7 @@ Pixel main( Fragment fg )
 	}
 	else if ( gRenderType.Type == 2 )
 	{
-		px.Color = gTexture.Sample( gSampler, fg.Tex );
+		px.Color = gTexture.Sample( gSamplerLinear, fg.Tex );
 		px.Color.a *= gRenderType.Opacity;
 	}
 	else

@@ -41,7 +41,9 @@ void BasePage::Update( Rect<double> clientRect )
 		fpsChecker -= 1.0;
 		auto text = String::Format( "FPS: {0}\nTime: {1}ms\n{2}", fpsTimer->TicksPerSecond, fpsTimer->ElapsedSeconds * 1000, App::Instance()->AppConfig.AdapterName );
 		fpsText->Content = text;
-		//App::Instance()->AppName = text;
+#if defined( _DEBUG )
+		App::Instance()->AppName = text;
+#endif
 	}
 
 	Page::Update( clientRect );

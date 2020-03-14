@@ -8,10 +8,13 @@ using namespace std;
 
 Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 {
-	if ( pLayout )
+	if ( ( clientRect != prevClient || contentChanged ) && pLayout )
 	{
-		HR( pLayout->SetMaxWidth( ( float )clientRect.Width ) );
-		HR( pLayout->SetMaxHeight( ( float )clientRect.Height ) );
+		prevClient = clientRect;
+		computed = clientRect;
+
+		HR( pLayout->SetMaxWidth( ( float )computed.Width ) );
+		HR( pLayout->SetMaxHeight( ( float )computed.Height ) );
 
 		if ( Width == 0 && Height == 0 && autoSizing )
 		{
@@ -28,26 +31,28 @@ Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 				{ 0, 1 }, { 0.5, 1 }, { 1, 1 }
 			};
 
-			auto right = clientRect.Right - actualWidth;
-			auto length = right - clientRect.Left;
+			auto right = computed.Right - actualWidth;
+			auto length = right - computed.Left;
 
 			int idx = ( int )Anchor;
-			clientRect.Left += offset[idx].X * length;
-			clientRect.Right = clientRect.Left + actualWidth;
+			computed.Left += offset[idx].X * length;
+			computed.Right = computed.Left + actualWidth;
 
-			auto bottom = clientRect.Bottom - actualHeight;
-			length = bottom - clientRect.Top;
+			auto bottom = computed.Bottom - actualHeight;
+			length = bottom - computed.Top;
 
 			idx = ( int )Anchor;
-			clientRect.Top += offset[idx].Y * length;
-			clientRect.Bottom = clientRect.Top + actualHeight;
+			computed.Top += offset[idx].Y * length;
+			computed.Bottom = computed.Top + actualHeight;
 		}
 
-		HR( pLayout->SetMaxWidth( ( float )clientRect.Width ) );
-		HR( pLayout->SetMaxHeight( ( float )clientRect.Height ) );
+		HR( pLayout->SetMaxWidth( ( float )computed.Width ) );
+		HR( pLayout->SetMaxHeight( ( float )computed.Height ) );
+
+		contentChanged = false;
 	}
 
-	return clientRect;
+	return computed;
 }
 
 void TextBlock::OnRender( RefPtr<CDeviceContext>& deviceContext )
@@ -212,6 +217,7 @@ void TextBlock::OnContentChanged( object sender, object content )
 
 		Alignment_set( Alignment );
 		VerticalAlignment_set( VerticalAlignment );
+		contentChanged = true;
 	}
 }
 

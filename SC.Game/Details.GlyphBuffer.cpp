@@ -213,8 +213,10 @@ void GlyphBuffer::LockGlyphs()
 
 				if ( glyph.pFontFace == glyphRun.fontFace )
 				{
+					float advance = ( float )( ( int )( glyph.width + 0.9f ) );
+
 					// 글리프 런 정보를 수정합니다.
-					glyphAdvances[glyphRun.glyphCount] = glyph.width;
+					glyphAdvances[glyphRun.glyphCount] = advance;
 					glyphOffsets[glyphRun.glyphCount].advanceOffset = -glyph.offsetX;
 					glyphOffsets[glyphRun.glyphCount].ascenderOffset = descent;
 					glyphIndices[glyphRun.glyphCount] = glyph.glyphIndex;
@@ -222,7 +224,7 @@ void GlyphBuffer::LockGlyphs()
 
 					// 할당된 글리프 목록을 갱신합니다.
 					allocated.insert( { glyph, lastGlyphOffset + appendWidth } );
-					appendWidth += glyph.width;
+					appendWidth += advance;
 				}
 				else
 				{
@@ -258,12 +260,24 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 		clientDrawingContext->pCommandQueue->pCommandQueue->Wait( directQueue->pFence.Get(), lastPending );
 	}
 
-	// 글리프 렌더링 목록에 현재 글리프 목록을 추가합니다. 다음 프레임에서 구현됩니다.
-	PushGlyphRun( glyphRun );
-
 	// 각 글리프에 대해 글리프 정보를 작성합니다.
 	vector<tag_ShaderInfo> glyphInfo( glyphRun->glyphCount );
 	auto bufferPtr = glyphInfo.data();
+
+	static thread_local UINT16 glyphIndices[512];
+	static thread_local FLOAT glyphAdvances[512];
+	static thread_local DWRITE_GLYPH_OFFSET glyphOffsets[512];
+	DWRITE_GLYPH_RUN nextPush{ };
+
+	nextPush.fontEmSize = glyphRun->fontEmSize;
+	nextPush.glyphCount = 0;
+	nextPush.glyphIndices = glyphIndices;
+	nextPush.glyphAdvances = glyphRun->glyphAdvances ? glyphAdvances : nullptr;
+	nextPush.glyphOffsets = glyphRun->glyphOffsets ? glyphOffsets : nullptr;
+	nextPush.isSideways = glyphRun->isSideways;
+	nextPush.bidiLevel = glyphRun->bidiLevel;
+
+	nextPush.fontFace = glyphRun->fontFace;
 
 	float advanceAcc = 0;
 	for ( int i = 0; i < ( int )glyphRun->glyphCount; ++i )
@@ -280,10 +294,10 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 			auto& input = bufferPtr[i].input;
 			auto& output = bufferPtr[i].output;
 
-			input.left = offset / ( float )maxWidth;
+			input.left = offset;
 			input.top = 0.0f;
-			input.width = glyph.width / ( float )maxWidth;
-			input.height = 1.0f;
+			input.width = glyph.width;
+			input.height = maxHeight;
 
 			output.left = baselineX + advanceAcc + glyph.offsetX;
 			output.top = baselineY - ascent;
@@ -293,9 +307,18 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 		else
 		{
 			bufferPtr[i] = { };
+
+			glyphIndices[nextPush.glyphCount] = glyphRun->glyphIndices[i];
+			if ( glyphRun->glyphAdvances ) glyphAdvances[nextPush.glyphCount] = glyphRun->glyphAdvances[i];
+			if ( glyphRun->glyphOffsets ) glyphOffsets[nextPush.glyphCount] = glyphRun->glyphOffsets[i];
+
+			nextPush.glyphCount += 1;
 		}
 		advanceAcc += glyphRun->glyphAdvances[i];
 	}
+
+	// 글리프 렌더링 목록에 현재 글리프 목록을 추가합니다. 다음 프레임에서 구현됩니다.
+	PushGlyphRun( &nextPush );
 
 	if ( auto slot = clientDrawingContext->Slot["Texture"]; slot != -1 )
 	{
@@ -303,13 +326,13 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 		clientDrawingContext->DispatchShaderInfo( glyphRun->glyphCount, bufferPtr );
 	}
 
-#if false && defined( _DEBUG )
-	if ( fontEmSize == 22.0f )
+#if defined( _DEBUG )
+	if ( fontEmSize == 20.0f )
 	{
-		bufferPtr = ( tag_ShaderInfo* )glyphInfo[frameIndex]->pBlock + glyphInfoBufferOffset;
+		tag_ShaderInfo shaderInfo;
 
-		auto& input = bufferPtr[0].input;
-		auto& output = bufferPtr[0].output;
+		auto& input = shaderInfo.input;
+		auto& output = shaderInfo.output;
 
 		input.left = 0;
 		input.top = 0;
@@ -321,19 +344,11 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 		output.width = ( float )maxWidth;
 		output.height = maxHeight;
 
-		if ( auto slot = clientDrawingContext->Slot["GlyphInfo"]; slot != -1 )
-		{
-			pCommandList->SetGraphicsRootShaderResourceView( ( UINT )slot, glyphInfo[frameIndex]->VirtualAddress + sizeof( tag_ShaderInfo ) * glyphInfoBufferOffset );
-		}
-
 		if ( auto slot = clientDrawingContext->Slot["TextBuffer"]; slot != -1 )
 		{
 			clientDrawingContext->SetGraphicsRootShaderResources( slot, pShaderResourceView );
-			pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-			pCommandList->DrawInstanced( 4, 1, 0, 0 );
+			clientDrawingContext->DispatchShaderInfo( 1, &shaderInfo );
 		}
-
-		glyphInfoBufferOffset += 1;
 	}
 #endif
 }
