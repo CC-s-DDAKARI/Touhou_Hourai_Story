@@ -349,6 +349,24 @@
     <ClInclude Include="Details.SkinnedMeshRendererQueue.h">
       <Filter>Details</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IDevice.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IResource.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IDeviceChild.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IShaderResourceView.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IView.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Details.IDeviceContext.h">
+      <Filter>Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -643,6 +661,9 @@
     <ClCompile Include="Details.SkinnedMeshRendererQueue.cpp">
       <Filter>Details</Filter>
     </ClCompile>
+    <ClCompile Include="..\Include\SC.Game\Details.ShaderBuilder.LoadRenderingShader.cpp">
+      <Filter>Shaders\RenderingShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -710,6 +731,9 @@
     </Filter>
     <Filter Include="Shaders\SkinningShader">
       <UniqueIdentifier>{08e17637-9b4b-4d1a-8a87-8cb03021ed17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\RenderingShader">
+      <UniqueIdentifier>{5464d930-81fe-43b1-b472-b6be75d04150}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -47,18 +47,17 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::Release()
 	{
-		for ( auto i : disposableObjects )
-		{
-			i->Dispose();
-		}
-
 		gameLogic = nullptr;
+
+		for ( auto i : pxRigidActor )
+		{
+			i->release();
+		}
 
 		for ( auto i : pxSceneList )
 		{
 			i->release();
 		}
-		pxSceneList.clear();
 
 		if ( pxDefaultDispatcher )
 		{

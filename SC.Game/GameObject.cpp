@@ -20,14 +20,9 @@ void GameObject::AttachCollider( Collider* pCol )
 		gp.p = ToPhysX( pos );
 		gp.q = ToPhysX( quat );
 
-		pxRigidbody = GlobalVar.pxDevice->createRigidStatic( gp );
-		pxRigidbody->attachShape( *pCol->pxShape );
-
-		// 장면에 새 리지드바디를 추가합니다.
-		if ( pScene )
-		{
-			pScene->pxScene->addActor( *pxRigidbody );
-		}
+		auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
+		pxRigid->attachShape( *pCol->pxShape );
+		RigidSwap( ( PxRigidActor* )pxRigid );
 	}
 }
 
@@ -35,24 +30,15 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 {
 	if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); pIsRigid )
 	{
+#if defined( _DEBUG )
 		if ( pxRigidbody )
 		{
-#if defined( _DEBUG )
 			if ( !isStaticRigid )
 			{
 				throw new Exception( "SC.Game.GameObject.OnAddComponent(): Dynamic rigidbody already added." );
 			}
-#endif
-			if ( pScene )
-			{
-				// 장면에서 기본 리지드바디를 제거합니다.
-				pScene->pxScene->removeActor( *pxRigidbody );
-			}
-
-			// 기존의 리지드바디를 제거합니다.
-			pxRigidbody->release();
-			pxRigidbody = nullptr;
 		}
+#endif
 
 		// 새로운 Dynamic 리지드바디를 생성합니다.
 		auto pos = transform->position;
@@ -62,23 +48,34 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		gp.p = ToPhysX( pos );
 		gp.q = ToPhysX( quat );
 
-		pxRigidbody = GlobalVar.pxDevice->createRigidDynamic( gp );
+		auto pxRigid = GlobalVar.pxDevice->createRigidDynamic( gp );
+		RigidSwap( ( PxRigidActor* )pxRigid );
 
 		// 기존 충돌체 컴포넌트가 있을 경우 추가합니다.
 		auto colliders = GetComponentsInChildren<Collider>();
 		for ( int i = 0, count = ( int )colliders.size(); i < count; ++i )
 		{
-			pxRigidbody->attachShape( *colliders[i]->pxShape );
+			pxRigid->attachShape( *colliders[i]->pxShape );
 		}
 
-		pIsRigid->pxRigidbody = pxRigidbody->is<PxRigidDynamic>();
+		pIsRigid->pxRigidbody = pxRigid->is<PxRigidDynamic>();
 		isStaticRigid = false;
 
 		// 장면에 새 리지드바디를 추가합니다.
 		if ( pScene )
 		{
-			pScene->pxScene->addActor( *pxRigidbody );
+			pScene->pxScene->addActor( *pxRigid );
 		}
+	}
+
+	else if ( MeshRenderer* pIsMR = dynamic_cast< MeshRenderer* >( pComponent ); pIsMR )
+	{
+		transform->CreateBuffer();
+	}
+
+	else if ( SkinnedMeshRenderer* pIsSMR = dynamic_cast< SkinnedMeshRenderer* >( pComponent ); pIsSMR )
+	{
+		transform->CreateBuffer();
 	}
 
 	return true;
@@ -98,12 +95,6 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 		{
 			pxShapes.resize( ( size_t )pxRigidbody->getNbShapes() );
 			pxRigidbody->getShapes( pxShapes.data(), pxRigidbody->getNbShapes() );
-
-			if ( pScene )
-			{
-				// 장면에서 기본 리지드바디를 제거합니다.
-				pScene->pxScene->removeActor( *pxRigidbody );
-			}
 		}
 
 		auto pos = transform->position;
@@ -113,17 +104,18 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 		gp.p = ToPhysX( pos );
 		gp.q = ToPhysX( quat );
 
-		pxRigidbody = GlobalVar.pxDevice->createRigidStatic( gp );
+		auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
+		RigidSwap( ( PxRigidActor* )pxRigid );
 
 		for ( size_t i = 0; i < pxShapes.size(); ++i )
 		{
-			pxRigidbody->attachShape( *pxShapes[i] );
+			pxRigid->attachShape( *pxShapes[i] );
 		}
 
 		// 장면에 새 리지드바디를 추가합니다.
 		if ( pScene )
 		{
-			pScene->pxScene->addActor( *pxRigidbody );
+			pScene->pxScene->addActor( *pxRigid );
 		}
 
 		isStaticRigid = true;
@@ -167,8 +159,6 @@ GameObject::GameObject( String name ) : Assets( name )
 	transform = new Game::Transform();
 	transform->Component::gameObject = this;
 	transform->gameObject = this;
-
-	GlobalVar.disposableObjects.insert( this );
 }
 
 GameObject::~GameObject()
@@ -180,7 +170,7 @@ GameObject::~GameObject()
 
 	if ( !AppShutdown && pxRigidbody )
 	{
-		GlobalVar.disposableObjects.erase( this );
+		GlobalVar.pxRigidActor.erase( pxRigidbody );
 
 		pxRigidbody->release();
 		pxRigidbody = nullptr;
@@ -216,15 +206,6 @@ object GameObject::Clone()
 	return gameObject;
 }
 
-void GameObject::Dispose()
-{
-	if ( pxRigidbody )
-	{
-		pxRigidbody->release();
-		pxRigidbody = nullptr;
-	}
-}
-
 void GameObject::Start()
 {
 	for ( auto i : gameObjects )
@@ -253,11 +234,13 @@ void GameObject::Update( Time& time, Input& input )
 	// 개체 업데이트 중 변경 내용은 다음 프레임에 반영됩니다.
 	transform->Update( time, input );
 
+	/*
 	// 하위 개체들을 모두 업데이트합니다.
 	for ( auto i : gameObjects )
 	{
 		i->Update( time, input );
 	}
+	*/
 
 	// 개체의 각 컴포넌트를 업데이트합니다.
 	for ( auto i : components )
@@ -277,11 +260,13 @@ void GameObject::Update( Time& time, Input& input )
 
 void GameObject::FixedUpdate( Time& time )
 {
+	/*
 	// 하위 개체들의 고정 프레임 업데이트 함수를 호출합니다.
 	for ( auto i : gameObjects )
 	{
 		i->FixedUpdate( time );
 	}
+	*/
 
 	// 개체의 각 컴포넌트의 고정 프레임 업데이트 함수를 호출합니다.
 	for ( auto i : components )
@@ -296,11 +281,13 @@ void GameObject::FixedUpdate( Time& time )
 
 void GameObject::LateUpdate( Time& time, Input& input )
 {
+	/*
 	// 하위 개체들의 늦은 업데이트 함수를 호출합니다.
 	for ( auto i : gameObjects )
 	{
 		i->LateUpdate( time, input );
 	}
+	*/
 
 	// 개체의 각 컴포넌트의 늦은 업데이트 함수를 호출합니다.
 	for ( auto i : components )
@@ -322,10 +309,12 @@ void GameObject::Render( RefPtr<CDeviceContext>& deviceContext )
 			i.second->Render( deviceContext );
 	}
 
+	/*
 	for ( auto i : gameObjects )
 	{
 		i->Render( deviceContext );
 	}
+	*/
 }
 
 RefPtr<Transform> GameObject::Transform_get()
@@ -348,6 +337,7 @@ void GameObject::Parent_set( RefPtr<GameObject> value )
 		{
 			if ( par->gameObjects[i].Get() == this )
 			{
+				par->pScene->updateSceneGraph = true;
 				par->gameObjects.erase( par->gameObjects.begin() + i );
 				break;
 			}
@@ -359,6 +349,11 @@ void GameObject::Parent_set( RefPtr<GameObject> value )
 		value->gameObjects.push_back( this );
 		parent = value;
 		pScene = value->pScene;
+	}
+
+	if ( pScene )
+	{
+		pScene->updateSceneGraph = true;
 	}
 }
 
@@ -455,5 +450,35 @@ void GameObject::RemoveComponent( size_t type_hash, function<bool( Component* )>
 		{
 			components.erase( components.begin() + idx );
 		}
+	}
+}
+
+void GameObject::RigidSwap( void* pxRigid )
+{
+	if ( pxRigidbody )
+	{
+		if ( pScene )
+		{
+			// 장면에서 기존 리지드바디를 제거합니다.
+			pScene->pxScene->removeActor( *pxRigidbody );
+		}
+
+		// 가비지 컬렉션 목록에서 리지드바디를 제거합니다.
+		GlobalVar.pxRigidActor.erase( pxRigidbody );
+
+		// 기존의 리지드바디를 제거합니다.
+		pxRigidbody->release();
+		pxRigidbody = nullptr;
+	}
+
+	pxRigidbody = ( PxRigidActor* )pxRigid;
+
+	// 가비지 컬렉션 목록에 리지드바디를 추가합니다.
+	GlobalVar.pxRigidActor.insert( pxRigidbody );
+
+	// 장면에 새 리지드바디를 추가합니다.
+	if ( pScene )
+	{
+		pScene->pxScene->addActor( *pxRigidbody );
 	}
 }

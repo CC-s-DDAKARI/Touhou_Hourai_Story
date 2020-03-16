@@ -37,10 +37,9 @@ object Camera::Clone()
 void Camera::LateUpdate( Time& time, Input& input )
 {
 	int frameIndex = GlobalVar.frameIndex;
-	auto& transform = *( Transform::Constants* )Transform->dynamicBuffer[frameIndex]->pBlock;
 	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
 
-	auto world = XMLoadFloat4x4( &transform.World );
+	XMMATRIX world = XMLoadFloat4x4( &Transform->world );
 	auto det = XMMatrixDeterminant( world );
 	auto worldInv = XMMatrixInverse( &det, world );
 
@@ -73,9 +72,8 @@ void Camera::LateUpdate( Time& time, Input& input )
 Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
 {
 	int frameIndex = GlobalVar.frameIndex;
-	auto& transform = *( Transform::Constants* )Transform->dynamicBuffer[frameIndex]->pBlock;
 
-	auto world = XMLoadFloat4x4( &transform.World );
+	XMMATRIX world = XMLoadFloat4x4( &Transform->world );
 	auto det = XMMatrixDeterminant( world );
 	auto worldInv = XMMatrixInverse( &det, world );
 

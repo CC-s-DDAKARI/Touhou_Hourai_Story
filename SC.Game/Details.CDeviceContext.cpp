@@ -5,13 +5,19 @@ using namespace SC::Game::Details;
 using namespace std;
 
 CDeviceContext::CDeviceContext( RefPtr<CDevice>& device, D3D12_COMMAND_LIST_TYPE type, ID3D12CommandAllocator* pInitialCommandAllocator, ID3D12PipelineState* pInitialPipelineState )
-	: pDevice( device->pDevice )
+	: pDeviceParent( dynamic_cast< IDevice* >( device.Get() ) )
+	, pDevice( device->pDevice )
 	, type( type )
 {
 	if ( pInitialCommandAllocator )
 	{
 		HR( pDevice->CreateCommandList( 0, type, pInitialCommandAllocator, pInitialPipelineState, IID_PPV_ARGS( &pCommandList ) ) );
 	}
+}
+
+RefPtr<IDevice> CDeviceContext::GetDevice()
+{
+	return pDeviceParent;
 }
 
 void CDeviceContext::CreateShaderInfoBuffers( int capacity )

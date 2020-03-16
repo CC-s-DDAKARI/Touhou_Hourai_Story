@@ -114,6 +114,12 @@ namespace SC::Game
 
 /* Interface */
 #include "SC.Game/IAsyncLoad.h"
+#include "SC.Game/Details.IDevice.h"
+#include "SC.Game/Details.IDeviceChild.h"
+#include "SC.Game/Details.IDeviceContext.h"
+#include "SC.Game/Details.IResource.h"
+#include "SC.Game/Details.IView.h"
+#include "SC.Game/Details.IShaderResourceView.h"
 
 /* Struct */
 #include "SC.Game/AppConfiguration.h"

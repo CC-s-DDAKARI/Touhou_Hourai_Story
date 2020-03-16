@@ -6,25 +6,39 @@ using namespace physx;
 
 void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext )
 {
-	int frameIndex = GlobalVar.frameIndex;
-
-	if ( auto slot = deviceContext->Slot["World"]; slot != -1 )
+	if ( hasBuffer )
 	{
-		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, dynamicBuffer[frameIndex]->VirtualAddress );
+		int frameIndex = GlobalVar.frameIndex;
+
+		if ( auto slot = deviceContext->Slot["World"]; slot != -1 )
+		{
+			deviceContext->pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, dynamicBuffer[frameIndex]->VirtualAddress );
+		}
+	}
+}
+
+void Transform::CreateBuffer()
+{
+	if ( !hasBuffer )
+	{
+		dynamicBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		dynamicBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
+
+		hasBuffer = true;
 	}
 }
 
 Transform::Transform()
 {
 	scale = Vector3::One;
-
-	dynamicBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
-	dynamicBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
 }
 
 Transform::~Transform()
 {
-	GC.Add( dynamicBuffer );
+	if ( hasBuffer )
+	{
+		GC.Add( dynamicBuffer );
+	}
 }
 
 object Transform::Clone()
@@ -94,16 +108,21 @@ void Transform::Update( Time& time, Input& input )
 
 	// 노말 계산을 위한 역전치행렬을 계산합니다.
 	auto det = XMMatrixDeterminant( world );
-	auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
 
 	// 값을 저장합니다.
 	XMStoreFloat4x4( &this->world, world );
 
-	// 값을 GPU에 출력합니다.
-	int frameIndex = GlobalVar.frameIndex;
-	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
-	XMStoreFloat4x4( &frameResource.World, world );
-	XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
+	if ( hasBuffer )
+	{
+		// 법선 계산을 위해 역전치 행렬을 계산합니다.
+		auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
+
+		// 값을 GPU에 출력합니다.
+		int frameIndex = GlobalVar.frameIndex;
+		auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
+		XMStoreFloat4x4( &frameResource.World, world );
+		XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
+	}
 }
 
 void Transform::LookAt( RefPtr<Transform> target, Vector3 up )

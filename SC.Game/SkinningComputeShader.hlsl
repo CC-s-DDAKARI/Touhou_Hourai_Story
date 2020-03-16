@@ -44,7 +44,7 @@ void main( uint3 tid : SV_DispatchThreadID )
 	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
 
 	// 뼈대 색인을 배열 형식으로 가져옵니다.
-	uint indices[4];
+	uint indices[4] = { 0, 0, 0, 0 };
 	//UInt_Sep( sv.Indices.x, indices[0], indices[1] );
 	//UInt_Sep( sv.Indices.y, indices[2], indices[3] );
 

@@ -54,33 +54,6 @@ void GameLogic::Update()
 	}
 	currentScene->Update();
 
-	// 장면에 포함된 모든 카메라 개체와 조명 개체를 가져옵니다.
-	cameraCollection.clear();
-	lightCollection.clear();
-	skinningCollections.clear();
-
-	auto iterator = currentScene->GetEnumerator();
-	for ( auto i : iterator )
-	{
-		auto cameras = i->GetComponentsInChildren<Camera>();
-		if ( cameras.size() != 0 )
-		{
-			cameraCollection.insert( cameraCollection.end(), cameras.begin(), cameras.end() );
-		}
-
-		auto lights = i->GetComponentsInChildren<Light>();
-		if ( lights.size() != 0 )
-		{
-			lightCollection.insert( lightCollection.end(), lights.begin(), lights.end() );
-		}
-
-		auto skinnedMeshes = i->GetComponentsInChildren<SkinnedMeshRenderer>();
-		if ( skinnedMeshes.size() )
-		{
-			skinningCollections.insert( skinningCollections.end(), skinnedMeshes.begin(), skinnedMeshes.end() );
-		}
-	}
-
 	// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
 	physicsTimer->Tick( [this]() { FixedUpdate(); } );
 
@@ -115,13 +88,16 @@ void GameLogic::Render()
 	auto pCommandList = deviceContext->pCommandList;
 
 	// 메시 스키닝을 진행합니다.
-	for ( auto i : skinningCollections )
+	//for ( auto i : skinningCollections )
 	{
-		pCommandList->SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
-		pCommandList->SetPipelineState( ShaderBuilder::pPipelineState_Skinning.Get() );
+		//pCommandList->SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
+		//pCommandList->SetPipelineState( ShaderBuilder::pPipelineState_Skinning.Get() );
 
 		//i->MeshSkinning( deviceContext );
 	}
+
+	auto& cameraCollection = currentScene->mSceneCameras;
+	auto& lightCollection = currentScene->mSceneLights;
 
 	if ( !cameraCollection.empty() )
 	{

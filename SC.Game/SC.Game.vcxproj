@@ -195,6 +195,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Include\SC.Game\Details.ShaderBuilder.LoadRenderingShader.cpp" />
     <ClCompile Include="AnimationClip.cpp" />
     <ClCompile Include="AnimationState.cpp" />
     <ClCompile Include="Animator.cpp" />
@@ -276,8 +277,14 @@
     <ClInclude Include="..\Include\SC.Game\AppConfiguration.h" />
     <ClInclude Include="..\Include\SC.Game\AppDuplicateException.h" />
     <ClInclude Include="..\Include\SC.Game\Application.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IDevice.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IDeviceChild.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IDeviceContext.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IResource.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IShaderResourceView.h" />
     <ClInclude Include="..\Include\SC.Game\DirectionalLight.h" />
     <ClInclude Include="..\Include\SC.Game\IAsyncLoad.h" />
+    <ClInclude Include="..\Include\SC.Game\Details.IView.h" />
     <ClInclude Include="..\Include\SC.Game\Keyframe.h" />
     <ClInclude Include="..\Include\SC.Game\Keyframes.h" />
     <ClInclude Include="..\Include\SC.Game\Light.h" />

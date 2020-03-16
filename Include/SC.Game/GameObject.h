@@ -3,7 +3,7 @@
 namespace SC::Game
 {
 	/// <summary> 게임 엔진에서 모든 게임 항목에 대한 기본 클래스를 나타냅니다. </summary>
-	class GameObject : public Assets, virtual public IEnumerable<RefPtr<GameObject>>, virtual public ICloneable, virtual public IDisposable
+	class GameObject : public Assets, virtual public IEnumerable<RefPtr<GameObject>>, virtual public ICloneable
 	{
 		friend class Scene;
 		friend class Transform;
@@ -55,9 +55,6 @@ namespace SC::Game
 
 		/// <summary> (<see cref="ICloneable"/>) 현재 인스턴스의 복사본인 새 개체를 생성합니다. </summary>
 		object Clone() override;
-
-		/// <summary> (<see cref="IDisposable"/>) 내부 자원을 해제합니다. </summary>
-		void Dispose() override;
 
 		/// <summary> 장면이 시작될 때 장면에 포함된 모든 게임 개체에 실행됩니다. </summary>
 		virtual void Start();
@@ -198,5 +195,7 @@ namespace SC::Game
 		RefPtr<Component> GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		Component* GetRawComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		void RemoveComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
+
+		void RigidSwap( void* pxRigid );
 	};
 }

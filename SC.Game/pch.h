@@ -40,7 +40,7 @@ using namespace DirectX;
 namespace SC::Game::Details
 {
 	class IntegratedFactory;
-	class CDevice;
+	struct CDevice;
 	class CDeviceContext;
 	class CCommandQueue;
 	class CSwapChain;

@@ -59,12 +59,15 @@ int Scene::Add( RefPtr<GameObject> value )
 	int index = ( int )gameObjects.size();
 	gameObjects.push_back( value );
 	value->OnSceneAttached( this );
+
+	updateSceneGraph = true;
 	return index;
 }
 
 void Scene::Clear()
 {
 	gameObjects.clear();
+	updateSceneGraph = true;
 }
 
 bool Scene::Contains( RefPtr<GameObject> value )
@@ -104,6 +107,7 @@ int Scene::IndexOf( RefPtr<GameObject> value )
 void Scene::Insert( int index, RefPtr<GameObject> value )
 {
 	gameObjects.insert( gameObjects.begin() + index, value );
+	updateSceneGraph = true;
 }
 
 void Scene::Remove( RefPtr<GameObject> value )
@@ -113,11 +117,15 @@ void Scene::Remove( RefPtr<GameObject> value )
 		Item[i]->OnSceneDetached( this );
 		RemoveAt( i );
 	}
+
+	updateSceneGraph = true;
 }
 
 void Scene::RemoveAt( int index )
 {
 	gameObjects.erase( gameObjects.begin() + index );
+
+	updateSceneGraph = true;
 }
 
 int Scene::Count_get()
@@ -138,6 +146,7 @@ RefPtr<GameObject> Scene::Item_get( int index )
 void Scene::Item_set( int index, RefPtr<GameObject> value )
 {
 	gameObjects[index] = value;
+	updateSceneGraph = true;
 }
 
 void Scene::Start()
@@ -151,6 +160,12 @@ void Scene::Start()
 
 void Scene::Update()
 {
+	if ( updateSceneGraph )
+	{
+		PopulateSceneGraph();
+		updateSceneGraph = false;
+	}
+
 	pSkinnedMeshRendererQueue->Clear();
 
 	if ( firstUpdate == false )
@@ -207,8 +222,7 @@ void Scene::Update()
 		input.scrollDelta = GlobalVar.scrollDelta;
 	}
 
-	auto e = GetEnumerator();
-	for ( auto go : e )
+	for ( auto go : mSceneGraph )
 	{
 		go->Update( time, input );
 	}
@@ -221,10 +235,9 @@ void Scene::FixedUpdate()
 	time.fixedTime = fixedTimer.TotalSeconds;
 	time.fixedDeltaTime = fixedTimer.ElapsedSeconds;
 
-	auto e = GetEnumerator();
-	for ( auto go = std::begin( e ); go != std::end( e ); ++go )
+	for ( auto go : mSceneGraph )
 	{
-		( *go )->FixedUpdate( time );
+		go->FixedUpdate( time );
 	}
 
 	pxScene->simulate( 1.0f / GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds );
@@ -233,10 +246,9 @@ void Scene::FixedUpdate()
 
 void Scene::LateUpdate()
 {
-	auto e = GetEnumerator();
-	for ( auto go = std::begin( e ); go != std::end( e ); ++go )
+	for ( auto go : mSceneGraph )
 	{
-		( *go )->LateUpdate( time, input );
+		go->LateUpdate( time, input );
 	}
 }
 
@@ -252,9 +264,43 @@ void Scene::Unload()
 
 void Scene::Render( RefPtr<CDeviceContext>& deviceContext )
 {
-	auto e = GetEnumerator();
-	for ( auto go : e )
+	for ( auto go : mSceneGraph )
 	{
 		go->Render( deviceContext );
+	}
+}
+
+void Scene::PopulateSceneGraph()
+{
+	mSceneGraph.clear();
+	mSceneCameras.clear();
+	mSceneLights.clear();
+
+	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
+	{
+		InsertSceneGraph( mSceneGraph, gameObjects[i].Get() );
+	}
+
+	for ( auto i : mSceneGraph )
+	{
+		if ( auto t = i->GetComponent<Camera>(); t )
+		{
+			mSceneCameras.push_back( t.Get() );
+		}
+
+		if ( auto t = i->GetComponent<Light>(); t )
+		{
+			mSceneLights.push_back( t.Get() );
+		}
+	}
+}
+
+void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject )
+{
+	mSceneGraph.push_back( pGameObject );
+
+	for ( int i = 0, count = pGameObject->NumChilds; i < count; ++i )
+	{
+		InsertSceneGraph( sceneGraph, pGameObject->Childs[i].Get() );
 	}
 }

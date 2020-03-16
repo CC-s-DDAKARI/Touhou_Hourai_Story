@@ -2,13 +2,15 @@
 
 namespace SC::Game::Details
 {
-	class CDeviceContext : virtual public Object
+	class CDeviceContext : virtual public Object, virtual public IDeviceChild
 	{
 		struct tag_WaitPair
 		{
 			ID3D12Fence* pFence;
 			uint64 FenceValue;
 		};
+
+		IDevice* pDeviceParent = nullptr;
 
 		const D3D12_COMMAND_LIST_TYPE type;
 		ComPtr<ID3D12Device> pDevice;
@@ -21,6 +23,8 @@ namespace SC::Game::Details
 
 	public:
 		CDeviceContext( RefPtr<CDevice>& device, D3D12_COMMAND_LIST_TYPE type, ID3D12CommandAllocator* pInitialCommandAllocator = nullptr, ID3D12PipelineState* pInitialPipelineState = nullptr );
+
+		RefPtr<IDevice> GetDevice() override;
 
 		void CreateShaderInfoBuffers( int capacity = 2048 );
 		

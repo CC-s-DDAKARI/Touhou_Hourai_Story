@@ -5,21 +5,24 @@ namespace SC::Game::Details
 	class HeapAllocator : virtual public Object
 	{
 		const int alignOf;
-		const uint32 heapCount;
+		const int heapCount;
 
 		ComPtr<ID3D12Device> pDevice;
-		ComPtr<ID3D12Resource> pDynamicBuffer;
 
-		D3D12_GPU_VIRTUAL_ADDRESS virtualAddress = 0;
-		char* pBlock = nullptr;
+		std::vector<ComPtr<ID3D12Resource>> pDynamicBuffers;
+		std::vector<D3D12_GPU_VIRTUAL_ADDRESS> virtualAddress;
+		std::vector<char*> pBlock;
 
 		std::mutex locker;
-		std::queue<int> allocQueue;
+		std::vector<std::queue<int>> allocQueue;
 
 	public:
-		HeapAllocator( CDevice* device, int alignOf = 512, uint32 heapCount = 2048 );  // 1MB
+		HeapAllocator( CDevice* device, int alignOf = 512, int heapCount = 2048 );  // 1MB
 
 		int Alloc( D3D12_GPU_VIRTUAL_ADDRESS& virtualAddress, void*& pBlock );
 		void Free( int index );
+
+	private:
+		int SearchIndex();
 	};
 }

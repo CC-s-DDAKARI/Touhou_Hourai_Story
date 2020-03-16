@@ -2,9 +2,8 @@
 
 namespace SC::Game::Details
 {
-	class CDevice : virtual public Object
+	struct CDevice : virtual public Object, virtual public IDevice
 	{
-	public:
 		struct tag_FontFamily
 		{
 			String Name;
@@ -22,7 +21,6 @@ namespace SC::Game::Details
 			}
 		};
 
-	private:
 		std::mutex viewStorageLocker;
 		std::queue<RefPtr<ViewStorage>> viewStorageChain;
 
@@ -30,7 +28,6 @@ namespace SC::Game::Details
 		RefPtr<HeapAllocator> heapAllocator256;  // 1MB
 		RefPtr<HeapAllocator> heapAllocator512;  // 1MB
 
-	public:
 		CDevice( IDXGIAdapter1* pAdapter );
 
 		void FreeStorage( ViewStorage* pStorage );

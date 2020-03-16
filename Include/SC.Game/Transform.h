@@ -19,12 +19,14 @@ namespace SC::Game
 		Quaternion rotation;
 		GameObject* gameObject = nullptr;
 
+		bool hasBuffer = false;
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
 
 		sc_game_export_float( XMFLOAT4X4, 16 ) world;
 
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );
+		void CreateBuffer();
 
 	public:
 		/// <summary> <see cref="Transform"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

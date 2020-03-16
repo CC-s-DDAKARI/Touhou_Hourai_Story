@@ -126,6 +126,7 @@ int Application::Start( RefPtr<Application> app )
 	// 앱이 종료될 때 모든 작업이 완료된 상태인지 검사합니다.
 	WaitAllQueues();
 	GlobalVar.Release();
+	AssetBundle::Dispose();
 
 	// 앱 종료 요청을 수행합니다.
 	auto ret = app->OnExit();

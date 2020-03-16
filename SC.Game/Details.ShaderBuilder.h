@@ -20,11 +20,21 @@ namespace SC::Game::Details
 	constexpr int Slot_Skinning_VertexBuffer = 2;
 	constexpr int Slot_Skinning_SkinningConstants = 3;
 
+	constexpr int Slot_Rendering_Camera = 0;
+	constexpr int Slot_Rendering_World = 1;
+	constexpr int Slot_Rendering_BoneTransform = 2;
+	constexpr int Slot_Rendering_Textures = 3;
+	constexpr int Slot_Rendering_Material = 4;
+	constexpr int Slot_Rendering_IsSkinned = 5;
+	constexpr int Slot_Rendering_Light = 6;
+
 	class ShaderBuilder : virtual public Object
 	{
 	public:
 		static ComPtr<ID3D12RootSignature> pRootSignature_Skinning;
 		static ComPtr<ID3D12PipelineState> pPipelineState_Skinning;
+
+		static ComPtr<ID3D12RootSignature> pRootSignature_Rendering;
 
 	private:
 		static ShaderModule colorShader;
@@ -54,6 +64,8 @@ namespace SC::Game::Details
 
 	private:
 		static void LoadSkinningShader();
+		static void LoadRenderingShader();
+
 		static void LoadColorShader();
 		static void LoadSkyboxShader();
 		static void LoadHDRShader();

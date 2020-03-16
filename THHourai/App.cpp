@@ -50,7 +50,6 @@ AppConfiguration App::GetConfig()
 	AppConfiguration config;
 	config.AppName = "Touhou Hourai";
 	config.PhysicsUpdatePerSeconds = 60;
-	config.ScaleFactor = 1.0;
 	config.VSync = false;
 	return config;
 }

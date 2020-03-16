@@ -42,34 +42,33 @@ void Scene0_Terrain::InitializeComponents()
 	// 나무 배치
 	vector<Vector3> placements;
 
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i < 50; ++i )
 	{
-		auto place = Vector3( -5, 0, 5 - i * 3 );
+		auto place = Vector3( -5, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	/*
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i < 50; ++i )
 	{
-		auto place = Vector3( -3.5, 0, 3.5 - i * 3 );
+		auto place = Vector3( -4, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i < 50; ++i )
 	{
-		auto place = Vector3( -2, 0, 2 - i * 3 );
+		auto place = Vector3( -3, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i < 50; ++i )
 	{
-		auto place = Vector3( -0.5, 0, 5 - i * 3 );
+		auto place = Vector3( -2, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 20; ++i )
+	for ( int i = 0; i < 50; ++i )
 	{
-		auto place = Vector3( 1, 0, 3.5 - i * 3 );
+		auto place = Vector3( -1, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
@@ -79,7 +78,6 @@ void Scene0_Terrain::InitializeComponents()
 		tree->Transform->Position = placements[i];
 		tree->Parent = this;
 	}
-	*/
 
 	// 테스트
 	RefPtr<GameObject> test01 = new ColliderBoxVisualizer( "test01" );

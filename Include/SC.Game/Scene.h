@@ -24,7 +24,11 @@ namespace SC::Game
 
 		bool firstUpdate = false;
 		bool fetchResults = false;
+		bool updateSceneGraph = true;
 
+		std::list<GameObject*> mSceneGraph;
+		std::list<Camera*> mSceneCameras;
+		std::list<Light*> mSceneLights;
 		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) pSkinnedMeshRendererQueue;
 
 	public:
@@ -129,5 +133,8 @@ namespace SC::Game
 
 	private:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
+		void PopulateSceneGraph();
+
+		void InsertSceneGraph( std::list<GameObject*>& sceneGraph, GameObject* pGameObject );
 	};
 }
