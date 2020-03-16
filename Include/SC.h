@@ -1,6 +1,16 @@
 #pragma once
 
+#pragma warning( push )
+
 #pragma warning( disable: 4250 )
+#pragma warning( disable: 4251 )
+#pragma warning( disable: 4275 )
+
+# if defined( __SC_API_EXPORT__ )
+#define __SC_API__ __declspec( dllexport )
+#else
+#define __SC_API__ __declspec( dllimport )
+#endif
 
 #include <utility>
 #include <sstream>
@@ -118,7 +128,6 @@ using object = SC::RefPtr<SC::Object>;
 #include "SC/Drawing.EaseOut.h"
 #include "SC/Drawing.EaseIn.h"
 #include "SC/Diagnostics.StepTimer.h"
-#include "SC/Collections.ArrayList.h"
 
 // EXCEPTION
 #include "SC/Exception.h"
@@ -141,3 +150,5 @@ using object = SC::RefPtr<SC::Object>;
 #include "SC/Event.hpp"
 #include "SC/NumericType.hpp"
 #include "SC/Diagnostics.StepTimerCallbackDelegate.hpp"
+
+#pragma warning( pop )

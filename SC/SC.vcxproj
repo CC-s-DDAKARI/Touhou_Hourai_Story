@@ -169,7 +169,6 @@
     <ClInclude Include="..\Include\SC\ArgumentOutOfRangeException.h" />
     <ClInclude Include="..\Include\SC\BasicEnumerator.h" />
     <ClInclude Include="..\Include\SC\callback.h" />
-    <ClInclude Include="..\Include\SC\Collections.ArrayList.h" />
     <ClInclude Include="..\Include\SC\Delegate.h" />
     <ClInclude Include="..\Include\SC\Details.HasOperator.h" />
     <ClInclude Include="..\Include\SC\Details.ReferenceCounter.h" />

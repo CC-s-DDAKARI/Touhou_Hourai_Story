@@ -123,9 +123,6 @@
     <ClInclude Include="String.StringEnumerator.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\SC\Collections.ArrayList.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\SC\Collections.IList.h">
       <Filter>Include</Filter>
     </ClInclude>
