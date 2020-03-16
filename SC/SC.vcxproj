@@ -234,6 +234,7 @@
     <ClCompile Include="Drawing.Color.cpp" />
     <ClCompile Include="EventArgs.cpp" />
     <ClCompile Include="Exception.cpp" />
+    <ClCompile Include="IntPtr.cpp" />
     <ClCompile Include="InvalidCastException.cpp" />
     <ClCompile Include="InvalidOperationException.cpp" />
     <ClCompile Include="NativeException.cpp" />
