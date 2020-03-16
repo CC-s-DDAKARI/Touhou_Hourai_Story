@@ -32,6 +32,7 @@ void varName ## _set( className value );
 #include "Scene0_Terrain.h"
 #include "ColliderBoxVisualizer.h"
 #include "Rock1.h"
+#include "RandomAshenTree.h"
 
 
 /* Components */
@@ -40,6 +41,7 @@ void varName ## _set( className value );
 #include "KeyboardMovement.h"
 #include "CombatBase.h"
 #include "AutoRotate.h"
+#include "CameraViewAction.h"
 
 
 /* UI Pages */

@@ -13,7 +13,7 @@ Rock1::Rock1( String name ) : GameObject( name )
 	boxCol->Center = Vector3( 0, 1, 0 );
 	boxCol->Extent = Vector3( 2, 1, 2 );
 
-#if defined( _DEBUG )
+#if false && defined( _DEBUG )
 	var go = new ColliderBoxVisualizer( "debugVisualizer" );
 	go->Parent = this;
 

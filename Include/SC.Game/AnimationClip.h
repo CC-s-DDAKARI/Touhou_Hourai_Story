@@ -14,6 +14,8 @@ namespace SC::Game
 		std::map<std::string, Keyframes::KeyframePair, std::less<>> MakeInterpolateMap();
 		void Interpolate( double timePos, std::map<std::string, Keyframes::KeyframePair, std::less<>>& interpolated );
 
+		bool isEmpty = true;
+
 	public:
 		/// <summary> <see cref="AnimationClip"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="name"> 데이터 자산 이름을 전달합니다. </param>

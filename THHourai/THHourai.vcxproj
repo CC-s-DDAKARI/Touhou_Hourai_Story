@@ -172,6 +172,7 @@
     <ClInclude Include="BaseCombatLayout.h" />
     <ClInclude Include="BasePage.h" />
     <ClInclude Include="Bee.h" />
+    <ClInclude Include="CameraViewAction.h" />
     <ClInclude Include="CharacterPickPage.h" />
     <ClInclude Include="ColliderBoxVisualizer.h" />
     <ClInclude Include="CombatBase.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="OnlyScriptPage.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayableCharacterBase.h" />
+    <ClInclude Include="RandomAshenTree.h" />
     <ClInclude Include="Rock1.h" />
     <ClInclude Include="Scene00.h" />
     <ClInclude Include="Scene01.h" />
@@ -202,6 +204,7 @@
     <ClCompile Include="BaseCombatLayout.cpp" />
     <ClCompile Include="BasePage.cpp" />
     <ClCompile Include="Bee.cpp" />
+    <ClCompile Include="CameraViewAction.cpp" />
     <ClCompile Include="CharacterPickPage.cpp" />
     <ClCompile Include="ColliderBoxVisualizer.cpp" />
     <ClCompile Include="CombatBase.cpp" />
@@ -224,6 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PlayableCharacterBase.cpp" />
+    <ClCompile Include="RandomAshenTree.cpp" />
     <ClCompile Include="Rock1.cpp" />
     <ClCompile Include="Scene00.cpp" />
     <ClCompile Include="Scene01.cpp" />

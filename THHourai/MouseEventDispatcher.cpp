@@ -23,7 +23,7 @@ void MouseEventDispatcher::Update( Time& time, Input& input )
 	if ( input.IsKeyDown( KeyCode::Mouse1 ) )
 	{
 		var go = MainCamera::GetInstance();
-		var cam = go->GetComponent<Camera>();
+		auto cam = go->GetComponentsInChildren<Camera>();
 
 		Point<double> screenSpace = 0;
 		auto clientSize = App::Instance()->ClientSize;
@@ -33,7 +33,7 @@ void MouseEventDispatcher::Update( Time& time, Input& input )
 		screenSpace.X = screenSpace.X * 2.0 - 1.0;
 		screenSpace.Y = -( screenSpace.Y * 2.0 - 1.0 );
 
-		auto ray = cam->ScreenSpaceToRay( screenSpace );
+		auto ray = cam[0]->ScreenSpaceToRay( screenSpace );
 		double t = -ray.Origin.Y / ray.Direction.Y;
 		Vector3 p = ray.Origin + ray.Direction * t;
 

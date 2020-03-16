@@ -28,6 +28,9 @@ GameLogic::GameLogic() : Object()
 	geometryBuffer = new GeometryBuffer( GlobalVar.device );
 	hdrBuffer = new HDRBuffer( GlobalVar.device );
 	hdrComputedBuffer = new HDRComputedBuffer( GlobalVar.device );
+
+	// 기초 데이터 자산을 생성합니다.
+	skyboxMesh = Mesh::CreateCube( "skybox_mesh" );
 }
 
 GameLogic::~GameLogic()
@@ -42,9 +45,6 @@ void GameLogic::Update()
 	{
 		currentScene = move( SceneManager::currentScene );
 	}
-
-	// 타이머 상태를 갱신합니다.
-	physicsTimer->Tick( [this]() { FixedUpdate(); } );
 
 	// 장면 갱신 함수를 호출합니다.
 	if ( currentScene->firstUpdate == false )
@@ -73,6 +73,9 @@ void GameLogic::Update()
 			lightCollection.insert( lightCollection.end(), lights.begin(), lights.end() );
 		}
 	}
+
+	// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
+	physicsTimer->Tick( [this]() { FixedUpdate(); } );
 
 	// 장면 늦은 갱신 함수를 호출합니다.
 	currentScene->LateUpdate();

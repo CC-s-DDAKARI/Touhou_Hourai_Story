@@ -14,11 +14,6 @@ void Scene01::Start()
 	App::Navigate( complexPage );
 
 	var quaterViewCam = MainCamera::GetInstance();
-	{
-		auto trp = quaterViewCam->Transform;
-		trp->Position = Vector3( 0, 8, -7 );
-		trp->LookAt( Vector3::Zero );
-	}
 	quaterViewCam->AddComponent<KeyboardMovement>();
 
 	Scene::Start();

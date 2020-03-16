@@ -288,6 +288,7 @@
     <ClInclude Include="..\Include\SC.Game\Keyframes.h" />
     <ClInclude Include="..\Include\SC.Game\Light.h" />
     <ClInclude Include="..\Include\SC.Game\Material.h" />
+    <ClInclude Include="..\Include\SC.Game\MeshCollider.h" />
     <ClInclude Include="..\Include\SC.Game\PhysicsMaterial.h" />
     <ClInclude Include="..\Include\SC.Game\CapsuleCollider.h" />
     <ClInclude Include="..\Include\SC.Game\Ray.h" />

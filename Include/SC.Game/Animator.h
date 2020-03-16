@@ -47,6 +47,8 @@ namespace SC::Game
 		std::vector<tag_Bone> boneTransform;
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> finalTransformBuffer;
 
+		bool keyframeUpdated = false;
+
 	protected:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext ) override;
 
