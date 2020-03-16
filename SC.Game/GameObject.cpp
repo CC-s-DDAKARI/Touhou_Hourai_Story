@@ -66,7 +66,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 
 		// 기존 충돌체 컴포넌트가 있을 경우 추가합니다.
 		auto colliders = GetComponentsInChildren<Collider>();
-		for ( int i = 0, count = colliders.size(); i < count; ++i )
+		for ( int i = 0, count = ( int )colliders.size(); i < count; ++i )
 		{
 			pxRigidbody->attachShape( *colliders[i]->pxShape );
 		}
@@ -222,6 +222,20 @@ void GameObject::Start()
 
 void GameObject::Update( Time& time, Input& input )
 {
+	// 개체의 각 컴포넌트의 Start 함수를 호출합니다.
+	for ( auto i : components )
+	{
+		if ( i.second->IsEnabled )
+		{
+			auto cmp = i.second;
+			if ( cmp->isFirst )
+			{
+				cmp->Start();
+				cmp->isFirst = false;
+			}
+		}
+	}
+
 	// 개체의 트랜스폼을 업데이트합니다.
 	// 개체 업데이트 중 변경 내용은 다음 프레임에 반영됩니다.
 	transform->Update( time, input );
@@ -262,11 +276,6 @@ void GameObject::FixedUpdate( Time& time )
 		if ( i.second->IsEnabled )
 		{
 			auto cmp = i.second;
-			if ( cmp->isFirst )
-			{
-				cmp->Start();
-				cmp->isFirst = false;
-			}
 			cmp->FixedUpdate( time );
 		}
 	}

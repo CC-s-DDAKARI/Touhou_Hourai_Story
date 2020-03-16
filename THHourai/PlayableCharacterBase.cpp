@@ -28,7 +28,7 @@ PlayableCharacterBase::PlayableCharacterBase( String name, String filename ) : G
 		collider->Rotation = Quaternion::AngleAxis( 3.14 * 0.5, Vector3::Forward );
 	}
 
-#if defined( _DEBUG )
+#if false && defined( _DEBUG )
 	var go = new ColliderBoxVisualizer( "debugVisualizer" );
 	go->Parent = this;
 

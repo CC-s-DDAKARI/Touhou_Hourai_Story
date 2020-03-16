@@ -42,6 +42,7 @@ void AnimationClip::RemoveKeyframes( const string_view& boneName )
 	if ( it != keyframes.end() ) keyframes.erase( it );
 
 	ComputeDur();
+	isEmpty = keyframes.empty();
 }
 
 Keyframes AnimationClip::Keyframes_get( const string_view& param0 )
@@ -58,6 +59,7 @@ void AnimationClip::Keyframes_set( const string_view& param0, const Game::Keyfra
 	else keyframes.insert( { string( param0 ), value } );
 
 	ComputeDur();
+	isEmpty = keyframes.empty();
 }
 
 void AnimationClip::Keyframes_set( const string_view& param0, Game::Keyframes&& value )
@@ -70,6 +72,7 @@ void AnimationClip::Keyframes_set( const string_view& param0, Game::Keyframes&& 
 	else keyframes.insert( { string( param0 ), move( value ) } );
 
 	ComputeDur();
+	isEmpty = keyframes.empty();
 }
 
 double AnimationClip::Duration_get()

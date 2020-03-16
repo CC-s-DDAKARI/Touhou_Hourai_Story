@@ -84,6 +84,12 @@
     <ClInclude Include="Rock1.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="CameraViewAction.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomAshenTree.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -165,6 +171,12 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Rock1.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraViewAction.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomAshenTree.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>

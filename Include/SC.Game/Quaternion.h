@@ -127,6 +127,11 @@ namespace SC::Game
 			return Quaternion( X / value, Y / value, Z / value, W / value );
 		}
 
+		Quaternion& operator+=( const Quaternion& right );
+		Quaternion& operator-=( const Quaternion& right );
+		Quaternion& operator*=( const Quaternion& right );
+		Quaternion& operator/=( const Quaternion& right );
+
 		constexpr bool operator==( const Quaternion& right ) const
 		{
 			return X == right.X && Y == right.Y && Z == right.Z && W == right.W;

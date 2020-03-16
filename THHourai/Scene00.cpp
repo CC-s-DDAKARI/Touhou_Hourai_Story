@@ -19,8 +19,6 @@ void Scene00::Start()
 
 void Scene00::Update()
 {
-	if ( onPlane && renderers.empty() ) renderers = onPlane->GetComponentsInChildren<SkinnedMeshRenderer>();
-
 	if ( loadingPage->AsyncLoad )
 	{
 		if ( nextScene->Status == AsyncStatus::Completed )
@@ -48,7 +46,8 @@ void Scene00::Load( RefPtr<IAsyncLoad> asyncLoad )
 	kaguyaLoader = AssetBundle::LoadModelAssetsAsync( "Assets/Model/Kaguya/Kaguya.mdl" );
 	mokouLoader = AssetBundle::LoadModelAssetsAsync( "Assets/Model/Mokou/Mokou.mdl" );
 
-	auto camera = MainCamera::GetInstance();
+	var camera = new GameObject( "camera" );
+	camera->AddComponent<Camera>();
 	camera->Transform->Position = Vector3( -6, 3, 6 );
 	camera->Transform->LookAt( Vector3( -4, 0, 4 ) );
 	Add( camera );

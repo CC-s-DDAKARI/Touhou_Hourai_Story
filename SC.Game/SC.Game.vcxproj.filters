@@ -343,6 +343,9 @@
     <ClInclude Include="..\Include\SC.Game\CapsuleCollider.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\MeshCollider.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

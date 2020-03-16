@@ -2,6 +2,8 @@ using namespace Touhou;
 
 using namespace SC::Drawing;
 
+using namespace std;
+
 Scene0_Terrain::Scene0_Terrain( String name ) : GameObject( name )
 {
 	IsLocked = true;
@@ -29,7 +31,7 @@ void Scene0_Terrain::InitializeComponents()
 	trp->Position = Vector3( 94, 0, -94 );
 	terrain->Parent = this;
 
-#if defined( _DEBUG )
+#if false && defined( _DEBUG )
 	var go = new ColliderBoxVisualizer( "debugVisualizer" );
 	go->Parent = terrain;
 
@@ -37,10 +39,45 @@ void Scene0_Terrain::InitializeComponents()
 	go->Transform->Position = Vector3( 0, -1, 0 );
 #endif
 
-	// 돌
-	var rock01 = new Rock1( "rock01" );
-	rock01->Transform->Position = Vector3( -5.0, 0, 1 );
-	rock01->Parent = this;
+	// 나무 배치
+	vector<Vector3> placements;
+
+	for ( int i = 0; i < 20; ++i )
+	{
+		auto place = Vector3( -5, 0, 5 - i * 3 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 20; ++i )
+	{
+		auto place = Vector3( -3.5, 0, 3.5 - i * 3 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 20; ++i )
+	{
+		auto place = Vector3( -2, 0, 2 - i * 3 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 20; ++i )
+	{
+		auto place = Vector3( -0.5, 0, 5 - i * 3 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 20; ++i )
+	{
+		auto place = Vector3( 1, 0, 3.5 - i * 3 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < ( int )placements.size(); ++i )
+	{
+		var tree = new RandomAshenTree( String::Format( "tree{0}", i ) );
+		tree->Transform->Position = placements[i];
+		tree->Parent = this;
+	}
 
 	// 테스트
 	RefPtr<GameObject> test01 = new ColliderBoxVisualizer( "test01" );

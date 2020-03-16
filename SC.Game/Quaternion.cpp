@@ -51,6 +51,38 @@ void Quaternion::V_set( Vector3 value )
 	Z = value.Z;
 }
 
+Quaternion& Quaternion::operator+=( const Quaternion& right )
+{
+    X += right.X;
+    Y += right.Y;
+    Z += right.Z;
+    W += right.W;
+    return *this;
+}
+
+Quaternion& Quaternion::operator-=( const Quaternion& right )
+{
+    X -= right.X;
+    Y -= right.Y;
+    Z -= right.Z;
+    W -= right.W;
+    return *this;
+}
+
+Quaternion& Quaternion::operator*=( const Quaternion& right )
+{
+    return *this = ( *this ) * right;
+}
+
+Quaternion& Quaternion::operator/=( const Quaternion& right )
+{
+    X /= right.X;
+    Y /= right.Y;
+    Z /= right.Z;
+    W /= right.W;
+    return *this;
+}
+
 Quaternion Quaternion::AngleAxis( double angle, Vector3 axis )
 {
 	auto sinv = sin( angle * 0.5 );

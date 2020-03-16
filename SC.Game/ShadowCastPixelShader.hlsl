@@ -29,5 +29,6 @@ void main( Fragment pIn )
 		color.xyz += gDiffuseMap1.Sample( gSampler, pIn.Tex ).xyz;
 	}
 
-	clip( color.a - 0.1f );
+	if ( true || gMaterial.AlphaClip )
+		clip( color.a - 0.9f );
 }

@@ -74,12 +74,17 @@ void Animator::FixedUpdate( Time& time )
 	{
 		Transistor();
 
-		currentState.Interpolate( time.FixedDeltaTimeInSeconds );
-		prevState.Interpolate( time.FixedDeltaTimeInSeconds );
-		UpdateBlend( time.FixedDeltaTimeInSeconds );
+		if ( !keyframeUpdated && currentState.Clip->isEmpty )
+		{
+			currentState.Interpolate( time.FixedDeltaTimeInSeconds );
+			prevState.Interpolate( time.FixedDeltaTimeInSeconds );
+			UpdateBlend( time.FixedDeltaTimeInSeconds );
 
-		UpdateToRoot( Linked );
-		ReplaceToRoot();
+			UpdateToRoot( Linked );
+			ReplaceToRoot();
+
+			keyframeUpdated = true;
+		}
 	}
 }
 
@@ -284,6 +289,7 @@ void Animator::Transistor()
 			}
 
 			currentState = MakeStateMachine( i.To );
+			keyframeUpdated = false;
 			break;
 		}
 	}
