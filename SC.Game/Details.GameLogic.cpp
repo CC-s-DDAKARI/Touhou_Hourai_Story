@@ -87,153 +87,191 @@ void GameLogic::Render()
 
 	auto pCommandList = deviceContext->pCommandList;
 
-	// 메시 스키닝을 진행합니다.
-	//for ( auto i : skinningCollections )
+	try
 	{
-		//pCommandList->SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
-		//pCommandList->SetPipelineState( ShaderBuilder::pPipelineState_Skinning.Get() );
-
-		//i->MeshSkinning( deviceContext );
-	}
-
-	auto& cameraCollection = currentScene->mSceneCameras;
-	auto& lightCollection = currentScene->mSceneLights;
-
-	if ( !cameraCollection.empty() )
-	{
-		bool readyLight = false;
-
-		// 각 라이트 객체에 대해 렌더링을 수행합니다.
-		for ( auto i : lightCollection )
+		// 메시 스키닝을 진행합니다.
+		//for ( auto i : skinningCollections )
 		{
-			if ( i->IsShadowCast )
-			{
-				if ( readyLight == false )
-				{
-					ShaderBuilder::ShadowCastShader_get().SetAll( deviceContext );
-					readyLight = true;
-				}
+			//pCommandList->SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
+			//pCommandList->SetPipelineState( ShaderBuilder::pPipelineState_Skinning.Get() );
 
-				i->BeginDraw( deviceContext );
-				i->SetGraphicsRootShaderResources( deviceContext );
-				currentScene->Render( deviceContext );
-				i->EndDraw( deviceContext );
-			}
+			//i->MeshSkinning( deviceContext );
 		}
 
-		// 각 카메라 개체에 대해 렌더링을 수행합니다.
-		for ( auto i : cameraCollection )
+		auto& cameraCollection = currentScene->mSceneCameras;
+		auto& lightCollection = currentScene->mSceneLights;
+
+		if ( !cameraCollection.empty() )
 		{
-			// 기하 버퍼를 렌더 타겟으로 설정합니다.
-			geometryBuffer->OMSetRenderTargets( deviceContext );
+			bool readyLight = false;
 
-			if ( auto skybox = i->ClearMode.TryAs<CameraClearModeSkybox>(); skybox )
-			{
-				// 장면이 스카이박스를 사용할 경우 우선 스카이박스 렌더링을 진행합니다.
-				ShaderBuilder::SkyboxShader_get().SetAll( deviceContext );
-
-				i->SetGraphicsRootConstantBufferView( deviceContext );
-				deviceContext->SetGraphicsRootShaderResources( deviceContext->Slot["Texture"], skybox->SkyboxTexture->pShaderResourceView );
-				skyboxMesh->DrawIndexed( deviceContext );
-			}
-
-			// 기하 버퍼 셰이더를 선택합니다.
-			ShaderBuilder::ColorShader_get().SetAll( deviceContext );
-
-			// 장면에 포함된 모든 개체를 렌더링합니다.
-			i->SetGraphicsRootConstantBufferView( deviceContext );
-			currentScene->Render( deviceContext );
-
-			// 기하 버퍼 사용을 종료합니다.
-			geometryBuffer->EndDraw( deviceContext );
-
-			// HDR 버퍼를 렌더 타겟으로 설정합니다.
-			hdrBuffer->OMSetRenderTargets( deviceContext );
-
-			// HDR 렌더링을 수행합니다.
-			ShaderBuilder::HDRShader_get().SetAll( deviceContext );
-
-			// 매개변수를 입력합니다.
-			i->SetGraphicsRootConstantBufferView( deviceContext );
-			geometryBuffer->SetGraphicsRootShaderResourcesForLayer( deviceContext );
-
-			// 각 조명에 대해 조명 렌더 패스를 진행합니다.
-			pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-			Material::SetGraphicsRootShaderResources( deviceContext );
-
+			// 각 라이트 객체에 대해 렌더링을 수행합니다.
 			for ( auto i : lightCollection )
 			{
-				i->SetGraphicsRootShaderResources( deviceContext );
-				pCommandList->DrawInstanced( 4, 1, 0, 0 );
+				if ( i->IsShadowCast )
+				{
+					if ( readyLight == false )
+					{
+						ShaderBuilder::ShadowCastShader_get().SetAll( deviceContext );
+						readyLight = true;
+					}
+
+					i->BeginDraw( deviceContext );
+					i->SetGraphicsRootShaderResources( deviceContext );
+					currentScene->Render( deviceContext );
+					i->EndDraw( deviceContext );
+				}
 			}
 
-			// HDR 색상 렌더링을 수행합니다.
-			ShaderBuilder::HDRColorShader_get().SetAll( deviceContext );
-
-			// 매개변수를 입력합니다.
-			geometryBuffer->SetGraphicsRootShaderResourcesForColor( deviceContext );
-
-			// HDR 버퍼에 색상 렌더링을 수행합니다.
-			pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-			pCommandList->DrawInstanced( 4, 1, 0, 0 );
-
-			// HDR 버퍼 사용을 종료합니다.
-			hdrBuffer->EndDraw( deviceContext );
-
-			// 시간 경과를 조회합니다.
-			timer->Tick();
-			double t = timer->ElapsedSeconds;
-
-			// 매개변수를 입력합니다.
-			ShaderBuilder::HDRComputeShader_get( 0 ).SetAll( deviceContext );
-			hdrComputedBuffer->SetComputeRootTimestamp( deviceContext, t );
-			hdrBuffer->SetComputeRootShaderResources( deviceContext );
-			
-			// 렌더 패스를 수행합니다.
-			for ( int i = 0; i < 3; ++i )
+			// 각 카메라 개체에 대해 렌더링을 수행합니다.
+			for ( auto i : cameraCollection )
 			{
-				// 셰이더를 선택합니다.
-				if ( i != 0 ) ShaderBuilder::HDRComputeShader_get( i ).SetAll( deviceContext );
-				hdrComputedBuffer->Compute( deviceContext, i );
+				// 기하 버퍼를 렌더 타겟으로 설정합니다.
+				geometryBuffer->OMSetRenderTargets( deviceContext );
+
+				if ( auto skybox = i->ClearMode.TryAs<CameraClearModeSkybox>(); skybox )
+				{
+					// 장면이 스카이박스를 사용할 경우 우선 스카이박스 렌더링을 진행합니다.
+					ShaderBuilder::SkyboxShader_get().SetAll( deviceContext );
+
+					i->SetGraphicsRootConstantBufferView( deviceContext );
+					deviceContext->SetGraphicsRootShaderResources( deviceContext->Slot["Texture"], skybox->SkyboxTexture->pShaderResourceView );
+					skyboxMesh->DrawIndexed( deviceContext );
+				}
+
+				// 기하 버퍼 셰이더를 선택합니다.
+				ShaderBuilder::ColorShader_get().SetAll( deviceContext );
+
+				// 장면에 포함된 모든 개체를 렌더링합니다.
+				i->SetGraphicsRootConstantBufferView( deviceContext );
+				currentScene->Render( deviceContext );
+
+				// 기하 버퍼 사용을 종료합니다.
+				geometryBuffer->EndDraw( deviceContext );
+
+				// HDR 버퍼를 렌더 타겟으로 설정합니다.
+				hdrBuffer->OMSetRenderTargets( deviceContext );
+
+				// HDR 렌더링을 수행합니다.
+				ShaderBuilder::HDRShader_get().SetAll( deviceContext );
+
+				// 매개변수를 입력합니다.
+				i->SetGraphicsRootConstantBufferView( deviceContext );
+				geometryBuffer->SetGraphicsRootShaderResourcesForLayer( deviceContext );
+
+				// 각 조명에 대해 조명 렌더 패스를 진행합니다.
+				pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+				Material::SetGraphicsRootShaderResources( deviceContext );
+
+				for ( auto i : lightCollection )
+				{
+					i->SetGraphicsRootShaderResources( deviceContext );
+					pCommandList->DrawInstanced( 4, 1, 0, 0 );
+				}
+
+				// HDR 색상 렌더링을 수행합니다.
+				ShaderBuilder::HDRColorShader_get().SetAll( deviceContext );
+
+				// 매개변수를 입력합니다.
+				geometryBuffer->SetGraphicsRootShaderResourcesForColor( deviceContext );
+
+				// HDR 버퍼에 색상 렌더링을 수행합니다.
+				pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+				pCommandList->DrawInstanced( 4, 1, 0, 0 );
+
+				// HDR 버퍼 사용을 종료합니다.
+				hdrBuffer->EndDraw( deviceContext );
+
+				// 시간 경과를 조회합니다.
+				timer->Tick();
+				double t = timer->ElapsedSeconds;
+
+				// 매개변수를 입력합니다.
+				ShaderBuilder::HDRComputeShader_get( 0 ).SetAll( deviceContext );
+				hdrComputedBuffer->SetComputeRootTimestamp( deviceContext, t );
+				hdrBuffer->SetComputeRootShaderResources( deviceContext );
+
+				// 렌더 패스를 수행합니다.
+				for ( int i = 0; i < 3; ++i )
+				{
+					// 셰이더를 선택합니다.
+					if ( i != 0 ) ShaderBuilder::HDRComputeShader_get( i ).SetAll( deviceContext );
+					hdrComputedBuffer->Compute( deviceContext, i );
+				}
 			}
 		}
+
+		// 현재 후면 버퍼의 인덱스를 가져옵니다.
+		auto idx = GlobalVar.swapChain->Index;
+		auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
+		auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+
+		// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
+		deviceContext->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, 0 );
+		pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
+
+		// 후면 버퍼를 단색으로 초기화합니다.
+		constexpr float clear[4]{ 0.0f };
+		pCommandList->ClearRenderTargetView( rtvHandle, clear, 0, nullptr );
+
+		if ( !cameraCollection.empty() )
+		{
+			// 톤 매핑 렌더링을 수행합니다.
+			ShaderBuilder::ToneMappingShader_get().SetAll( deviceContext );
+
+			// HDR 원본 텍스처 및 계산된 HDR 상수를 설정하고 렌더링을 수행합니다.
+			//geometryBuffer->SetGraphicsRootShaderResourcesForColor( deviceContext );
+			hdrBuffer->SetGraphicsRootShaderResources( deviceContext );
+			hdrComputedBuffer->SetGraphicsRootConstantBuffers( deviceContext );
+			pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+			pCommandList->DrawInstanced( 4, 1, 0, 0 );
+		}
+
+		// 명령 목록을 닫고 푸쉬합니다.
+		deviceContext->Close();
+		directQueue->Execute( deviceContext );
+
+		// 마지막 명령 번호를 저장합니다.
+		lastPending[frameIndex++] = directQueue->Signal();
+
+		// 프레임 인덱스를 한정합니다.
+		if ( frameIndex >= 2 ) frameIndex -= 2;
 	}
-
-	// 현재 후면 버퍼의 인덱스를 가져옵니다.
-	auto idx = GlobalVar.swapChain->Index;
-	auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
-	auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
-
-	// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
-	deviceContext->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, 0 );
-	pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
-
-	// 후면 버퍼를 단색으로 초기화합니다.
-	constexpr float clear[4]{ 0.0f };
-	pCommandList->ClearRenderTargetView( rtvHandle, clear, 0, nullptr );
-
-	if ( !cameraCollection.empty() )
+	catch ( Exception* e )
 	{
-		// 톤 매핑 렌더링을 수행합니다.
-		ShaderBuilder::ToneMappingShader_get().SetAll( deviceContext );
+		// 예외 개체를 제거하고 기본 작업을 수행합니다.
+		delete e;
 
-		// HDR 원본 텍스처 및 계산된 HDR 상수를 설정하고 렌더링을 수행합니다.
-		//geometryBuffer->SetGraphicsRootShaderResourcesForColor( deviceContext );
-		hdrBuffer->SetGraphicsRootShaderResources( deviceContext );
-		hdrComputedBuffer->SetGraphicsRootConstantBuffers( deviceContext );
-		pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-		pCommandList->DrawInstanced( 4, 1, 0, 0 );
+		// 기존 명령을 모두 제거합니다.
+		deviceContext->Close();
+		visibleViewStorage->Reset();
+
+		HR( pCommandAllocator[frameIndex]->Reset() );
+		deviceContext->Reset( GlobalVar.device->DirectQueue[0].Get(), pCommandAllocator[frameIndex].Get(), nullptr );
+
+		// 현재 후면 버퍼의 인덱스를 가져옵니다.
+		auto idx = GlobalVar.swapChain->Index;
+		auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
+		auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+
+		// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
+		deviceContext->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, 0 );
+		pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
+
+		// 후면 버퍼를 단색으로 초기화합니다.
+		constexpr float clear[4]{ 0.0f };
+		pCommandList->ClearRenderTargetView( rtvHandle, clear, 0, nullptr );
+
+		// 명령 목록을 닫고 푸쉬합니다.
+		deviceContext->Close();
+		directQueue->Execute( deviceContext );
+
+		// 마지막 명령 번호를 저장합니다.
+		lastPending[frameIndex++] = directQueue->Signal();
+
+		// 프레임 인덱스를 한정합니다.
+		if ( frameIndex >= 2 ) frameIndex -= 2;
 	}
-
-	// 명령 목록을 닫고 푸쉬합니다.
-	deviceContext->Close();
-	directQueue->Execute( deviceContext );
-
-	// 마지막 명령 번호를 저장합니다.
-	lastPending[frameIndex++] = directQueue->Signal();
-
-	// 프레임 인덱스를 한정합니다.
-	if ( frameIndex >= 2 ) frameIndex -= 2;
 }
 
 void GameLogic::ResizeBuffers( uint32 width, uint32 height )

@@ -367,6 +367,9 @@
     <ClInclude Include="..\Include\SC.Game\Details.IDeviceContext.h">
       <Filter>Details</Filter>
     </ClInclude>
+    <ClInclude Include="Details.ViewStorageException.h">
+      <Filter>Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -663,6 +666,9 @@
     </ClCompile>
     <ClCompile Include="..\Include\SC.Game\Details.ShaderBuilder.LoadRenderingShader.cpp">
       <Filter>Shaders\RenderingShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.ViewStorageException.cpp">
+      <Filter>Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

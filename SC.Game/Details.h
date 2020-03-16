@@ -1,5 +1,8 @@
 #pragma once
 
+/* Exception */
+#include "Details.ViewStorageException.h"
+
 /* Struct */
 #include "Details.CRootSignatureDesc.h"
 #include "Details.CGraphicsPipelineStateDesc.h"

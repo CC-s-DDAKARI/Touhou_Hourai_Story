@@ -10,7 +10,7 @@ namespace SC::Game
 
 		RefPtr<Mesh> skinnedMesh;
 		RefPtr<Material> material;
-		RefPtr<Mesh> mesh;
+		sc_game_export_object( RefPtr<Details::CBuffer> ) mVertexBuffer;
 
 	protected:
 		void Skinning( RefPtr<Details::CDeviceContext>& deviceContext );

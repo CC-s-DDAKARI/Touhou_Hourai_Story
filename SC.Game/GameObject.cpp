@@ -78,6 +78,22 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		transform->CreateBuffer();
 	}
 
+	else if ( Camera* pIsCam = dynamic_cast< Camera* >( pComponent ); pIsCam )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
+	else if ( Light* pIsLight = dynamic_cast< Light* >( pComponent ); pIsLight )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
 	return true;
 }
 
@@ -87,6 +103,7 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 	{
 		pxRigidbody->detachShape( *pIsCol->pxShape );
 	}
+
 	else if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); !AppShutdown && pIsRigid )
 	{
 		vector<PxShape*> pxShapes;
@@ -119,6 +136,22 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 		}
 
 		isStaticRigid = true;
+	}
+
+	else if ( Camera* pIsCam = dynamic_cast< Camera* >( pComponent ); pIsCam )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
+	else if ( Light* pIsLight = dynamic_cast< Light* >( pComponent ); pIsLight )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
 	}
 
 	return true;
@@ -234,14 +267,6 @@ void GameObject::Update( Time& time, Input& input )
 	// 개체 업데이트 중 변경 내용은 다음 프레임에 반영됩니다.
 	transform->Update( time, input );
 
-	/*
-	// 하위 개체들을 모두 업데이트합니다.
-	for ( auto i : gameObjects )
-	{
-		i->Update( time, input );
-	}
-	*/
-
 	// 개체의 각 컴포넌트를 업데이트합니다.
 	for ( auto i : components )
 	{
@@ -260,14 +285,6 @@ void GameObject::Update( Time& time, Input& input )
 
 void GameObject::FixedUpdate( Time& time )
 {
-	/*
-	// 하위 개체들의 고정 프레임 업데이트 함수를 호출합니다.
-	for ( auto i : gameObjects )
-	{
-		i->FixedUpdate( time );
-	}
-	*/
-
 	// 개체의 각 컴포넌트의 고정 프레임 업데이트 함수를 호출합니다.
 	for ( auto i : components )
 	{
@@ -281,14 +298,6 @@ void GameObject::FixedUpdate( Time& time )
 
 void GameObject::LateUpdate( Time& time, Input& input )
 {
-	/*
-	// 하위 개체들의 늦은 업데이트 함수를 호출합니다.
-	for ( auto i : gameObjects )
-	{
-		i->LateUpdate( time, input );
-	}
-	*/
-
 	// 개체의 각 컴포넌트의 늦은 업데이트 함수를 호출합니다.
 	for ( auto i : components )
 	{
@@ -308,13 +317,6 @@ void GameObject::Render( RefPtr<CDeviceContext>& deviceContext )
 		if ( i.second->IsEnabled )
 			i.second->Render( deviceContext );
 	}
-
-	/*
-	for ( auto i : gameObjects )
-	{
-		i->Render( deviceContext );
-	}
-	*/
 }
 
 RefPtr<Transform> GameObject::Transform_get()

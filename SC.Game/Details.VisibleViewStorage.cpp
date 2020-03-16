@@ -33,10 +33,6 @@ int VisibleViewStorage::Lock()
 	{
 		if ( lockId >= capacity )
 		{
-#if defined( _DEBUG )
-			Debug::Log( "Debug Information: SC.Game.Details.VisibleViewStorage.Lock(): lockId >= capacity. Object begin expand automatically." );
-#endif
-
 			GC.Add( pDescriptorHeap );
 
 			// 서술자 힙 개체를 다시 생성합니다.
@@ -52,6 +48,9 @@ int VisibleViewStorage::Lock()
 			capacity *= 2;
 
 			failure = true;
+
+			// 예외를 발생시켜 처리 작업을 진행하도록 합니다.
+			throw new ViewStorageException();
 		}
 
 		return lockId++;
