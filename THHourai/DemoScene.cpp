@@ -13,7 +13,7 @@ void DemoScene::Start()
 
 #if defined( _DEBUG )
 	GameVar::pickedCharacterType = 0;
-	//nextScene = SceneManager::LoadSceneAsync<Scene01>();
+	nextScene = SceneManager::LoadSceneAsync<Scene01>();
 #else
 	nextScene = SceneManager::LoadSceneAsync<Scene00>();
 #endif
@@ -23,7 +23,7 @@ void DemoScene::Start()
 
 void DemoScene::Update()
 {
-	if ( false && nextScene->Status == AsyncStatus::Error )
+	if ( nextScene->Status == AsyncStatus::Error )
 	{
 		RefPtr<Exception> exception = new Exception( "\"Scene00\" 장면을 불러오는 중이었습니다.", nextScene->Error.Get() );
 		demoPage->HelpText = String::Format( "게임 엔진에서 시작 장면을 로드하는 중 오류가 발생하였습니다.\n예외 메시지:\n{0}", exception );
@@ -32,7 +32,7 @@ void DemoScene::Update()
 	{
 		if ( demoPage->DemoEnd )
 		{
-			if ( false && nextScene->Status == AsyncStatus::Completed )
+			if ( nextScene->Status == AsyncStatus::Completed )
 			{
 				SceneManager::StartScene( nextScene );
 			}

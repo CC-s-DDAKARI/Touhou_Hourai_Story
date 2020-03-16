@@ -68,13 +68,18 @@ void Animator::Start()
 	}
 }
 
+void Animator::Update( Time& time, Input& input )
+{
+	
+}
+
 void Animator::FixedUpdate( Time& time )
 {
 	if ( controller && boneTransform.size() )
 	{
 		Transistor();
 
-		if ( !keyframeUpdated && currentState.Clip->isEmpty )
+		if ( !keyframeUpdated )
 		{
 			currentState.Interpolate( time.FixedDeltaTimeInSeconds );
 			prevState.Interpolate( time.FixedDeltaTimeInSeconds );
@@ -83,7 +88,8 @@ void Animator::FixedUpdate( Time& time )
 			UpdateToRoot( Linked );
 			ReplaceToRoot();
 
-			keyframeUpdated = true;
+			if ( currentState.Clip->isEmpty )
+				keyframeUpdated = true;
 		}
 	}
 }

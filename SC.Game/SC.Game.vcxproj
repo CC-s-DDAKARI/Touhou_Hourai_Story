@@ -231,9 +231,11 @@
     <ClCompile Include="Details.ShaderBuilder.HDRShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.IntegratedUIShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.ShadowCastShader.cpp" />
+    <ClCompile Include="Details.ShaderBuilder.SkinningShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.SkyboxShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.TextAndRectShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.ToneMappingShader.cpp" />
+    <ClCompile Include="Details.SkinnedMeshRendererQueue.cpp" />
     <ClCompile Include="Details.TextParser.cpp" />
     <ClCompile Include="Details.ViewStorage.cpp" />
     <ClCompile Include="Details.VisibleViewStorage.cpp" />
@@ -366,6 +368,7 @@
     <ClInclude Include="Details.GlobalVar.h" />
     <ClInclude Include="Details.HDRBuffer.h" />
     <ClInclude Include="Details.ShaderInfo.h" />
+    <ClInclude Include="Details.SkinnedMeshRendererQueue.h" />
     <ClInclude Include="Details.TextParser.h" />
     <ClInclude Include="Details.ViewStorage.h" />
     <ClInclude Include="Details.VisibleViewStorage.h" />
@@ -526,6 +529,16 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="SkinningComputeShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="SkyboxPixelShader.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>

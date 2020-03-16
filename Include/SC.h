@@ -1,8 +1,9 @@
 #pragma once
 
+#pragma warning( disable: 4250 )
+
 #pragma warning( push )
 
-#pragma warning( disable: 4250 )
 #pragma warning( disable: 4251 )
 #pragma warning( disable: 4275 )
 

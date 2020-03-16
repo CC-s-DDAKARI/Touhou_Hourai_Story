@@ -30,6 +30,7 @@ namespace SC::Game::Details
 		physx::PxCooking* pxCooking = nullptr;
 		physx::PxDefaultCpuDispatcher* pxDefaultDispatcher = nullptr;
 
+		std::set<IDisposable*> disposableObjects;
 		std::set<physx::PxScene*> pxSceneList;
 
 		void InitializeComponents();

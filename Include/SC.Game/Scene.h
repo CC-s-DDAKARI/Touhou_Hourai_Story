@@ -25,6 +25,8 @@ namespace SC::Game
 		bool firstUpdate = false;
 		bool fetchResults = false;
 
+		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) pSkinnedMeshRendererQueue;
+
 	public:
 		/// <summary> <see cref="Scene"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		Scene();

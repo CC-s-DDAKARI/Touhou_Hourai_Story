@@ -346,6 +346,9 @@
     <ClInclude Include="..\Include\SC.Game\MeshCollider.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Details.SkinnedMeshRendererQueue.h">
+      <Filter>Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -634,6 +637,12 @@
     <ClCompile Include="CapsuleCollider.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Details.ShaderBuilder.SkinningShader.cpp">
+      <Filter>Shaders\SkinningShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.SkinnedMeshRendererQueue.cpp">
+      <Filter>Details</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -699,6 +708,9 @@
     <Filter Include="UI.View">
       <UniqueIdentifier>{691b2983-f508-4d90-9425-0f333da732ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SkinningShader">
+      <UniqueIdentifier>{08e17637-9b4b-4d1a-8a87-8cb03021ed17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ColorVertexShader.hlsl">
@@ -751,6 +763,9 @@
     </FxCompile>
     <FxCompile Include="TextAndRectPixelShader.hlsl">
       <Filter>Shaders\TextAndRectShader</Filter>
+    </FxCompile>
+    <FxCompile Include="SkinningComputeShader.hlsl">
+      <Filter>Shaders\SkinningShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,8 @@ Scene::Scene()
 	GlobalVar.globalMutex.lock();
 	GlobalVar.pxSceneList.insert( pxScene );
 	GlobalVar.globalMutex.unlock();
+
+	pSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 }
 
 Scene::~Scene()
@@ -149,6 +151,8 @@ void Scene::Start()
 
 void Scene::Update()
 {
+	pSkinnedMeshRendererQueue->Clear();
+
 	if ( firstUpdate == false )
 	{
 		Start();

@@ -63,6 +63,11 @@ namespace SC::Game
 		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 연결된 개체가 시작될 때 실행됩니다. </summary>
 		void Start() override;
 
+		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 컴포넌트에 대한 논리 갱신을 수행합니다. </summary>
+		/// <param name="time"> 게임 시간을 전달합니다. </param>
+		/// <param name="input"> 현재 프레임에서 입력 상태를 전달합니다. </param>
+		void Update( Time& time, Input& input ) override;
+
 		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 컴포넌트에 대한 고정 프레임 논리 갱신을 수행합니다. </summary>
 		/// <param name="time"> 게임 시간을 전달합니다. </param>
 		void FixedUpdate( Time& time ) override;

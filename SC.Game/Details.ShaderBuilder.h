@@ -15,8 +15,18 @@ namespace SC::Game::Details
 		void SetAll( RefPtr<CDeviceContext>& commandList );
 	};
 
+	constexpr int Slot_Skinning_SkinnedVertexBuffer = 0;
+	constexpr int Slot_Skinning_BoneTransform = 1;
+	constexpr int Slot_Skinning_VertexBuffer = 2;
+	constexpr int Slot_Skinning_SkinningConstants = 3;
+
 	class ShaderBuilder : virtual public Object
 	{
+	public:
+		static ComPtr<ID3D12RootSignature> pRootSignature_Skinning;
+		static ComPtr<ID3D12PipelineState> pPipelineState_Skinning;
+
+	private:
 		static ShaderModule colorShader;
 		static ShaderModule skyboxShader;
 		static ShaderModule hdrShader;
@@ -43,6 +53,7 @@ namespace SC::Game::Details
 		static ShaderModule TextAndRectShader_get();
 
 	private:
+		static void LoadSkinningShader();
 		static void LoadColorShader();
 		static void LoadSkyboxShader();
 		static void LoadHDRShader();

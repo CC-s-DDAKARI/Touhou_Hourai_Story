@@ -58,6 +58,8 @@ namespace SC::Game::Details
 	class HDRComputedBuffer;
 	class GlyphBuffer;
 	class GlyphRenderer;
+
+	class SkinnedMeshRendererQueue;
 }
 
 #include "../Include/SC.Game.h"

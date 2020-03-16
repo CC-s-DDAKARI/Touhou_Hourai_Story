@@ -5,6 +5,16 @@ using namespace SC::Game::Details;
 RefPtr<Material> SkinnedMeshRenderer::defaultMaterial;
 uint64 SkinnedMeshRenderer::reference_count = 0;
 
+void SkinnedMeshRenderer::Skinning( RefPtr<CDeviceContext>& deviceContext )
+{
+	if ( skinnedMesh.IsValid )
+	{
+		auto pCommandList = deviceContext->pCommandList.Get();
+
+		pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_SkinnedVertexBuffer, skinnedMesh->vertexBuffer->pResource->GetGPUVirtualAddress() );
+	}
+}
+
 void SkinnedMeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext )
 {
 	if ( mesh.IsValid )

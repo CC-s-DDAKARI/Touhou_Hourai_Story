@@ -47,6 +47,11 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::Release()
 	{
+		for ( auto i : disposableObjects )
+		{
+			i->Dispose();
+		}
+
 		gameLogic = nullptr;
 
 		for ( auto i : pxSceneList )

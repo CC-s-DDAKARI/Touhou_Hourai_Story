@@ -7,10 +7,13 @@ namespace SC::Game
 	{
 		static RefPtr<Material> defaultMaterial;
 		static uint64 reference_count;
-		RefPtr<Mesh> mesh;
+
+		RefPtr<Mesh> skinnedMesh;
 		RefPtr<Material> material;
+		RefPtr<Mesh> mesh;
 
 	protected:
+		void Skinning( RefPtr<Details::CDeviceContext>& deviceContext );
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext ) override;
 
 	public:

@@ -1,6 +1,8 @@
-#include "Details.ShaderBuilder.h"
 using namespace SC;
 using namespace SC::Game::Details;
+
+ComPtr<ID3D12RootSignature> ShaderBuilder::pRootSignature_Skinning;
+ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_Skinning;
 
 ShaderModule ShaderBuilder::colorShader;
 ShaderModule ShaderBuilder::skyboxShader;
@@ -43,6 +45,8 @@ void ShaderModule::SetAll( RefPtr<CDeviceContext>& deviceContext )
 
 void ShaderBuilder::Initialize()
 {
+	LoadSkinningShader();
+
 	LoadColorShader();
 	LoadSkyboxShader();
 	LoadHDRShader();

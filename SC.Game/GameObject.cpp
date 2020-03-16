@@ -167,6 +167,8 @@ GameObject::GameObject( String name ) : Assets( name )
 	transform = new Game::Transform();
 	transform->Component::gameObject = this;
 	transform->gameObject = this;
+
+	GlobalVar.disposableObjects.insert( this );
 }
 
 GameObject::~GameObject()
@@ -178,6 +180,8 @@ GameObject::~GameObject()
 
 	if ( !AppShutdown && pxRigidbody )
 	{
+		GlobalVar.disposableObjects.erase( this );
+
 		pxRigidbody->release();
 		pxRigidbody = nullptr;
 	}
@@ -210,6 +214,15 @@ object GameObject::Clone()
 	}
 
 	return gameObject;
+}
+
+void GameObject::Dispose()
+{
+	if ( pxRigidbody )
+	{
+		pxRigidbody->release();
+		pxRigidbody = nullptr;
+	}
 }
 
 void GameObject::Start()

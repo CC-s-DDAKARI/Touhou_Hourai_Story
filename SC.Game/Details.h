@@ -37,5 +37,7 @@
 #include "Details.GlyphRenderer.h"
 #include "Details.RichTextColorUnknown.h"
 
+#include "Details.SkinnedMeshRendererQueue.h"
+
 #include "Details.GlobalVar.h"
 #include "Details.ShaderBuilder.h"

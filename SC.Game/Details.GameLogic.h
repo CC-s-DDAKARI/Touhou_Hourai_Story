@@ -17,6 +17,7 @@ namespace SC::Game::Details
 		RefPtr<HDRBuffer> hdrBuffer;
 		RefPtr<HDRComputedBuffer> hdrComputedBuffer;
 
+		std::list<RefPtr<SkinnedMeshRenderer>> skinningCollections;
 		std::list<RefPtr<Camera>> cameraCollection;
 		std::list<RefPtr<Light>> lightCollection;
 
