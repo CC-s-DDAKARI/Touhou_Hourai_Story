@@ -10,7 +10,6 @@ AppConfiguration::AppConfiguration()
 AppConfiguration::AppConfiguration( const AppConfiguration& copy )
 	: appName( copy.appName )
 	, fullscreenMode( copy.fullscreenMode )
-	, scaleFactor( copy.scaleFactor )
 	, physicsFPS( copy.physicsFPS )
 	, disableUI( copy.disableUI )
 	, deviceName( copy.deviceName )
@@ -42,16 +41,6 @@ bool AppConfiguration::FullscreenMode_get()
 void AppConfiguration::FullscreenMode_set( bool value )
 {
 	fullscreenMode = value;
-}
-
-double AppConfiguration::ScaleFactor_get()
-{
-	return scaleFactor;
-}
-
-void AppConfiguration::ScaleFactor_set( double value )
-{
-	scaleFactor = std::clamp( value, 1.0, 5.0 );
 }
 
 int AppConfiguration::PhysicsUpdatePerSeconds_get()
@@ -93,7 +82,6 @@ AppConfiguration& AppConfiguration::operator=( const AppConfiguration& copy )
 {
 	appName = copy.appName;
 	fullscreenMode = copy.fullscreenMode;
-	scaleFactor = copy.scaleFactor;
 	physicsFPS = copy.physicsFPS;
 	disableUI = copy.disableUI;
 	deviceName = copy.deviceName;

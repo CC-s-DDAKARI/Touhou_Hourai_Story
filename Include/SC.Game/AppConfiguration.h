@@ -10,7 +10,6 @@ namespace SC::Game
 	private:
 		String appName;
 		bool fullscreenMode = false;
-		double scaleFactor = 1.0;
 		int physicsFPS = 60;
 		bool disableUI = false;
 		String deviceName;
@@ -45,15 +44,6 @@ namespace SC::Game
 		/// <summary> 앱이 전체 화면 모드를 사용하는지 나타내는 값을 설정합니다. 플랫폼이 전체 화면을 지원하지 않는 경우 값은 무시됩니다. </summary>
 		/// <param name="value"> 값을 전달합니다. </param>
 		void FullscreenMode_set( bool value );
-
-		/// <summary> (Visual Studio 전용) UI 확대 비율을 설정하거나 가져옵니다. 1 ~ 5 사이의 값을 지정합니다. </summary>
-		vs_property( double, ScaleFactor );
-
-		/// <summary> UI 확대 비율을 가져옵니다. </summary>
-		double ScaleFactor_get();
-
-		/// <summary> UI 확대 비율을 설정합니다. 1 ~ 5 사이의 값을 지정합니다. </summary>
-		void ScaleFactor_set( double value );
 
 		/// <summary> (Visual Studio 전용) 초당 물리 연산 횟수를 설정하거나 가져옵니다. </summary>
 		vs_property( int, PhysicsUpdatePerSeconds );

@@ -72,7 +72,6 @@ void Scene0_Terrain::InitializeComponents()
 		auto place = Vector3( 1, 0, 3.5 - i * 3 );
 		placements.push_back( place );
 	}
-	*/
 
 	for ( int i = 0; i < ( int )placements.size(); ++i )
 	{
@@ -80,6 +79,7 @@ void Scene0_Terrain::InitializeComponents()
 		tree->Transform->Position = placements[i];
 		tree->Parent = this;
 	}
+	*/
 
 	// Å×½ºÆ®
 	RefPtr<GameObject> test01 = new ColliderBoxVisualizer( "test01" );

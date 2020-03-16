@@ -39,7 +39,6 @@ Application::Application( AppConfiguration appConfig )
 	}
 
 	GlobalVar.hWnd = CreateWindowExW( NULL, wcex.lpszClassName, appConfig.AppName.Chars, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT_ALL, nullptr, nullptr, wcex.hInstance, nullptr );
-	dpi = 96.0 * appConfig.ScaleFactor;
 
 	// 내부 API 초기화
 	InitializeDevice();
