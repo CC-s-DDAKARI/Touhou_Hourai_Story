@@ -105,9 +105,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;../assimp-lib/Win32/assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Lib>
-      <AdditionalDependencies>$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevel_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelAABB_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelDynamics_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysX.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCharacterKinematic_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCommon.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCooking.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXExtensions_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXFoundation.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXPvdSDK_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXTask_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXVehicle_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SceneQuery_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SimulationController_static.lib;DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;WindowsCodecs.lib;DXGuid.lib</AdditionalDependencies>
-    </Lib>
+    <Lib />
     <FxCompile>
       <VariableName>p%(Filename)</VariableName>
       <HeaderFileOutput>$(ProjectDir)CompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -132,9 +130,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Lib>
-      <AdditionalDependencies>$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevel_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelAABB_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelDynamics_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysX.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCharacterKinematic_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCommon.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCooking.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXExtensions_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXFoundation.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXPvdSDK_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXTask_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXVehicle_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SceneQuery_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SimulationController_static.lib;DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;WindowsCodecs.lib;DXGuid.lib</AdditionalDependencies>
-    </Lib>
+    <Lib />
     <FxCompile>
       <VariableName>p%(Filename)</VariableName>
       <HeaderFileOutput>$(ProjectDir)CompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -163,9 +159,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;../assimp-lib/Win32/assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Lib>
-      <AdditionalDependencies>$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevel_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelAABB_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelDynamics_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysX.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCharacterKinematic_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCommon.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCooking.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXExtensions_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXFoundation.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXPvdSDK_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXTask_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXVehicle_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SceneQuery_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SimulationController_static.lib;DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;WindowsCodecs.lib;DXGuid.lib</AdditionalDependencies>
-    </Lib>
+    <Lib />
     <FxCompile>
       <VariableName>p%(Filename)</VariableName>
       <HeaderFileOutput>$(ProjectDir)CompiledShaders\%(Filename).h</HeaderFileOutput>
@@ -194,9 +188,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Lib>
-      <AdditionalDependencies>$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\assimp.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevel_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelAABB_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\LowLevelDynamics_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysX.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCharacterKinematic_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCommon.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXCooking.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXExtensions_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXFoundation.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXPvdSDK_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXTask_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\PhysXVehicle_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SceneQuery_static.lib;$(SolutionDir)ExternalLib\$(Platform)\$(Configuration)\SimulationController_static.lib;DXGI.lib;D3D12.lib;D3D11.lib;D2D1.lib;DWrite.lib;WindowsCodecs.lib;DXGuid.lib</AdditionalDependencies>
-    </Lib>
+    <Lib />
     <FxCompile>
       <VariableName>p%(Filename)</VariableName>
       <HeaderFileOutput>$(ProjectDir)CompiledShaders\%(Filename).h</HeaderFileOutput>

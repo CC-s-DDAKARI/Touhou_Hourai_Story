@@ -20,11 +20,6 @@ namespace SC::Game::Details
 
 		bool recordMemoryAllocations = false;
 #if defined( _DEBUG )
-		// 디버그 모드 빌드일 경우 Pvd 개체를 생성합니다.
-		pxPvd = PxCreatePvd( *pxFoundation );
-		PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate( "127.0.0.1", 5425, 10 );
-		pxPvd->connect( *transport, PxPvdInstrumentationFlag::eALL );
-
 		recordMemoryAllocations = true;
 #endif
 
@@ -33,8 +28,8 @@ namespace SC::Game::Details
 		if ( !pxDevice ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreatePhysics failed." );
 
 		// 추가 라이브러리를 불러옵니다.
-		if ( !PxInitExtensions( *pxDevice, pxPvd ) )
-			throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxInitExtensions failed." );
+		//if ( !PxInitExtensions( *pxDevice, pxPvd ) )
+			//throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxInitExtensions failed." );
 
 		PxRegisterArticulations( *pxDevice );
 		PxRegisterHeightFields( *pxDevice );
@@ -77,14 +72,6 @@ namespace SC::Game::Details
 			pxDevice->release();
 			pxDevice = nullptr;
 		}
-
-#if defined( _DEBUG )
-		if ( pxPvd )
-		{
-			pxPvd->release();
-			pxPvd = nullptr;
-		}
-#endif
 
 		if ( pxFoundation )
 		{

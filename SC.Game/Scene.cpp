@@ -200,7 +200,7 @@ void Scene::Update()
 			input.cursorPos = { cursor.x, cursor.y };
 		}
 
-		//input.scrollDelta = Details::scrollDelta;
+		input.scrollDelta = GlobalVar.scrollDelta;
 	}
 
 	auto e = GetEnumerator();
