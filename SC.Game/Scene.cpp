@@ -284,9 +284,43 @@ void Scene::FixedUpdate()
 	time.fixedTime = fixedTimer.TotalSeconds;
 	time.fixedDeltaTime = fixedTimer.ElapsedSeconds;
 
-	for ( auto go : mSceneGraph )
+	if ( mThreadSceneGraph.size() )
 	{
-		go->FixedUpdate( time );
+		std::atomic<int> locker = 0;
+
+		// 각 스레드 배치 아이템에 대해 스레드 업데이트를 수행합니다.
+		for ( auto i : mThreadSceneGraph )
+		{
+			Threading::ThreadPool::QueueUserWorkItem( Threading::AsyncTaskDelegate<void>( [&]( object arg )
+				{
+					list<GameObject*> mylist = arg.As<list<GameObject*>>();
+
+					for ( auto go : mylist )
+					{
+						go->FixedUpdate( time );
+					}
+
+					locker += 1;
+					return nullptr;
+				}
+			), i.second );
+		}
+
+		// 주 스레드 작업은 여기서 진행합니다.
+		for ( auto go : mCoreThreadSceneGraph )
+		{
+			go->FixedUpdate( time );
+		}
+
+		// 모든 스레드가 작업을 마칠 때까지 대기합니다.
+		while ( locker != ( int )mThreadSceneGraph.size() );
+	}
+	else
+	{
+		for ( auto go : mSceneGraph )
+		{
+			go->FixedUpdate( time );
+		}
 	}
 
 	pxScene->simulate( 1.0f / GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds );
@@ -328,22 +362,22 @@ void Scene::PopulateSceneGraph()
 	{
 		if ( auto t = i->GetComponent<Camera>(); t )
 		{
-			mSceneCameras.push_back( t.Get() );
+			mSceneCameras.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Light>(); t )
 		{
-			mSceneLights.push_back( t.Get() );
+			mSceneLights.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Animator>(); t )
 		{
-			mpSkinnedMeshRendererQueue->PushAnimator( t.Get() );
+			mpSkinnedMeshRendererQueue->PushAnimator( t );
 		}
 
 		if ( auto t = i->GetComponent<SkinnedMeshRenderer>(); t )
 		{
-			mpSkinnedMeshRendererQueue->AddRenderer( t.Get() );
+			mpSkinnedMeshRendererQueue->AddRenderer( t );
 		}
 	}
 
@@ -366,6 +400,6 @@ void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameOb
 
 	for ( int i = 0, count = pGameObject->NumChilds; i < count; ++i )
 	{
-		InsertSceneGraph( sceneGraph, pGameObject->Childs[i].Get(), threadId );
+		InsertSceneGraph( sceneGraph, pGameObject->Childs[i], threadId );
 	}
 }

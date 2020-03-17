@@ -42,7 +42,8 @@ void AnimationClip::RemoveKeyframes( const string_view& boneName )
 	if ( it != keyframes.end() ) keyframes.erase( it );
 
 	ComputeDur();
-	isEmpty = keyframes.empty();
+	if ( !isEmpty )
+		isEmpty = keyframes.empty();
 }
 
 Keyframes AnimationClip::Keyframes_get( const string_view& param0 )
@@ -59,7 +60,15 @@ void AnimationClip::Keyframes_set( const string_view& param0, const Game::Keyfra
 	else keyframes.insert( { string( param0 ), value } );
 
 	ComputeDur();
-	isEmpty = keyframes.empty();
+	
+	if ( value.Translation.size() < 2 && value.Scaling.size() < 2 && value.Rotation.size() < 2 )
+	{
+		isEmpty = isEmpty && true;
+	}
+	else
+	{
+		isEmpty = false;
+	}
 }
 
 void AnimationClip::Keyframes_set( const string_view& param0, Game::Keyframes&& value )
@@ -69,10 +78,19 @@ void AnimationClip::Keyframes_set( const string_view& param0, Game::Keyframes&& 
 	{
 		it->second = move( value );
 	}
-	else keyframes.insert( { string( param0 ), move( value ) } );
+	else it = keyframes.insert( { string( param0 ), move( value ) } ).first;
 
 	ComputeDur();
-	isEmpty = keyframes.empty();
+
+	auto& v = it->second;
+	if ( v.Translation.size() < 2 && v.Scaling.size() < 2 && v.Rotation.size() < 2 )
+	{
+		isEmpty = isEmpty && true;
+	}
+	else
+	{
+		isEmpty = false;
+	}
 }
 
 double AnimationClip::Duration_get()

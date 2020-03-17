@@ -16,7 +16,7 @@ namespace SC::Game
 		RefPtr<Transform> transform;
 
 		std::vector<RefPtr<GameObject>> gameObjects;
-		WeakPtr parent;
+		GameObject* parent = nullptr;
 
 		sc_game_export_object( physx::PxRigidActor* ) pxRigidbody = nullptr;
 		bool isStaticRigid = false;
@@ -86,12 +86,12 @@ namespace SC::Game
 		template< class T >
 		T* GetComponent()
 		{
-			return GetComponent( typeid( T ).hash_code(), []( Component* ptr ) -> auto
-				{
-					T* dynamic = dynamic_cast< T* >( ptr );
-					return dynamic != nullptr;
-				}
-			).TryAs<T>();
+			return dynamic_cast< T* >( GetComponent( typeid( T ).hash_code(), []( Component* ptr ) -> auto
+			{
+				T* dynamic = dynamic_cast< T* >( ptr );
+				return dynamic != nullptr;
+			}
+			) );
 		}
 
 		/// <summary> 개체에 추가된 확장 컴포넌트를 제거합니다. </summary>
@@ -121,28 +121,6 @@ namespace SC::Game
 			for ( int i = 0; i < NumChilds_get(); ++i )
 			{
 				auto vec = Childs_get( i )->GetComponentsInChildren<T>();
-				components.insert( components.end(), vec.begin(), vec.end() );
-			}
-
-			return move( components );
-		}
-
-		/// <summary> 자식 요소까지 포함하여 개체에 추가된 확장 컴포넌트 목록을 가져옵니다. </summary>
-		template< class T >
-		std::vector<T*> GetRawComponentsInChildren()
-		{
-			using namespace std;
-
-			vector<T*> components;
-			// for each childs.
-			if ( auto c = GetRawComponent<T>(); c )
-			{
-				components.push_back( c );
-			}
-
-			for ( int i = 0; i < NumChilds_get(); ++i )
-			{
-				auto vec = Childs_get( i )->GetRawComponentsInChildren<T>();
 				components.insert( components.end(), vec.begin(), vec.end() );
 			}
 

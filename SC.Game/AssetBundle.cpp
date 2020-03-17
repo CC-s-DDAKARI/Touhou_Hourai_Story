@@ -136,11 +136,11 @@ RefPtr<GameObject> AssetBundle::CreateGameObjectFromM3DModel( const path& filepa
 			int parent = hierarchy[i];
 			if ( parent == -1 )
 			{
-				gameObject->Parent = head;
+				gameObject->Parent = head.Get();
 			}
 			else
 			{
-				gameObject->Parent = boneObjects[parent];
+				gameObject->Parent = boneObjects[parent].Get();
 			}
 
 			auto bone = gameObject->AddComponent<Bone>();
@@ -243,7 +243,7 @@ RefPtr<GameObject> AssetBundle::CreateGameObjectFromM3DModel( const path& filepa
 				meshRenderer->Material = material;
 			}
 
-			gameObject->Parent = head;
+			gameObject->Parent = head.Get();
 		}
 
 		for ( int i = 0; i < header.AnimationClips; ++i )

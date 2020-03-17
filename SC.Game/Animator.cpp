@@ -67,7 +67,7 @@ void Animator::Start()
 
 void Animator::Update( Time& time, Input& input )
 {
-	
+
 }
 
 void Animator::FixedUpdate( Time& time )
@@ -86,7 +86,9 @@ void Animator::FixedUpdate( Time& time )
 			ReplaceToRoot();
 
 			if ( currentState.Clip->isEmpty )
+			{
 				keyframeUpdated = true;
+			}
 		}
 	}
 }

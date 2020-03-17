@@ -349,7 +349,7 @@ void AssimpParser::ProcessMeshes( RefPtr<GameObject> gameObject, const aiScene* 
 			go->AddComponent<MeshRenderer>()->Material = materials[mesh->mMaterialIndex];
 		}
 
-		go->Parent = gameObject;
+		go->Parent = gameObject.Get();
 	}
 }
 
@@ -387,7 +387,7 @@ void AssimpParser::ProcessJointHierarchy( RefPtr<GameObject> gameObject, aiNode*
 	trp->Scale = ConvertVector3( scale );
 	trp->Rotation = ConvertQuaternion( quat );
 
-	go->Parent = gameObject;
+	go->Parent = gameObject.Get();
 
 	for ( int i = 0; i < ( int )node->mNumChildren; ++i )
 	{

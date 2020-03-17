@@ -60,6 +60,27 @@ namespace SC
 			return nullptr;
 		}
 
+		/// <summary> 개체의 참조 포인터를 가져옵니다. </summary>
+		/// <exception cref="NullReferenceException"> 개체가 이미 제거된 개체일 경우 발생합니다. </exception>
+		/// <exception cref="InvalidCastException"> 개체의 형식이 제공된 형식과 일치하지 않을 경우 발생합니다. </exception>
+		template< class T >
+		inline T* ResolveAsRaw()
+		{
+			return dynamic_cast< T* >( ResolveRaw() );
+		}
+
+		/// <summary> 개체의 참조 포인터를 가져옵니다. 실패할 경우 null을 반환합니다. </summary>
+		template< class T >
+		inline T* TryResolveAsRaw()
+		{
+			auto obj = ResolveRaw();
+			if ( obj )
+			{
+				return dynamic_cast< T* >( obj );
+			}
+			return nullptr;
+		}
+
 		/// <summary> (Visual Studio 전용) 개체의 존재 여부를 나타내는 값을 가져옵니다. </summary>
 		vs_property_get( bool, IsValid );
 
@@ -72,5 +93,6 @@ namespace SC
 		void AddRef();
 		void Release();
 		object Resolve();
+		Object* ResolveRaw();
 	};
 }

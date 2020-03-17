@@ -49,67 +49,92 @@ object Transform::Clone()
 
 void Transform::Update( Time& time, Input& input )
 {
-	XMMATRIX parent = XMMatrixIdentity();
-	XMMATRIX parentInv = XMMatrixIdentity();
+	XMMATRIX world;
 
-	XMVECTOR pos;
-	XMVECTOR scale;
-	XMVECTOR quat;
-
-	// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
-	if ( auto p = gameObject->Parent.Get(); p )
+	if ( updated )
 	{
-		parent = XMLoadFloat4x4( &p->transform->world );
-		auto det = XMMatrixDeterminant( parent );
-		parentInv = XMMatrixInverse( &det, parent );
+		updated = false;
 	}
 
-	// 리지드바디가 존재할 경우 물리 계산이 완료된 리지드바디에서 위치와 회전 벡터를 가져옵니다.
-	if ( gameObject->pxRigidbody )
+	bool flag = hasUpdate;
+	if ( ( gameObject && gameObject->parent && gameObject->parent->transform->updated ) || gameObject->pxRigidbody )
 	{
-		auto globalPose = gameObject->pxRigidbody->getGlobalPose();
-
-		pos = ToXMVec( globalPose.p );
-		quat = ToXMVec( globalPose.q );
-
-		// 글로벌 벡터에서 로컬 벡터로 변환합니다.
-		XMVECTOR depos, descale, dequat;
-		XMMatrixDecompose( &descale, &dequat, &depos, parentInv );
-
-		pos += depos;
-		quat = XMQuaternionMultiply( quat, dequat );
-
-		// 리지드바디의 정보를 트랜스폼 정보로 가져옵니다.
-		this->position = ToVector( pos );
-		this->rotation = ToQuat( quat );
+		flag = true;
 	}
-	// 그렇지 않을 경우 트랜스폼 개체에서 위치와 회전 벡터를 가져옵니다.
+
+	if ( flag )
+	{
+		XMMATRIX parent = XMMatrixIdentity();
+		XMMATRIX parentInv = XMMatrixIdentity();
+
+		XMVECTOR pos;
+		XMVECTOR scale;
+		XMVECTOR quat;
+
+		// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
+		if ( auto p = gameObject->Parent; p )
+		{
+			parent = XMLoadFloat4x4( &p->transform->world );
+			auto det = XMMatrixDeterminant( parent );
+			parentInv = XMMatrixInverse( &det, parent );
+		}
+
+		// 리지드바디가 존재할 경우 물리 계산이 완료된 리지드바디에서 위치와 회전 벡터를 가져옵니다.
+		if ( gameObject->pxRigidbody )
+		{
+			auto globalPose = gameObject->pxRigidbody->getGlobalPose();
+
+			pos = ToXMVec( globalPose.p );
+			quat = ToXMVec( globalPose.q );
+
+			// 글로벌 벡터에서 로컬 벡터로 변환합니다.
+			XMVECTOR depos, descale, dequat;
+			XMMatrixDecompose( &descale, &dequat, &depos, parentInv );
+
+			pos += depos;
+			quat = XMQuaternionMultiply( quat, dequat );
+
+			// 리지드바디의 정보를 트랜스폼 정보로 가져옵니다.
+			this->position = ToVector( pos );
+			this->rotation = ToQuat( quat );
+		}
+		// 그렇지 않을 경우 트랜스폼 개체에서 위치와 회전 벡터를 가져옵니다.
+		else
+		{
+			pos = ToXMVec( position );
+			quat = ToXMVec( rotation );
+		}
+		scale = ToXMVec( this->scale );
+
+		// 개체의 월드 행렬을 계산합니다.
+		world = XMMatrixTransformation(
+			XMVectorZero(),
+			XMQuaternionIdentity(),
+			scale,
+			XMQuaternionIdentity(),
+			quat,
+			pos
+		);
+
+		world = XMMatrixMultiply( world, parent );
+
+		// 값을 저장합니다.
+		XMStoreFloat4x4( &this->world, world );
+
+		hasUpdate = false;
+		updated = true;
+	}
 	else
 	{
-		pos = ToXMVec( position );
-		quat = ToXMVec( rotation );
+		world = XMLoadFloat4x4( &this->world );
 	}
-	scale = ToXMVec( this->scale );
-
-	// 개체의 월드 행렬을 계산합니다.
-	auto world = XMMatrixTransformation(
-		XMVectorZero(),
-		XMQuaternionIdentity(),
-		scale,
-		XMQuaternionIdentity(),
-		quat,
-		pos
-	);
-
-	world = XMMatrixMultiply( world, parent );
-
-	// 값을 저장합니다.
-	XMStoreFloat4x4( &this->world, world );
 
 	if ( hasBuffer )
 	{
 		// 노말 계산을 위한 역전치행렬을 계산합니다.
 		auto det = XMMatrixDeterminant( world );
+
+		hasUpdate = false;
 
 		// 법선 계산을 위해 역전치 행렬을 계산합니다.
 		auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
@@ -153,7 +178,7 @@ void Transform::Position_set( Vector3 value )
 		XMVECTOR pos;
 
 		// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
-		if ( auto p = gameObject->Parent.Get(); p )
+		if ( auto p = gameObject->Parent; p )
 		{
 			parent = XMLoadFloat4x4( &p->transform->world );
 		}
@@ -167,6 +192,8 @@ void Transform::Position_set( Vector3 value )
 		gp.p = ToPhysX3( pos );
 		gameObject->pxRigidbody->setGlobalPose( gp );
 	}
+
+	hasUpdate = true;
 }
 
 Vector3 Transform::Scale_get()
@@ -177,6 +204,8 @@ Vector3 Transform::Scale_get()
 void Transform::Scale_set( Vector3 value )
 {
 	scale = value;
+
+	hasUpdate = true;
 }
 
 Quaternion Transform::Rotation_get()
@@ -193,7 +222,7 @@ void Transform::Rotation_set( Quaternion value )
 		XMMATRIX parent = XMMatrixIdentity();
 
 		// 연결된 게임 개체의 부모가 있을 경우 부모의 변환 행렬을 가져옵니다.
-		if ( auto p = gameObject->Parent.Get(); p )
+		if ( auto p = gameObject->Parent; p )
 		{
 			parent = XMLoadFloat4x4( &p->transform->world );
 		}
@@ -208,6 +237,8 @@ void Transform::Rotation_set( Quaternion value )
 		gp.q = ToPhysX4( quat );
 		gameObject->pxRigidbody->setGlobalPose( gp );
 	}
+
+	hasUpdate = true;
 }
 
 Vector3 Transform::Forward_get()

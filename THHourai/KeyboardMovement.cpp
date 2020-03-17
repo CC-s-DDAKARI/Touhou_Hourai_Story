@@ -34,5 +34,8 @@ void KeyboardMovement::Update( Time& time, Input& input )
 		mov -= forw * time.DeltaTimeInSeconds * speed;
 	}
 
-	Transform->Position += mov;
+	if ( mov.Magnitude > 0.001 )
+	{
+		Transform->Position += mov;
+	}
 }

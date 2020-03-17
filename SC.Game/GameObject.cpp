@@ -249,7 +249,7 @@ object GameObject::Clone()
 	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
 	{
 		auto child = gameObjects[i]->Clone().As<GameObject>();
-		child->Parent = gameObject;
+		child->Parent = gameObject.Get();
 	}
 
 	return gameObject;
@@ -344,21 +344,19 @@ Transform* GameObject::Transform_get()
 
 GameObject* GameObject::Parent_get()
 {
-	return parent.TryResolveAs<GameObject>().Get();
+	return parent;
 }
 
-void GameObject::Parent_set( RefPtr<GameObject> value )
+void GameObject::Parent_set( GameObject* value )
 {
-	if ( parent.IsValid )
+	if ( parent )
 	{
-		auto par = parent.ResolveAs<GameObject>();
-
-		for ( size_t i = 0, count = par->gameObjects.size(); i < count; ++i )
+		for ( size_t i = 0, count = parent->gameObjects.size(); i < count; ++i )
 		{
-			if ( par->gameObjects[i].Get() == this )
+			if ( parent->gameObjects[i].Get() == this )
 			{
-				par->pScene->updateSceneGraph = true;
-				par->gameObjects.erase( par->gameObjects.begin() + i );
+				parent->pScene->updateSceneGraph = true;
+				parent->gameObjects.erase( parent->gameObjects.begin() + i );
 				break;
 			}
 		}
@@ -382,9 +380,9 @@ int GameObject::NumChilds_get()
 	return ( int )gameObjects.size();
 }
 
-RefPtr<GameObject> GameObject::Childs_get( int param0 )
+GameObject* GameObject::Childs_get( int param0 )
 {
-	return gameObjects[param0];
+	return gameObjects[param0].Get();
 }
 
 void GameObject::AddComponent( size_t type_hash, Component* component )

@@ -97,3 +97,15 @@ object WeakPtr::Resolve()
 		return nullptr;
 	}
 }
+
+Object* WeakPtr::ResolveRaw()
+{
+	if ( IsValid )
+	{
+		return ptr;
+	}
+	else
+	{
+		return nullptr;
+	}
+}

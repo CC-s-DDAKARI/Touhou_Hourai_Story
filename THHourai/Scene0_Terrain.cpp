@@ -28,7 +28,7 @@ void Scene0_Terrain::InitializeComponents()
 
 	auto trp = terrain->Transform;
 	trp->Scale = Vector3( 100, 1, 100 );
-	trp->Position = Vector3( 94, 0, -94 );
+	trp->Position = Vector3( 90, 0, -90 );
 	terrain->Parent = this;
 
 #if false && defined( _DEBUG )
@@ -42,52 +42,13 @@ void Scene0_Terrain::InitializeComponents()
 	// 나무 배치
 	vector<Vector3> placements;
 
-	for ( int i = 0; i < 100; ++i )
+	for ( int j = 0; j < 8; ++j )
 	{
-		auto place = Vector3( -5, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( -4, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( -3, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( -2, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( -1, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( 0, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( 1, 0, 5 - i * 1 );
-		placements.push_back( place );
-	}
-
-	for ( int i = 0; i < 100; ++i )
-	{
-		auto place = Vector3( 2, 0, 5 - i * 1 );
-		placements.push_back( place );
+		for ( int i = 0; i < 50; ++i )
+		{
+			auto place = Vector3( -9 + j, 0, 9 - i * 1 );
+			placements.push_back( place );
+		}
 	}
 
 	for ( int i = 0; i < ( int )placements.size(); ++i )
@@ -97,7 +58,7 @@ void Scene0_Terrain::InitializeComponents()
 		tree->Parent = this;
 
 		auto td = tree->AddComponent<ThreadDispatcher>();
-		td->ThreadID = ( i / 400 );
+		td->ThreadID = ( i / 200 );
 	}
 
 	// 테스트

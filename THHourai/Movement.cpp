@@ -21,8 +21,6 @@ void Movement::Start()
 	animator = GetComponent<Animator>();
 }
 
-extern object globalDebug;
-
 void Movement::FixedUpdate( Time& fixedTime )
 {
 	auto deltaTime = fixedTime.FixedDeltaTimeInSeconds;
@@ -41,7 +39,6 @@ void Movement::FixedUpdate( Time& fixedTime )
 
 		Transform->Position = current + move;
 		Transform->LookTo( delta );
-		globalDebug = Transform->Position;
 
 		if ( animator )
 		{

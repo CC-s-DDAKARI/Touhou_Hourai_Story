@@ -7,8 +7,8 @@ PlayableCharacterBase::PlayableCharacterBase( String name, String filename ) : G
 
 	AddComponent<MouseEventDispatcher>();
 	AddComponent<Animator>();
+	var combat = AddComponent<CombatBase>();
 	{
-		var combat = AddComponent<CombatBase>();
 		combat->MaxHealthPoint = 500;
 		combat->MaxMagicPoint = 10;
 		combat->CurrentHealthPoint = 500;

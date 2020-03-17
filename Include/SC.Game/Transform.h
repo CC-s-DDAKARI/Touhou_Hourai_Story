@@ -23,6 +23,8 @@ namespace SC::Game
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
 
 		sc_game_export_float( XMFLOAT4X4, 16 ) world;
+		bool hasUpdate = true;
+		bool updated = false;
 
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );

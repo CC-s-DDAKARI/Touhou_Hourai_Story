@@ -773,15 +773,15 @@ void MDLParser::LoadBones( String name, RefPtr<GameObject> head )
 
 		if ( par == -1 )
 		{
-			gameObjects[i]->Parent = root;
+			gameObjects[i]->Parent = root.Get();
 		}
 		else
 		{
-			gameObjects[i]->Parent = gameObjects[par];
+			gameObjects[i]->Parent = gameObjects[par].Get();
 		}
 	}
 
-	root->Parent = head;
+	root->Parent = head.Get();
 }
 
 void MDLParser::LoadMeshes( String name, RefPtr<GameObject> head, const vector<RefPtr<Material>>& mtr )
@@ -879,6 +879,6 @@ void MDLParser::LoadMeshes( String name, RefPtr<GameObject> head, const vector<R
 			meshRenderer->Mesh = mesh;
 		}
 
-		gameObject->Parent = head;
+		gameObject->Parent = head.Get();
 	}
 }

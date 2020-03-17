@@ -73,11 +73,11 @@ void Scene00::Load( RefPtr<IAsyncLoad> asyncLoad )
 	plane->AddComponent<MeshRenderer>()->Material = ground;
 	plane->Transform->Scale = Vector3( 10, 1, 10 );
 	var base = new GameObject( "plane" );
-	plane->Parent = base;
+	plane->Parent = base.Get();
 	this->plane = base;
 	var pivot = new GameObject( "pivot" );
 	pivot->Transform->Position = Vector3( -4.5, 0, 4.5 );
-	pivot->Parent = base;
+	pivot->Parent = base.Get();
 	this->pivot = pivot;
 }
 
@@ -154,7 +154,7 @@ void Scene00::OnPicked( object sender, int pickId )
 			onPlane = new GameObject( "Dummy" );
 			picked = -1;
 		}
-		onPlane->Parent = pivot;
+		onPlane->Parent = pivot.Get();
 	}
 }
 

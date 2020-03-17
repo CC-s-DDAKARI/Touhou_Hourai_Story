@@ -8,9 +8,10 @@ namespace SC::Game
 		/// <summary> 이동, 확대 축소 및 회전 키프레임이 모두 포함된 단일 개체를 표현합니다. </summary>
 		struct KeyframePair : private std::tuple<Keyframe<Vector3>, Keyframe<Vector3>, Keyframe<Quaternion>>
 		{
-			/// <summary> 빈 키프레임임을 나타내는 값을 가져옵니다. </summary>
-			const bool IsEmpty = false;
+		private:
+			const bool isEmpty = false;
 
+		public:
 			/// <summary> <see cref="KeyframePair"/> 구조체의 새 인스턴스를 초기화합니다. </summary>
 			constexpr KeyframePair() : tuple()
 			{
@@ -113,7 +114,7 @@ namespace SC::Game
 
 		private:
 			KeyframePair( bool isEmpty ) : tuple()
-				, IsEmpty( isEmpty )
+				, isEmpty( isEmpty )
 			{
 
 			}
