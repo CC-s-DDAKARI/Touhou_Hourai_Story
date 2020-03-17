@@ -55,6 +55,16 @@ namespace SC::Game::Details
 			AddRootParameter( param );
 		}
 
+		void AddUnorderedAccessView( int shaderRegister, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL, int registerSpace = 0 )
+		{
+			D3D12_ROOT_PARAMETER param{ };
+			param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+			param.Descriptor.ShaderRegister = shaderRegister;
+			param.Descriptor.RegisterSpace = registerSpace;
+			param.ShaderVisibility = shaderVisibility;
+			AddRootParameter( param );
+		}
+
 		template< size_t Count >
 		void AddDescriptorTable( const D3D12_DESCRIPTOR_RANGE( &ranges )[Count], D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL )
 		{

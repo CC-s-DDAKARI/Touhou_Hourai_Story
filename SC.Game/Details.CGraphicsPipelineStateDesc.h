@@ -5,14 +5,13 @@ namespace SC::Game::Details
 	struct CGraphicsPipelineStateDesc : public ValueType
 	{
 	private:
-		ComPtr<ID3D12RootSignature> rootSignature;
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{ };
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs;
 
 	public:
 		CGraphicsPipelineStateDesc( ComPtr<ID3D12RootSignature> rootSignatureInit = nullptr )
 		{
-			RootSignature = rootSignatureInit;
+			desc.pRootSignature = rootSignatureInit.Get();
 
 			desc.SampleMask = 0xFFFFFFFF;
 
@@ -141,7 +140,7 @@ namespace SC::Game::Details
 			desc.BlendState.RenderTarget[renderTargetIndex] = blendState;
 		}
 
-		vs_property( ComPtr<ID3D12RootSignature>, RootSignature );
+		vs_property( ID3D12RootSignature*, RootSignature );
 		vs_property( int, RTVCount );
 		vs_property( DXGI_FORMAT, RTVFormats )[];
 		vs_property_get( int, NumInputLayout );
@@ -149,15 +148,14 @@ namespace SC::Game::Details
 		vs_property( DXGI_FORMAT, DSVFormat );
 		vs_property( double, SlopeScaledDepthBias );
 
-		ComPtr<ID3D12RootSignature> RootSignature_get()
+		ID3D12RootSignature* RootSignature_get()
 		{
-			return rootSignature;
+			return desc.pRootSignature;
 		}
 
-		void RootSignature_set( ComPtr<ID3D12RootSignature> value )
+		void RootSignature_set( ID3D12RootSignature* value )
 		{
-			rootSignature = value;
-			desc.pRootSignature = rootSignature.Get();
+			desc.pRootSignature = value;
 		}
 
 		int RTVCount_get()
@@ -222,6 +220,15 @@ namespace SC::Game::Details
 		void SlopeScaledDepthBias_set( double value )
 		{
 			desc.RasterizerState.SlopeScaledDepthBias = ( float )value;
+		}
+
+		CGraphicsPipelineStateDesc& operator=( CGraphicsPipelineStateDesc&& right )
+		{
+			desc = right.desc;
+			inputElementDescs = right.inputElementDescs;
+			desc.InputLayout.NumElements = ( UINT )inputElementDescs.size();
+			desc.InputLayout.pInputElementDescs = inputElementDescs.data();
+			return *this;
 		}
 	};
 }

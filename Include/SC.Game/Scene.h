@@ -29,7 +29,10 @@ namespace SC::Game
 		std::list<GameObject*> mSceneGraph;
 		std::list<Camera*> mSceneCameras;
 		std::list<Light*> mSceneLights;
-		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) pSkinnedMeshRendererQueue;
+
+		std::list<GameObject*> mCoreThreadSceneGraph;
+		std::map<int, std::list<GameObject*>> mThreadSceneGraph;
+		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueue;
 
 	public:
 		/// <summary> <see cref="Scene"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
@@ -120,9 +123,6 @@ namespace SC::Game
 		/// <summary> 장면에 포함된 모든 개체에 대한 고정 프레임 논리 갱신을 순서대로 수행합니다. </summary>
 		virtual void FixedUpdate();
 
-		/// <summary> 장면에 포함된 모든 개체에 대한 늦은 프레임 논리 갱신을 순서대로 수행합니다. </summary>
-		 virtual void LateUpdate();
-
 		/// <summary> 장면이 로드될 때 호출되는 함수입니다. </summary>
 		/// <param name="asyncLoad"> 장면이 비동기 상태로 로드될 때 비동기 상태 개체가 전달됩니다. </param>
 		virtual void Load( RefPtr<IAsyncLoad> asyncLoad );
@@ -135,6 +135,6 @@ namespace SC::Game
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
 		void PopulateSceneGraph();
 
-		void InsertSceneGraph( std::list<GameObject*>& sceneGraph, GameObject* pGameObject );
+		void InsertSceneGraph( std::list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId );
 	};
 }

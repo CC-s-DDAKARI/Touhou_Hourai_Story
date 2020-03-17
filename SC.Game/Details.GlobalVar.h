@@ -29,6 +29,7 @@ namespace SC::Game::Details
 		physx::PxPhysics* pxDevice = nullptr;
 		physx::PxCooking* pxCooking = nullptr;
 		physx::PxDefaultCpuDispatcher* pxDefaultDispatcher = nullptr;
+		physx::PxCudaContextManager* pxCudaManager = nullptr;
 
 		std::set<physx::PxScene*> pxSceneList;
 		std::set<physx::PxRigidActor*> pxRigidActor;

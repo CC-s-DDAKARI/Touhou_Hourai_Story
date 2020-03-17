@@ -61,6 +61,7 @@ namespace SC::Game
 	class Collider;
 	class BoxCollider;
 	class CapsuleCollider;
+	class ThreadDispatcher;
 
 	namespace UI
 	{
@@ -174,6 +175,7 @@ namespace SC::Game
 #include "SC.Game/Collider.h"
 #include "SC.Game/BoxCollider.h"
 #include "SC.Game/CapsuleCollider.h"
+#include "SC.Game/ThreadDispatcher.h"
 #include "SC.Game/UI.EventDispatcher.h"
 #include "SC.Game/UI.DispatcherEventArgs.h"
 #include "SC.Game/UI.Brush.h"

@@ -10,10 +10,7 @@ void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& devic
 	{
 		int frameIndex = GlobalVar.frameIndex;
 
-		if ( auto slot = deviceContext->Slot["World"]; slot != -1 )
-		{
-			deviceContext->pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, dynamicBuffer[frameIndex]->VirtualAddress );
-		}
+		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, dynamicBuffer[frameIndex]->VirtualAddress );
 	}
 }
 
@@ -106,14 +103,14 @@ void Transform::Update( Time& time, Input& input )
 
 	world = XMMatrixMultiply( world, parent );
 
-	// 노말 계산을 위한 역전치행렬을 계산합니다.
-	auto det = XMMatrixDeterminant( world );
-
 	// 값을 저장합니다.
 	XMStoreFloat4x4( &this->world, world );
 
 	if ( hasBuffer )
 	{
+		// 노말 계산을 위한 역전치행렬을 계산합니다.
+		auto det = XMMatrixDeterminant( world );
+
 		// 법선 계산을 위해 역전치 행렬을 계산합니다.
 		auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
 

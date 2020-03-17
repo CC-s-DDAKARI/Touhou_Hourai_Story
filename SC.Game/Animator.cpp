@@ -4,16 +4,13 @@ using namespace SC::Game::Details;
 
 using namespace std;
 
-void Animator::Render( RefPtr<CDeviceContext>& deviceContext )
+void Animator::SetInput( RefPtr<CDeviceContext>& deviceContext )
 {
 	int fixedFrameIndex = GlobalVar.fixedFrameIndex;
 
 	if ( boneTransform.size() )
 	{
-		if ( auto slot = deviceContext->Slot["BoneTransform"]; slot != -1 )
-		{
-			deviceContext->pCommandList->SetGraphicsRootShaderResourceView( slot, finalTransformBuffer[fixedFrameIndex]->VirtualAddress );
-		}
+		deviceContext->pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_BoneTransform, finalTransformBuffer[fixedFrameIndex]->VirtualAddress );
 	}
 }
 

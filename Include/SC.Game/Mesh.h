@@ -19,6 +19,7 @@ namespace SC::Game
 		Mesh( String name );
 
 		void DrawIndexed( RefPtr<Details::CDeviceContext>& deviceContext );
+		void DrawSkinnedIndexed( uint64 virtualAddress, RefPtr<Details::CDeviceContext>& deviceContext );
 
 	public:
 		/// <summary> <see cref="Mesh"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

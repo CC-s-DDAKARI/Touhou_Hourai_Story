@@ -24,9 +24,9 @@ void ShaderBuilder::LoadSkinningShader()
 	};
 
 	CRootSignatureDesc rootSignatureDesc;
-	rootSignatureDesc.AddDescriptorTable( skinnedBuffer );
-	rootSignatureDesc.AddDescriptorTable( boneTransform );
-	rootSignatureDesc.AddDescriptorTable( vertexBuffer );
+	rootSignatureDesc.AddShaderResourceView( 0 );
+	rootSignatureDesc.AddShaderResourceView( 1 );
+	rootSignatureDesc.AddUnorderedAccessView( 0 );
 	rootSignatureDesc.AddRoot32BitConstants( 0, 1 );
 	pRootSignature_Skinning = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
 

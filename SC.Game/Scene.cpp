@@ -21,6 +21,7 @@ Scene::Scene()
 	pxSceneDesc.gravity = PxVec3( 0.0f, -9.8f, 0.0f );
 	pxSceneDesc.cpuDispatcher = GlobalVar.pxDefaultDispatcher;
 	pxSceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	pxSceneDesc.cudaContextManager = GlobalVar.pxCudaManager;
 
 	pxScene = GlobalVar.pxDevice->createScene( pxSceneDesc );
 
@@ -28,7 +29,7 @@ Scene::Scene()
 	GlobalVar.pxSceneList.insert( pxScene );
 	GlobalVar.globalMutex.unlock();
 
-	pSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
+	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 }
 
 Scene::~Scene()
@@ -166,8 +167,6 @@ void Scene::Update()
 		updateSceneGraph = false;
 	}
 
-	pSkinnedMeshRendererQueue->Clear();
-
 	if ( firstUpdate == false )
 	{
 		Start();
@@ -222,9 +221,59 @@ void Scene::Update()
 		input.scrollDelta = GlobalVar.scrollDelta;
 	}
 
-	for ( auto go : mSceneGraph )
+	if ( mThreadSceneGraph.size() )
 	{
-		go->Update( time, input );
+		std::atomic<int> locker = 0;
+
+		// 각 스레드 배치 아이템에 대해 스레드 업데이트를 수행합니다.
+		for ( auto i : mThreadSceneGraph )
+		{
+			Threading::ThreadPool::QueueUserWorkItem( Threading::AsyncTaskDelegate<void>( [&]( object arg )
+				{
+					list<GameObject*> mylist = arg.As<list<GameObject*>>();
+
+					for ( auto go : mylist )
+					{
+						go->Update( time, input );
+					}
+
+					for ( auto go : mylist )
+					{
+						go->LateUpdate( time, input );
+					}
+
+					locker += 1;
+					return nullptr;
+				}
+			), i.second );
+		}
+
+		// 주 스레드 작업은 여기서 진행합니다.
+		for ( auto go : mCoreThreadSceneGraph )
+		{
+			go->Update( time, input );
+		}
+
+		// 주 스레드 작업은 여기서 진행합니다.
+		for ( auto go : mCoreThreadSceneGraph )
+		{
+			go->LateUpdate( time, input );
+		}
+
+		// 모든 스레드가 작업을 마칠 때까지 대기합니다.
+		while ( locker != ( int )mThreadSceneGraph.size() );
+	}
+	else
+	{
+		for ( auto go : mSceneGraph )
+		{
+			go->Update( time, input );
+		}
+
+		for ( auto go : mSceneGraph )
+		{
+			go->LateUpdate( time, input );
+		}
 	}
 }
 
@@ -242,14 +291,6 @@ void Scene::FixedUpdate()
 
 	pxScene->simulate( 1.0f / GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds );
 	pxScene->fetchResults( true );
-}
-
-void Scene::LateUpdate()
-{
-	for ( auto go : mSceneGraph )
-	{
-		go->LateUpdate( time, input );
-	}
 }
 
 void Scene::Load( RefPtr<IAsyncLoad> asyncLoad )
@@ -275,10 +316,12 @@ void Scene::PopulateSceneGraph()
 	mSceneGraph.clear();
 	mSceneCameras.clear();
 	mSceneLights.clear();
+	mThreadSceneGraph.clear();
+	mpSkinnedMeshRendererQueue->Clear();
 
 	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
 	{
-		InsertSceneGraph( mSceneGraph, gameObjects[i].Get() );
+		InsertSceneGraph( mSceneGraph, gameObjects[i].Get(), 0 );
 	}
 
 	for ( auto i : mSceneGraph )
@@ -292,15 +335,37 @@ void Scene::PopulateSceneGraph()
 		{
 			mSceneLights.push_back( t.Get() );
 		}
+
+		if ( auto t = i->GetComponent<Animator>(); t )
+		{
+			mpSkinnedMeshRendererQueue->PushAnimator( t.Get() );
+		}
+
+		if ( auto t = i->GetComponent<SkinnedMeshRenderer>(); t )
+		{
+			mpSkinnedMeshRendererQueue->AddRenderer( t.Get() );
+		}
 	}
+
+	mpSkinnedMeshRendererQueue->PushAnimator( nullptr );
 }
 
-void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject )
+void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )
 {
 	mSceneGraph.push_back( pGameObject );
 
+	if ( auto t = pGameObject->GetComponent<ThreadDispatcher>(); t )
+	{
+		threadId = t->ThreadID;
+	}
+
+	if ( threadId == 0 )
+		mCoreThreadSceneGraph.push_back( pGameObject );
+	else
+		mThreadSceneGraph[threadId].push_back( pGameObject );
+
 	for ( int i = 0, count = pGameObject->NumChilds; i < count; ++i )
 	{
-		InsertSceneGraph( sceneGraph, pGameObject->Childs[i].Get() );
+		InsertSceneGraph( sceneGraph, pGameObject->Childs[i].Get(), threadId );
 	}
 }

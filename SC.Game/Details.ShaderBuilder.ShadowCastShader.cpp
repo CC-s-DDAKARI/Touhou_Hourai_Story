@@ -19,12 +19,11 @@ void ShaderBuilder::LoadShadowCastShader()
 	rootSignatureDesc.VertexShaderRootAccess = true;
 	rootSignatureDesc.PixelShaderRootAccess = true;
 
-	rootSignatureDesc.AddConstantBufferView( 0, D3D12_SHADER_VISIBILITY_VERTEX );
+	rootSignatureDesc.AddConstantBufferView( 2, D3D12_SHADER_VISIBILITY_VERTEX );
 	rootSignatureDesc.AddConstantBufferView( 1, D3D12_SHADER_VISIBILITY_VERTEX );
 	rootSignatureDesc.AddDescriptorTable( diffuseMap0, D3D12_SHADER_VISIBILITY_PIXEL );
 	rootSignatureDesc.AddConstantBufferView( 3, D3D12_SHADER_VISIBILITY_PIXEL );
 	rootSignatureDesc.AddShaderResourceView( 0, D3D12_SHADER_VISIBILITY_VERTEX );
-	rootSignatureDesc.AddRoot32BitConstants( 2, 1, D3D12_SHADER_VISIBILITY_VERTEX );
 
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_WRAP, 8 );
 	shader.RootSignature = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );

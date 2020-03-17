@@ -42,33 +42,51 @@ void Scene0_Terrain::InitializeComponents()
 	// 나무 배치
 	vector<Vector3> placements;
 
-	for ( int i = 0; i < 50; ++i )
+	for ( int i = 0; i < 100; ++i )
 	{
 		auto place = Vector3( -5, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 50; ++i )
+	for ( int i = 0; i < 100; ++i )
 	{
 		auto place = Vector3( -4, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 50; ++i )
+	for ( int i = 0; i < 100; ++i )
 	{
 		auto place = Vector3( -3, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 50; ++i )
+	for ( int i = 0; i < 100; ++i )
 	{
 		auto place = Vector3( -2, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
-	for ( int i = 0; i < 50; ++i )
+	for ( int i = 0; i < 100; ++i )
 	{
 		auto place = Vector3( -1, 0, 5 - i * 1 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 100; ++i )
+	{
+		auto place = Vector3( 0, 0, 5 - i * 1 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 100; ++i )
+	{
+		auto place = Vector3( 1, 0, 5 - i * 1 );
+		placements.push_back( place );
+	}
+
+	for ( int i = 0; i < 100; ++i )
+	{
+		auto place = Vector3( 2, 0, 5 - i * 1 );
 		placements.push_back( place );
 	}
 
@@ -77,6 +95,9 @@ void Scene0_Terrain::InitializeComponents()
 		var tree = new RandomAshenTree( String::Format( "tree{0}", i ) );
 		tree->Transform->Position = placements[i];
 		tree->Parent = this;
+
+		auto td = tree->AddComponent<ThreadDispatcher>();
+		td->ThreadID = ( i / 400 );
 	}
 
 	// 테스트

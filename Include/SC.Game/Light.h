@@ -43,6 +43,7 @@ namespace SC::Game
 	private:
 		Light();
 
+		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );
 		void SetGraphicsRootShaderResources( RefPtr<Details::CDeviceContext>& deviceContext );
 
 	protected:

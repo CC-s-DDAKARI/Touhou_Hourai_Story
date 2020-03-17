@@ -27,8 +27,8 @@ void ShaderBuilder::LoadHDRShader()
 	CRootSignatureDesc rootSignatureDesc;
 	rootSignatureDesc.PixelShaderRootAccess = true;
 
-	rootSignatureDesc.AddDescriptorTable( hdrSource0 );
 	rootSignatureDesc.AddConstantBufferView( 0 );
+	rootSignatureDesc.AddDescriptorTable( hdrSource0 );
 	rootSignatureDesc.AddConstantBufferView( 1 );
 	rootSignatureDesc.AddDescriptorTable( reflectionBuffer );
 	rootSignatureDesc.AddDescriptorTable( shadowDepth );
@@ -47,8 +47,8 @@ void ShaderBuilder::LoadHDRShader()
 
 	shader.RootParameterIndex =
 	{
-		{ "GeometryBuffer", 0 },
-		{ "Camera", 1 },
+		{ "Camera", 0 },
+		{ "GeometryBuffer", 1 },
 		{ "Light", 2 },
 		{ "Reflection", 3 },
 		{ "ShadowDepth", 4 }

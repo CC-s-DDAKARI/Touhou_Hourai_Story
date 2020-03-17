@@ -75,16 +75,16 @@ namespace SC::Game
 
 		/// <summary> 개체에 확장 컴포넌트를 추가합니다. </summary>
 		template< class T, class... CtorArgs, std::enable_if_t<where<Component, T>>* = nullptr >
-		RefPtr<T> AddComponent( CtorArgs&&... ctorArgs )
+		T* AddComponent( CtorArgs&&... ctorArgs )
 		{
-			RefPtr value = new T( ctorArgs... );
+			auto value = new T( ctorArgs... );
 			AddComponent( typeid( T ).hash_code(), value );
 			return value;
 		}
 
 		/// <summary> 개체에 추가된 확장 컴포넌트를 가져옵니다. </summary>
 		template< class T >
-		RefPtr<T> GetComponent()
+		T* GetComponent()
 		{
 			return GetComponent( typeid( T ).hash_code(), []( Component* ptr ) -> auto
 				{
@@ -92,18 +92,6 @@ namespace SC::Game
 					return dynamic != nullptr;
 				}
 			).TryAs<T>();
-		}
-
-		/// <summary> 개체에 추가된 확장 컴포넌트를 가져옵니다. </summary>
-		template< class T >
-		T* GetRawComponent()
-		{
-			return dynamic_cast< T* >( GetRawComponent( typeid( T ).hash_code(), []( Component* ptr ) -> auto
-			{
-				T* dynamic = dynamic_cast< T* >( ptr );
-				return dynamic != nullptr;
-			}
-			) );
 		}
 
 		/// <summary> 개체에 추가된 확장 컴포넌트를 제거합니다. </summary>
@@ -119,11 +107,11 @@ namespace SC::Game
 
 		/// <summary> 자식 요소까지 포함하여 개체에 추가된 확장 컴포넌트 목록을 가져옵니다. </summary>
 		template< class T >
-		std::vector<RefPtr<T>> GetComponentsInChildren()
+		std::vector<T*> GetComponentsInChildren()
 		{
 			using namespace std;
 
-			vector<RefPtr<T>> components;
+			vector<T*> components;
 			// for each childs.
 			if ( auto c = GetComponent<T>(); c )
 			{
@@ -162,19 +150,19 @@ namespace SC::Game
 		}
 
 		/// <summary> (Visual Studio 전용) 개체의 변환 상태를 가져옵니다. </summary>
-		vs_property_get( RefPtr<Game::Transform>, Transform );
+		vs_property_get( Game::Transform*, Transform );
 
 		/// <summary> 개체의 변환 상태를 가져옵니다. </summary>
-		RefPtr<Game::Transform> Transform_get();
+		Game::Transform* Transform_get();
 
 		/// <summary> (Visual Studio 전용) 개체의 부모를 설정하거나 가져옵니다. </summary>
-		vs_property( RefPtr<GameObject>, Parent );
+		vs_property( GameObject*, Parent );
 
 		/// <summary> 개체의 부모를 가져옵니다. </summary>
-		RefPtr<GameObject> Parent_get();
+		GameObject* Parent_get();
 
 		/// <summary> 개체의 부모를 설정합니다. </summary>
-		void Parent_set( RefPtr<GameObject> value );
+		void Parent_set( GameObject* value );
 
 		/// <summary> (Visual Studio 전용) 개체가 포함하고 있는 자식 개체의 개수를 가져옵니다. </summary>
 		vs_property_get( int, NumChilds );
@@ -183,17 +171,16 @@ namespace SC::Game
 		int NumChilds_get();
 
 		/// <summary> (Visual Studio 전용) 개체가 포함하고 있는 자식 개체를 가져옵니다. </summary>
-		vs_property_get( RefPtr<GameObject>, Childs )[];
+		vs_property_get( GameObject*, Childs )[];
 		
 		/// <summary> 개체가 포함하고 있는 자식 개체를 가져옵니다. </summary>
-		RefPtr<GameObject> Childs_get( int param0 );
+		GameObject* Childs_get( int param0 );
 
 	private:
 		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
-		void AddComponent( std::size_t type_hash, RefPtr<Component> component );
+		void AddComponent( std::size_t type_hash, Component* component );
 		std::size_t GetComponentIndex( std::size_t beginIndex, std::size_t type_hash, std::function<bool( Component* )> caster );
-		RefPtr<Component> GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
-		Component* GetRawComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
+		Component* GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 		void RemoveComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 
 		void RigidSwap( void* pxRigid );

@@ -5,6 +5,8 @@ namespace SC::Game
 	/// <summary> 지정된 Mesh 개체를 화면에 렌더링합니다. 개체는 IsSkinned 속성이 true 값을 가집니다. </summary>
 	class SkinnedMeshRenderer : public Component
 	{
+		friend class Details::GameLogic;
+
 		static RefPtr<Material> defaultMaterial;
 		static uint64 reference_count;
 

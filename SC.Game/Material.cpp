@@ -19,36 +19,30 @@ void Material::SetGraphicsRootConstantBuffers( RefPtr<CDeviceContext>& deviceCon
 	memcpy( constantBuffer->pBlock, &frameResourceConstants, sizeof( frameResourceConstants ) );
 	memcpy( reflectionBufferPtr + lockIndex, &frameResourceReflection, sizeof( frameResourceReflection ) );
 
-	if ( auto slot = deviceContext->Slot["Material"]; slot != -1 )
-	{
-		pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, constantBuffer->VirtualAddress );
-	}
+	pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Material, constantBuffer->VirtualAddress );
 
-	if ( auto slot = deviceContext->Slot["Textures"]; slot != -1 )
-	{
-		CShaderResourceView* ppSRVs[3]{ };
+	CShaderResourceView* ppSRVs[3]{ };
 		
-		if ( diffuseMap && diffuseMap->Lock( deviceContext ) )
-		{
-			ppSRVs[0] = diffuseMap->pShaderResourceView.Get();
-		}
-		else ppSRVs[0] = pNullSRV.Get();
-
-		if ( diffuseLayerMap && diffuseLayerMap->Lock( deviceContext ) )
-		{
-			ppSRVs[1] = diffuseLayerMap->pShaderResourceView.Get();
-		}
-		else ppSRVs[1] = pNullSRV.Get();
-
-		if ( normalMap && normalMap->Lock( deviceContext ) )
-		{
-			normalMap->Lock( deviceContext );
-			ppSRVs[2] = normalMap->pShaderResourceView.Get();
-		}
-		else ppSRVs[2] = pNullSRV.Get();
-
-		deviceContext->SetGraphicsRootShaderResources( ( UINT )slot, ARRAYSIZE( ppSRVs ), ppSRVs );
+	if ( diffuseMap && diffuseMap->Lock( deviceContext ) )
+	{
+		ppSRVs[0] = diffuseMap->pShaderResourceView.Get();
 	}
+	else ppSRVs[0] = pNullSRV.Get();
+
+	if ( diffuseLayerMap && diffuseLayerMap->Lock( deviceContext ) )
+	{
+		ppSRVs[1] = diffuseLayerMap->pShaderResourceView.Get();
+	}
+	else ppSRVs[1] = pNullSRV.Get();
+
+	if ( normalMap && normalMap->Lock( deviceContext ) )
+	{
+		normalMap->Lock( deviceContext );
+		ppSRVs[2] = normalMap->pShaderResourceView.Get();
+	}
+	else ppSRVs[2] = pNullSRV.Get();
+
+	deviceContext->SetGraphicsRootShaderResources( Slot_Rendering_Textures, ARRAYSIZE( ppSRVs ), ppSRVs );
 }
 
 void Material::SetGraphicsRootShaderResources( RefPtr<CDeviceContext>& deviceContext )

@@ -94,6 +94,14 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		}
 	}
 
+	else if ( ThreadDispatcher* pIsLight = dynamic_cast< ThreadDispatcher* >( pComponent ); pIsLight )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
 	return true;
 }
 
@@ -147,6 +155,14 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 	}
 
 	else if ( Light* pIsLight = dynamic_cast< Light* >( pComponent ); pIsLight )
+	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
+	else if ( ThreadDispatcher* pIsLight = dynamic_cast< ThreadDispatcher* >( pComponent ); pIsLight )
 	{
 		if ( pScene )
 		{
@@ -226,8 +242,8 @@ object GameObject::Clone()
 	{
 		auto pair = components[i];
 
-		auto clone = pair.second->Clone().As<Component>();
-		gameObject->AddComponent( pair.first, clone );
+		var clone = pair.second->Clone().As<Component>();
+		gameObject->AddComponent( pair.first, clone.Get() );
 	}
 
 	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
@@ -252,9 +268,9 @@ void GameObject::Update( Time& time, Input& input )
 	// 개체의 각 컴포넌트의 Start 함수를 호출합니다.
 	for ( auto i : components )
 	{
-		if ( i.second->IsEnabled )
+		auto cmp = i.second.Get();
+		if ( i.second->isEnabled )
 		{
-			auto cmp = i.second;
 			if ( cmp->isFirst )
 			{
 				cmp->Start();
@@ -270,9 +286,9 @@ void GameObject::Update( Time& time, Input& input )
 	// 개체의 각 컴포넌트를 업데이트합니다.
 	for ( auto i : components )
 	{
-		if ( i.second->IsEnabled )
+		auto cmp = i.second.Get();
+		if ( cmp->IsEnabled )
 		{
-			auto cmp = i.second;
 			if ( cmp->isFirst )
 			{
 				cmp->Start();
@@ -288,9 +304,9 @@ void GameObject::FixedUpdate( Time& time )
 	// 개체의 각 컴포넌트의 고정 프레임 업데이트 함수를 호출합니다.
 	for ( auto i : components )
 	{
-		if ( i.second->IsEnabled )
+		auto cmp = i.second.Get();
+		if ( cmp->IsEnabled )
 		{
-			auto cmp = i.second;
 			cmp->FixedUpdate( time );
 		}
 	}
@@ -301,9 +317,10 @@ void GameObject::LateUpdate( Time& time, Input& input )
 	// 개체의 각 컴포넌트의 늦은 업데이트 함수를 호출합니다.
 	for ( auto i : components )
 	{
-		if ( i.second->IsEnabled )
+		auto cmp = i.second.Get();
+		if ( cmp->IsEnabled )
 		{
-			i.second->LateUpdate( time, input );
+			cmp->LateUpdate( time, input );
 		}
 	}
 }
@@ -314,19 +331,20 @@ void GameObject::Render( RefPtr<CDeviceContext>& deviceContext )
 
 	for ( auto i : components )
 	{
-		if ( i.second->IsEnabled )
-			i.second->Render( deviceContext );
+		auto cmp = i.second.Get();
+		if ( cmp->IsEnabled )
+			cmp->Render( deviceContext );
 	}
 }
 
-RefPtr<Transform> GameObject::Transform_get()
+Transform* GameObject::Transform_get()
 {
-	return transform;
+	return transform.Get();
 }
 
-RefPtr<GameObject> GameObject::Parent_get()
+GameObject* GameObject::Parent_get()
 {
-	return parent.TryResolveAs<GameObject>();
+	return parent.TryResolveAs<GameObject>().Get();
 }
 
 void GameObject::Parent_set( RefPtr<GameObject> value )
@@ -369,7 +387,7 @@ RefPtr<GameObject> GameObject::Childs_get( int param0 )
 	return gameObjects[param0];
 }
 
-void GameObject::AddComponent( size_t type_hash, RefPtr<Component> component )
+void GameObject::AddComponent( size_t type_hash, Component* component )
 {
 	ComponentPair pair;
 	pair.first = type_hash;
@@ -408,24 +426,7 @@ size_t GameObject::GetComponentIndex( size_t beginIndex, size_t type_hash, funct
 	return -1;
 }
 
-RefPtr<Component> GameObject::GetComponent( size_t type_hash, std::function<bool( Component* )> caster )
-{
-	if ( type_hash == typeid( Game::Transform ).hash_code() )
-	{
-		return transform;
-	}
-
-	if ( auto idx = GetComponentIndex( 0, type_hash, caster ); idx != -1 )
-	{
-		return components[idx].second;
-	}
-	else
-	{
-		return nullptr;
-	}
-}
-
-Component* GameObject::GetRawComponent( size_t type_hash, std::function<bool( Component* )> caster )
+Component* GameObject::GetComponent( size_t type_hash, std::function<bool( Component* )> caster )
 {
 	if ( type_hash == typeid( Game::Transform ).hash_code() )
 	{

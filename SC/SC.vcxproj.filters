@@ -245,9 +245,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Include">
-      <UniqueIdentifier>{643e3894-fcf4-4cad-8826-ead4c53bc3cc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SC">
       <UniqueIdentifier>{68506437-2f48-471f-a6c2-94ef330e4752}</UniqueIdentifier>
     </Filter>

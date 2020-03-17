@@ -41,6 +41,10 @@ namespace SC::Game::Details
 		// 멀티 스레드를 사용하는 기본 PhysX 태스크 매니저 개체를 생성합니다.
 		pxDefaultDispatcher = PxDefaultCpuDispatcherCreate( 4 );
 
+		// CUDA GPU를 사용하여 PhysX GPU 디스패처를 구현합니다.
+		PxCudaContextManagerDesc desc;
+		pxCudaManager = PxCreateCudaContextManager( *pxFoundation, desc);
+
 		// 게임 논리를 수행하는 게임 논리 개체를 생성합니다.
 		gameLogic = new GameLogic();
 	}
@@ -57,6 +61,12 @@ namespace SC::Game::Details
 		for ( auto i : pxSceneList )
 		{
 			i->release();
+		}
+
+		if ( pxCudaManager )
+		{
+			pxCudaManager->release();
+			pxCudaManager = nullptr;
 		}
 
 		if ( pxDefaultDispatcher )

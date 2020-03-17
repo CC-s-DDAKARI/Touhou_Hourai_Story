@@ -370,6 +370,9 @@
     <ClInclude Include="Details.ViewStorageException.h">
       <Filter>Details</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\ThreadDispatcher.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -670,6 +673,9 @@
     <ClCompile Include="Details.ViewStorageException.cpp">
       <Filter>Details</Filter>
     </ClCompile>
+    <ClCompile Include="ThreadDispatcher.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -828,6 +834,9 @@
     </None>
     <None Include="Brush.hlsli">
       <Filter>Shaders\Common</Filter>
+    </None>
+    <None Include="RenderingShaderCommon.hlsli">
+      <Filter>Shaders\RenderingShader</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -8,11 +8,7 @@ using namespace std;
 void Camera::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext )
 {
 	int frameIndex = GlobalVar.frameIndex;
-
-	if ( auto slot = deviceContext->Slot["Camera"]; slot != -1 )
-	{
-		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, dynamicBuffer[frameIndex]->VirtualAddress );
-	}
+	deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Camera, dynamicBuffer[frameIndex]->VirtualAddress );
 }
 
 Camera::Camera()

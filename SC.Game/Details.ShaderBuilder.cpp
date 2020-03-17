@@ -4,6 +4,11 @@ using namespace SC::Game::Details;
 ComPtr<ID3D12RootSignature> ShaderBuilder::pRootSignature_Skinning;
 ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_Skinning;
 
+ComPtr<ID3D12RootSignature> ShaderBuilder::pRootSignature_Rendering;
+ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_ColorShader;
+ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_ShadowCastShader;
+ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_SkyboxShader;
+
 ShaderModule ShaderBuilder::colorShader;
 ShaderModule ShaderBuilder::skyboxShader;
 ShaderModule ShaderBuilder::hdrShader;
@@ -46,13 +51,14 @@ void ShaderModule::SetAll( RefPtr<CDeviceContext>& deviceContext )
 void ShaderBuilder::Initialize()
 {
 	LoadSkinningShader();
+	LoadRenderingShader();
 
-	LoadColorShader();
-	LoadSkyboxShader();
+	//LoadColorShader();
+	//LoadSkyboxShader();
 	LoadHDRShader();
 	LoadHDRColorShader();
 	LoadToneMappingShader();
-	LoadShadowCastShader();
+	//LoadShadowCastShader();
 	LoadHDRComputeShader();
 
 	LoadIntegratedUIShader();

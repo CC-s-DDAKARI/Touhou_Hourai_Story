@@ -22,11 +22,9 @@ namespace SC::Game::Details
 
 	constexpr int Slot_Rendering_Camera = 0;
 	constexpr int Slot_Rendering_World = 1;
-	constexpr int Slot_Rendering_BoneTransform = 2;
-	constexpr int Slot_Rendering_Textures = 3;
-	constexpr int Slot_Rendering_Material = 4;
-	constexpr int Slot_Rendering_IsSkinned = 5;
-	constexpr int Slot_Rendering_Light = 6;
+	constexpr int Slot_Rendering_Light = 2;
+	constexpr int Slot_Rendering_Material = 3;
+	constexpr int Slot_Rendering_Textures = 4;
 
 	class ShaderBuilder : virtual public Object
 	{
@@ -35,6 +33,9 @@ namespace SC::Game::Details
 		static ComPtr<ID3D12PipelineState> pPipelineState_Skinning;
 
 		static ComPtr<ID3D12RootSignature> pRootSignature_Rendering;
+		static ComPtr<ID3D12PipelineState> pPipelineState_ColorShader;
+		static ComPtr<ID3D12PipelineState> pPipelineState_ShadowCastShader;
+		static ComPtr<ID3D12PipelineState> pPipelineState_SkyboxShader;
 
 	private:
 		static ShaderModule colorShader;

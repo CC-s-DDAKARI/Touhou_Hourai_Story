@@ -30,6 +30,8 @@ void SkinnedMeshRendererQueue::PushAnimator( Animator* pAnimator )
 
 		pair.pAnimator = move( mpAnimator );
 		pair.SkinnedMeshRenderers = move( mSkinnedMeshRenderers );
+
+		mSkinnedPair.push_back( pair );
 	}
 
 	mpAnimator = pAnimator;

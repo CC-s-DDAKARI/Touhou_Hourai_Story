@@ -11,17 +11,17 @@ Light::Light()
 	Diffuse = 1.0;
 }
 
-void Light::SetGraphicsRootShaderResources( RefPtr<CDeviceContext>& deviceContext )
+void Light::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext )
 {
-	auto pCommandList = deviceContext->pCommandList.Get();
+	auto& pCommandList = *deviceContext->pCommandList.Get();
 	int frameIndex = GlobalVar.frameIndex;
 
-	if ( auto slot = deviceContext->Slot["Light"]; slot != -1 )
-	{
-		memcpy( lightBuffer[frameIndex]->pBlock, &frameResource, sizeof( frameResource ) );
-		pCommandList->SetGraphicsRootConstantBufferView( ( UINT )slot, lightBuffer[frameIndex]->VirtualAddress );
-	}
+	memcpy( lightBuffer[frameIndex]->pBlock, &frameResource, sizeof( frameResource ) );
+	pCommandList.SetGraphicsRootConstantBufferView( Slot_Rendering_Light, lightBuffer[frameIndex]->VirtualAddress );
+}
 
+void Light::SetGraphicsRootShaderResources( RefPtr<CDeviceContext>& deviceContext )
+{
 	if ( shadowCast )
 	{
 		if ( auto slot = deviceContext->Slot["ShadowDepth"]; slot != -1 )

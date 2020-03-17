@@ -1,22 +1,11 @@
+#include "RenderingShaderCommon.hlsli"
+
 struct Fragment
 {
 	float4 PosH : SV_Position;
 	float4 Color : COLOR;
 	float2 Tex : TEXCOORD;
 };
-
-struct Material_Constants
-{
-	int Index;
-	int DiffuseMap;
-	int NormalMap;
-	int AlphaClip;
-};
-
-Texture2D<float4> gDiffuseMap0 : register( t0 );
-Texture2D<float4> gDiffuseMap1 : register( t1 );
-SamplerState gSampler : register( s0 );
-ConstantBuffer<Material_Constants> gMaterial : register( b3 );
 
 void main( Fragment pIn )
 {

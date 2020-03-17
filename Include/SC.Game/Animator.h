@@ -5,6 +5,8 @@ namespace SC::Game
 	/// <summary> 뼈대 정보가 존재하는 개체에 대해 애니메이션 갱신을 진행합니다. 이 클래스는 상속될 수 없습니다. </summary>
 	class Animator final : public Component
 	{
+		friend class Details::GameLogic;
+
 		struct tag_StateMachine
 		{
 			std::wstring Name;
@@ -50,7 +52,7 @@ namespace SC::Game
 		bool keyframeUpdated = false;
 
 	protected:
-		void Render( RefPtr<Details::CDeviceContext>& deviceContext ) override;
+		void SetInput( RefPtr<Details::CDeviceContext>& deviceContext );
 
 	public:
 		/// <summary> <see cref="Animator"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

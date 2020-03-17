@@ -21,6 +21,17 @@ struct SkinnedVertex
 	uint4 Indices : INDICES;
 };
 
+struct SkinnedVertexBuffer
+{
+	float3 Pos;
+	float4 Color;
+	float2 Tex;
+	float3 Normal;
+	float3 Tangent;
+	float3 Weights;
+	uint2 Indices;
+};
+
 #endif
 
 /*

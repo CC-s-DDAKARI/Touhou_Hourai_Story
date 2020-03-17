@@ -1,13 +1,10 @@
-#include "Vertex.hlsli"
-#include "Camera.hlsli"
+#include "RenderingShaderCommon.hlsli"
 
 struct Fragment
 {
 	float4 PosH : SV_Position;
 	float2 Tex : TEXCOORD;
 };
-
-ConstantBuffer<Camera> gCamera : register( b0 );
 
 Fragment main( Vertex vIn, uint vertexId : SV_VertexID )
 {

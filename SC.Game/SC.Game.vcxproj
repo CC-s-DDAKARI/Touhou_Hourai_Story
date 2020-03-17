@@ -250,6 +250,7 @@
     <ClCompile Include="Rigidbody.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
+    <ClCompile Include="ThreadDispatcher.cpp" />
     <ClCompile Include="UI.KeyboardEventArgs.cpp" />
     <ClCompile Include="UI.RevealBrush.cpp" />
     <ClCompile Include="UnhandledErrorDetectedEventArgs.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="..\Include\SC.Game\Rigidbody.h" />
     <ClInclude Include="..\Include\SC.Game\SceneManager.h" />
     <ClInclude Include="..\Include\SC.Game\SkinnedMeshRenderer.h" />
+    <ClInclude Include="..\Include\SC.Game\ThreadDispatcher.h" />
     <ClInclude Include="..\Include\SC.Game\Trigger.h" />
     <ClInclude Include="..\Include\SC.Game\UI.KeyboardEventArgs.h" />
     <ClInclude Include="..\Include\SC.Game\UI.RevealBrush.h" />
@@ -619,6 +621,7 @@
     <None Include="HDR.hlsli" />
     <None Include="Light.hlsli" />
     <None Include="Material.hlsli" />
+    <None Include="RenderingShaderCommon.hlsli" />
     <None Include="Transform.hlsli" />
     <None Include="Vertex.hlsli" />
   </ItemGroup>

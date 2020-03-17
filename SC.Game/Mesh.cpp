@@ -11,15 +11,42 @@ void Mesh::DrawIndexed( RefPtr<CDeviceContext>& deviceContext )
 
 	auto pCommandList = deviceContext->pCommandList.Get();
 
-	if ( auto slot = deviceContext->Slot["IsSkinned"]; slot != -1 )
-	{
-		pCommandList->SetGraphicsRoot32BitConstant( ( UINT )slot, isSkinned, 0 );
-	}
-
 	D3D12_VERTEX_BUFFER_VIEW vbv{ };
 	vbv.BufferLocation = vertexBuffer->pResource->GetGPUVirtualAddress();
 	vbv.SizeInBytes = ( isSkinned ? sizeof( SkinnedVertex ) : sizeof( Vertex ) ) * numVertex;
 	vbv.StrideInBytes = ( isSkinned ? sizeof( SkinnedVertex ) : sizeof( Vertex ) );
+
+	vertexBuffer->Lock( deviceContext );
+	pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	pCommandList->IASetVertexBuffers( 0, 1, &vbv );
+
+	if ( indexBuffer )
+	{
+		D3D12_INDEX_BUFFER_VIEW ibv{ };
+		ibv.BufferLocation = indexBuffer->pResource->GetGPUVirtualAddress();
+		ibv.SizeInBytes = sizeof( uint32 ) * numIndex;
+		ibv.Format = DXGI_FORMAT_R32_UINT;
+
+		indexBuffer->Lock( deviceContext );
+		pCommandList->IASetIndexBuffer( &ibv );
+		pCommandList->DrawIndexedInstanced( ( UINT )numIndex, 1, 0, 0, 0 );
+	}
+	else
+	{
+		pCommandList->DrawInstanced( ( UINT )numVertex, 1, 0, 0 );
+	}
+}
+
+void Mesh::DrawSkinnedIndexed( uint64 virtualAddress, RefPtr<CDeviceContext>& deviceContext )
+{
+	indexBuffer->Lock( deviceContext );
+
+	auto pCommandList = deviceContext->pCommandList.Get();
+
+	D3D12_VERTEX_BUFFER_VIEW vbv{ };
+	vbv.BufferLocation = virtualAddress;
+	vbv.SizeInBytes = sizeof( Vertex ) * numVertex;
+	vbv.StrideInBytes = sizeof( Vertex );
 
 	vertexBuffer->Lock( deviceContext );
 	pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
