@@ -30,6 +30,16 @@ Scene::Scene()
 	GlobalVar.globalMutex.unlock();
 
 	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
+
+	mVisibleViewStorage = new VisibleViewStorage( GlobalVar.device.Get() );
+	mSceneBundleRender[0][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleRender[0][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleRender[1][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleRender[1][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleLight[0][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleLight[0][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleLight[1][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mSceneBundleLight[1][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
 }
 
 Scene::~Scene()
@@ -161,10 +171,13 @@ void Scene::Start()
 
 void Scene::Update()
 {
+	bool updatedSceneGraph = false;
+
 	if ( updateSceneGraph )
 	{
 		PopulateSceneGraph();
 		updateSceneGraph = false;
+		updatedSceneGraph = true;
 	}
 
 	if ( firstUpdate == false )
@@ -221,7 +234,7 @@ void Scene::Update()
 		input.scrollDelta = GlobalVar.scrollDelta;
 	}
 
-	if ( mThreadSceneGraph.size() )
+	if ( !updatedSceneGraph && mThreadSceneGraph.size() )
 	{
 		std::atomic<int> locker = 0;
 
@@ -353,11 +366,13 @@ void Scene::PopulateSceneGraph()
 	mThreadSceneGraph.clear();
 	mpSkinnedMeshRendererQueue->Clear();
 
+	// 장면 종속 관계를 풀어놓습니다.
 	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
 	{
 		InsertSceneGraph( mSceneGraph, gameObjects[i].Get(), 0 );
 	}
 
+	// 특수 컴포넌트 그래프를 미리 계산합니다.
 	for ( auto i : mSceneGraph )
 	{
 		if ( auto t = i->GetComponent<Camera>(); t )
@@ -382,6 +397,84 @@ void Scene::PopulateSceneGraph()
 	}
 
 	mpSkinnedMeshRendererQueue->PushAnimator( nullptr );
+
+	// 장면 렌더링 명령을 미리 쿼리합니다.
+	auto& pDevice = *GlobalVar.device->pDevice.Get();
+
+	auto frameIndexPrev = GlobalVar.frameIndex;
+	auto fixedFrameIndexPrev = GlobalVar.fixedFrameIndex;
+
+	if ( !mSceneCameras.empty() )
+	{
+		while ( true )
+		{
+			CDeviceContext* pCurrentBundle = nullptr;
+
+			try
+			{
+				if ( pCommandAllocator )
+				{
+					GC.Add( pCommandAllocator );
+				}
+
+				HR( pDevice.CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS( &pCommandAllocator ) ) );
+				mVisibleViewStorage->Reset();
+
+				for ( int i = 0; i < 4; ++i )
+				{
+					auto fi = GlobalVar.frameIndex = i % 2;
+					auto ffi = GlobalVar.fixedFrameIndex = i / 2;
+
+					mSceneBundleRender[fi][ffi]->Reset( nullptr, pCommandAllocator.Get() );
+					pCurrentBundle = mSceneBundleRender[fi][ffi].Get();
+					auto& pCommandList = *mSceneBundleRender[fi][ffi]->pCommandList.Get();
+
+					pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
+					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ColorShader.Get() );
+					mSceneBundleRender[fi][ffi]->SetVisibleViewStorage( mVisibleViewStorage );
+
+					Render( mSceneBundleRender[fi][ffi] );
+
+					mSceneBundleRender[fi][ffi]->Close();
+				}
+
+				for ( int i = 0; i < 4; ++i )
+				{
+					auto fi = GlobalVar.frameIndex = i % 2;
+					auto ffi = GlobalVar.fixedFrameIndex = i / 2;
+
+					mSceneBundleLight[fi][ffi]->Reset( nullptr, pCommandAllocator.Get() );
+					pCurrentBundle = mSceneBundleLight[fi][ffi].Get();
+					auto& pCommandList = *mSceneBundleLight[fi][ffi]->pCommandList.Get();
+
+					pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
+					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
+					mSceneBundleLight[fi][ffi]->SetVisibleViewStorage( mVisibleViewStorage );
+
+					Render( mSceneBundleLight[fi][ffi] );
+
+					mSceneBundleLight[fi][ffi]->Close();
+				}
+
+				break;
+			}
+			catch ( Exception * e )
+			{
+				if ( auto isStorage = dynamic_cast< ViewStorageException* >( e ); isStorage )
+				{
+					pCurrentBundle->Close();
+					delete isStorage;
+				}
+				else
+				{
+					throw e;
+				}
+			}
+		}
+	}
+
+	GlobalVar.frameIndex = frameIndexPrev;
+	GlobalVar.fixedFrameIndex = fixedFrameIndexPrev;
 }
 
 void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )

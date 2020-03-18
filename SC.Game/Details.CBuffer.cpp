@@ -2,12 +2,12 @@ using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
 
-CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_STATES initialState, D3D12_RESOURCE_FLAGS resourceFlags, const void* pInitialData, uint64 initialDataSize ) : Object()
+CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_STATES initialState, D3D12_RESOURCE_FLAGS resourceFlags, const void* pInitialData, uint64 initialDataSize, int queueIndex ) : Object()
 	, initialState( initialState )
 	, deviceRef( device )
 {
 	// 초기 데이터가 있으면 복사 상태로, 없으면 초기 상태로 생성합니다.
-	auto createState = pInitialData ? D3D12_RESOURCE_STATE_COMMON : initialState;
+	auto createState = pInitialData ? D3D12_RESOURCE_STATE_COPY_DEST : initialState;
 	auto pDevice = device->pDevice.Get();
 
 	D3D12_HEAP_PROPERTIES heapProp{ };
@@ -42,13 +42,14 @@ CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_ST
 		pUploadHeap->Unmap( 0, nullptr );
 
 		// 데이터 업로드 명령을 수행할 명령 목록을 구성합니다.
-		HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_COPY, IID_PPV_ARGS( &pUploadCommands ) ) );
-		var deviceContext = new CDeviceContext( device, D3D12_COMMAND_LIST_TYPE_COPY, pUploadCommands.Get() );
+		HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pUploadCommands ) ) );
+		var deviceContext = new CDeviceContext( device, D3D12_COMMAND_LIST_TYPE_DIRECT, pUploadCommands.Get() );
 		deviceContext->pCommandList->CopyResource( pResource.Get(), pUploadHeap.Get() );
+		deviceContext->TransitionBarrier( pResource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, initialState, 0 );
 
 		// 디바이스의 복사 큐에 명령을 제출합니다.
 		deviceContext->Close();
-		device->CopyQueue->Execute( deviceContext );
+		device->DirectQueue[queueIndex]->Execute( deviceContext );
 		uploadFenceValue = device->CopyQueue->Signal();
 
 		copySuccessFlag = false;
@@ -61,32 +62,18 @@ CBuffer::~CBuffer()
 	GC.Add( pUploadHeap );
 }
 
-void CBuffer::Lock( RefPtr<CDeviceContext>& deviceContext, bool sync )
+bool CBuffer::Lock( RefPtr<CDeviceContext>& deviceContext, bool sync )
 {
-	if ( !hasTransitionFlag )
-	{
-		// 리소스 상태를 초기 상태로 변경합니다.
-		deviceContext->TransitionBarrier( pResource.Get(), D3D12_RESOURCE_STATE_COMMON, initialState, 0 );
-		hasTransitionFlag = true;
-	}
-
 	if ( !copySuccessFlag )
 	{
-		// 복사가 아직 완료되지 않았을 경우,
-		if ( auto pFence = deviceRef->CopyQueue->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
-		{
-			if ( waitingFlag == false && sync )
-			{
-				// 대상 큐에서 복사 작업이 완료될 때까지 대기하라고 지시합니다.
-				HR( deviceContext->pCommandQueue->pCommandQueue->Wait( pFence, uploadFenceValue ) );
-				waitingFlag = true;
-			}
-		}
-		else
+		// 복사가 완료되었을 경우 임시 버퍼를 해제합니다.
+		if ( auto pFence = deviceRef->CopyQueue->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
 		{
 			copySuccessFlag = true;
 			pUploadCommands = nullptr;
 			pUploadHeap = nullptr;
 		}
 	}
+
+	return copySuccessFlag;
 }

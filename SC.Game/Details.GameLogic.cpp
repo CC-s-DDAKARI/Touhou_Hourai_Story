@@ -31,6 +31,14 @@ GameLogic::GameLogic() : Object()
 
 	// 기초 데이터 자산을 생성합니다.
 	skyboxMesh = Mesh::CreateCube( "skybox_mesh" );
+
+	// 멀티 스레드를 위한 추가 명령 할당기 개체를 생성합니다.
+	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocatorLights[0] ) ) );
+	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocatorLights[1] ) ) );
+	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocatorRender[0] ) ) );
+	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocatorRender[1] ) ) );
+	mDeviceContextLights = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
+	mDeviceContextRender = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
 }
 
 GameLogic::~GameLogic()
@@ -105,56 +113,92 @@ void GameLogic::Render()
 				}
 			}
 
-			// 렌더링 루트 서명을 설정합니다.
-			pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
+			deviceContext->Close();
+			GlobalVar.device->DirectQueue[0]->Execute( deviceContext );
+			lastPending[frameIndex] = directQueue->Signal();
+
+			std::atomic<int> lightCompleted = 0;
 			auto& lightCollection = currentScene->mSceneLights;
-
-			{	// 라이트 렌더링 셰이더를 설정합니다.
-				pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
-
-				// 각 라이트 객체에 대해 렌더링을 수행합니다.
-				for ( auto i : lightCollection )
+			Threading::ThreadPool::QueueUserWorkItem( [&]( object )
 				{
-					if ( i->IsShadowCast )
+					// 라이트 렌더링 셰이더를 설정합니다.
+					HR( pCommandAllocatorLights[frameIndex]->Reset() );
+
+					mDeviceContextLights->Reset( GlobalVar.device->DirectQueue[0].Get(), pCommandAllocatorLights[frameIndex].Get(), nullptr );
+					mDeviceContextLights->SetVisibleViewStorage( currentScene->mVisibleViewStorage );
+					auto& pCommandList = *mDeviceContextLights->pCommandList.Get();
+
+					pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
+
+					// 각 라이트 객체에 대해 렌더링을 수행합니다.
+					for ( auto i : lightCollection )
 					{
-						i->BeginDraw( deviceContext );
-						i->SetGraphicsRootConstantBufferView( deviceContext );
-						currentScene->Render( deviceContext );
-						i->EndDraw( deviceContext );
+						if ( i->IsShadowCast )
+						{
+							i->BeginDraw( mDeviceContextLights );
+							i->SetGraphicsRootConstantBufferView( mDeviceContextLights );
+							pCommandList.ExecuteBundle( currentScene->mSceneBundleLight[GlobalVar.frameIndex][GlobalVar.fixedFrameIndex]->pCommandList.Get() );
+							i->EndDraw( mDeviceContextLights );
+						}
 					}
+
+					mDeviceContextLights->Close();
+					GlobalVar.device->DirectQueue[0]->Execute( mDeviceContextLights );
+					lastPending[frameIndex] = directQueue->Signal();
+
+					lightCompleted += 1;
 				}
-			}
+			, nullptr );
 
 			Camera* pViewCamera = nullptr;
 
-			// 각 카메라 개체에 대해 렌더링을 수행합니다.
-			for ( auto i : cameraCollection )
-			{
-				pViewCamera = i;
+			{	// 각 카메라 개체에 대해 렌더링을 수행합니다.
+				HR( pCommandAllocatorRender[frameIndex]->Reset() );
 
-				// 기하 버퍼를 렌더 타겟으로 설정합니다.
-				geometryBuffer->OMSetRenderTargets( deviceContext );
+				mDeviceContextRender->Reset( GlobalVar.device->DirectQueue[0].Get(), pCommandAllocatorRender[frameIndex].Get(), nullptr );
+				mDeviceContextRender->SetVisibleViewStorage( currentScene->mVisibleViewStorage );
+				auto& pCommandList = *mDeviceContextRender->pCommandList.Get();
 
-				if ( auto skybox = i->ClearMode.TryAs<CameraClearModeSkybox>(); skybox )
+				pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
+
+				for ( auto i : cameraCollection )
 				{
-					// 장면이 스카이박스를 사용할 경우 우선 스카이박스 렌더링을 진행합니다.
-					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_SkyboxShader.Get() );
+					pViewCamera = i;
 
-					i->SetGraphicsRootConstantBufferView( deviceContext );
-					deviceContext->SetGraphicsRootShaderResources( Slot_Rendering_Textures, skybox->SkyboxTexture->pShaderResourceView );
-					skyboxMesh->DrawIndexed( deviceContext );
+					// 기하 버퍼를 렌더 타겟으로 설정합니다.
+					geometryBuffer->OMSetRenderTargets( mDeviceContextRender );
+
+					if ( auto skybox = i->ClearMode.TryAs<CameraClearModeSkybox>(); skybox )
+					{
+						// 장면이 스카이박스를 사용할 경우 우선 스카이박스 렌더링을 진행합니다.
+						//pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_SkyboxShader.Get() );
+
+						//i->SetGraphicsRootConstantBufferView( deviceContext );
+						//deviceContext->SetGraphicsRootShaderResources( Slot_Rendering_Textures, skybox->SkyboxTexture->pShaderResourceView );
+						//skyboxMesh->DrawIndexed( deviceContext );
+					}
+
+					// 기하 버퍼 셰이더를 선택합니다.
+					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ColorShader.Get() );
+
+					// 장면에 포함된 모든 개체를 렌더링합니다.
+					i->SetGraphicsRootConstantBufferView( mDeviceContextRender );
+					pCommandList.ExecuteBundle( currentScene->mSceneBundleRender[GlobalVar.frameIndex][GlobalVar.fixedFrameIndex]->pCommandList.Get() );
+
+					// 기하 버퍼 사용을 종료합니다.
+					geometryBuffer->EndDraw( mDeviceContextRender );
 				}
 
-				// 기하 버퍼 셰이더를 선택합니다.
-				pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ColorShader.Get() );
-
-				// 장면에 포함된 모든 개체를 렌더링합니다.
-				i->SetGraphicsRootConstantBufferView( deviceContext );
-				currentScene->Render( deviceContext );
-
-				// 기하 버퍼 사용을 종료합니다.
-				geometryBuffer->EndDraw( deviceContext );
+				mDeviceContextRender->Close();
+				GlobalVar.device->DirectQueue[0]->Execute( mDeviceContextRender );
+				lastPending[frameIndex] = directQueue->Signal();
 			}
+
+			// 라이팅 렌더링이 완료될 때까지 대기합니다.
+			while ( lightCompleted == 0 );
+
+			deviceContext->Reset( GlobalVar.device->DirectQueue[0].Get(), pCommandAllocator[frameIndex].Get(), nullptr );
+			deviceContext->SetVisibleViewStorage( visibleViewStorage );
 
 			// HDR 버퍼를 렌더 타겟으로 설정합니다.
 			hdrBuffer->OMSetRenderTargets( deviceContext );

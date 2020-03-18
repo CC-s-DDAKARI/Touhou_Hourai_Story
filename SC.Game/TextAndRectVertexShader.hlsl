@@ -43,6 +43,7 @@ Fragment main( uint vertexId : SV_VertexID, uint instanceId : SV_InstanceID )
 	tag_Rect input = shaderInfo.input;
 	tag_Rect output = shaderInfo.output;
 
+	// 스크린 좌표(output) 정보를 NDC 정보로 변환
 	fg.PosH = float4( tex[vertexId] * float2( output.width, output.height ) + float2( output.left, output.top ), 0.0f, 1.0f );
 	fg.PosH.xy /= float2( gResolution.width, gResolution.height ) * 0.5f;
 	fg.PosH.xy -= 1.0f;

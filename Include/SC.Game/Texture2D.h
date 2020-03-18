@@ -17,13 +17,11 @@ namespace SC::Game
 		uint64 uploadFenceValue = 0;
 
 		bool copySuccessFlag = false;
-		bool hasTransitionFlag = false;
-		bool syncFlag = false;
 
 		uint32 width;
 		uint32 height;
 
-		bool Lock( RefPtr<Details::CDeviceContext>& deviceContext, bool sync = true );
+		bool Lock( RefPtr<Details::CDeviceContext>& deviceContext );
 		
 		vs_property_get( bool, IsValid );
 		bool IsValid_get();
@@ -34,13 +32,15 @@ namespace SC::Game
 		/// <summary> <see cref="Texture2D"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="name"> 데이터 자산 이름을 제공합니다. </param>
 		/// <param name="filepath"> 이미지 파일 경로를 전달합니다. </param>
-		Texture2D( String name, const std::filesystem::path& filepath );
+		/// <param name="queueIndex"> 복사 및 트랜지션 명령을 실행할 큐 번호를 전달합니다. 일반적으로 0을 사용합니다. </param>
+		Texture2D( String name, const std::filesystem::path& filepath, int queueIndex = 0 );
 
 		/// <summary> <see cref="Texture2D"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="name"> 데이터 자산 이름을 제공합니다. </param>
 		/// <param name="textureData"> 텍스처 데이터를 전달합니다. </param>
 		/// <param name="sizeInBytes"> 텍스처 데이터의 크기를 전달합니다. </param>
-		Texture2D( String name, void* textureData, uint32 sizeInBytes );
+		/// <param name="queueIndex"> 복사 및 트랜지션 명령을 실행할 큐 번호를 전달합니다. 일반적으로 0을 사용합니다. </param>
+		Texture2D( String name, void* textureData, uint32 sizeInBytes, int queueIndex = 0 );
 
 		/// <summary> (Visual Studio 전용) 텍스처 개체의 픽셀 넓이를 가져옵니다. </summary>
 		vs_property_get( uint32, Width );
@@ -55,6 +55,6 @@ namespace SC::Game
 		uint32 Height_get();
 
 	private:
-		void InitializeFrom( sc_game_export_object( IWICBitmapDecoder* ) pDecoder );
+		void InitializeFrom( sc_game_export_object( IWICBitmapDecoder* ) pDecoder, int queueIndex );
 	};
 }

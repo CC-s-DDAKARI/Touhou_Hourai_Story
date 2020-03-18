@@ -22,6 +22,12 @@ namespace SC::Game::Details
 
 		RefPtr<Scene> currentScene;
 
+		// 멀티 스레드를 위한 추가 디바이스 컨텍스트입니다.
+		ComPtr<ID3D12CommandAllocator> pCommandAllocatorLights[2];
+		RefPtr<CDeviceContext> mDeviceContextLights;
+		ComPtr<ID3D12CommandAllocator> pCommandAllocatorRender[2];
+		RefPtr<CDeviceContext> mDeviceContextRender;
+
 	public:
 		GameLogic();
 		~GameLogic();

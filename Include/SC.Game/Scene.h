@@ -23,7 +23,6 @@ namespace SC::Game
 		sc_game_export_object( physx::PxScene* ) pxScene = nullptr;
 
 		bool firstUpdate = false;
-		bool fetchResults = false;
 		bool updateSceneGraph = true;
 
 		std::list<GameObject*> mSceneGraph;
@@ -33,6 +32,11 @@ namespace SC::Game
 		std::list<GameObject*> mCoreThreadSceneGraph;
 		std::map<int, std::list<GameObject*>> mThreadSceneGraph;
 		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueue;
+
+		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mVisibleViewStorage;
+		sc_game_export_object( ComPtr<ID3D12CommandAllocator> ) pCommandAllocator;
+		RefPtr<Details::CDeviceContext> mSceneBundleRender[2][2];
+		RefPtr<Details::CDeviceContext> mSceneBundleLight[2][2];
 
 	public:
 		/// <summary> <see cref="Scene"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

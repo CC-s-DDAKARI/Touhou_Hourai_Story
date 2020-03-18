@@ -6,6 +6,7 @@ namespace SC::Game
 	class Light : public Component
 	{
 		friend class Details::GameLogic;
+		friend class Scene;
 		friend class DirectionalLight;
 
 	protected:
