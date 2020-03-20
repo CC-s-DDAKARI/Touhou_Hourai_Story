@@ -12,7 +12,7 @@ namespace SC::Game::Details
 			solidColorBrush = new UI::SolidColorBrush( value );
 		}
 
-		~RichTextColorUnknown()
+		~RichTextColorUnknown() override
 		{
 			solidColorBrush = nullptr;
 		}
