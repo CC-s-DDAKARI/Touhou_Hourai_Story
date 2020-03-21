@@ -18,6 +18,7 @@ namespace SC::Game
 
 		sc_game_export_float( D3D12_VIEWPORT, 6 ) viewport;
 		sc_game_export_float( D3D12_RECT, 4 ) scissor;
+		Threading::Event mRenderThreadEvent;
 
 	protected:
 		/// <summary> <see cref="Application"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

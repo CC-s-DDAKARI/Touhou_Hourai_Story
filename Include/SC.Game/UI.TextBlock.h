@@ -21,6 +21,8 @@ namespace SC::Game::UI
 		Drawing::Rect<double> computed;
 		bool contentChanged = true;
 
+		std::mutex locker;
+
 	protected:
 		/// <summary> (<see cref="Element"/> 클래스에서 상속 됨.) 요소를 갱신합니다. </summary>
 		/// <param name="clientRect"> 부모의 컨텐츠 사각 영역이 전달됩니다. </param>

@@ -1,6 +1,7 @@
 using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
+using namespace SC::Threading;
 
 using namespace physx;
 using namespace std;
@@ -31,15 +32,14 @@ Scene::Scene()
 
 	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 
-	mVisibleViewStorage = new VisibleViewStorage( GlobalVar.device.Get() );
-	mSceneBundleRender[0][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleRender[0][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleRender[1][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleRender[1][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleLight[0][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleLight[0][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleLight[1][0] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
-	mSceneBundleLight[1][1] = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_BUNDLE );
+	mDeviceContextForSkinning = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	for ( int i = 0; i < NumThreadsForLight; ++i )
+	{
+		mViewStoragesForLight[i] = new VisibleViewStorage( GlobalVar.device.Get() );
+		mDeviceContextsForLight[i] = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
+	}
+	mViewStorageForRender = new VisibleViewStorage( GlobalVar.device.Get() );
+	mDeviceContextForRender = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
 }
 
 Scene::~Scene()
@@ -186,6 +186,11 @@ void Scene::Update()
 		firstUpdate = true;
 	}
 
+	if ( !mFetchResults )
+	{
+		mFetchResults = pxScene->fetchResults( true );
+	}
+
 	timer.Tick();
 
 	time.time = timer.TotalSeconds;
@@ -236,45 +241,20 @@ void Scene::Update()
 
 	if ( !updatedSceneGraph && mThreadSceneGraph.size() )
 	{
-		std::atomic<int> locker = 0;
+		mCompletedValue = 0;
+		mCompletedGoal = 1 + ( int )mThreadSceneGraph.size();
 
 		// 각 스레드 배치 아이템에 대해 스레드 업데이트를 수행합니다.
 		for ( auto i : mThreadSceneGraph )
 		{
-			Threading::ThreadPool::QueueUserWorkItem( Threading::AsyncTaskDelegate<void>( [&]( object arg )
-				{
-					list<GameObject*> mylist = arg.As<list<GameObject*>>();
-
-					for ( auto go : mylist )
-					{
-						go->Update( time, input );
-					}
-
-					for ( auto go : mylist )
-					{
-						go->LateUpdate( time, input );
-					}
-
-					locker += 1;
-					return nullptr;
-				}
-			), i.second );
+			ThreadPool::QueueUserWorkItem( bind( &Scene::UpdateAndLateUpdate, this, placeholders::_1, i.second ), nullptr );
 		}
 
-		// 주 스레드 작업은 여기서 진행합니다.
-		for ( auto go : mCoreThreadSceneGraph )
-		{
-			go->Update( time, input );
-		}
+		// 주 스레드 아이템을 업데이트합니다.
+		UpdateAndLateUpdate( nullptr, mCoreThreadSceneGraph );
 
-		// 주 스레드 작업은 여기서 진행합니다.
-		for ( auto go : mCoreThreadSceneGraph )
-		{
-			go->LateUpdate( time, input );
-		}
-
-		// 모든 스레드가 작업을 마칠 때까지 대기합니다.
-		while ( locker != ( int )mThreadSceneGraph.size() );
+		// 모든 스레드가 완료될 때까지 대기합니다.
+		mCompletedEvent.WaitForSingleObject();
 	}
 	else
 	{
@@ -299,34 +279,20 @@ void Scene::FixedUpdate()
 
 	if ( mThreadSceneGraph.size() )
 	{
-		std::atomic<int> locker = 0;
+		mCompletedValue = 0;
+		mCompletedGoal = 1 + ( int )mThreadSceneGraph.size();
 
 		// 각 스레드 배치 아이템에 대해 스레드 업데이트를 수행합니다.
 		for ( auto i : mThreadSceneGraph )
 		{
-			Threading::ThreadPool::QueueUserWorkItem( Threading::AsyncTaskDelegate<void>( [&]( object arg )
-				{
-					list<GameObject*> mylist = arg.As<list<GameObject*>>();
-
-					for ( auto go : mylist )
-					{
-						go->FixedUpdate( time );
-					}
-
-					locker += 1;
-					return nullptr;
-				}
-			), i.second );
+			ThreadPool::QueueUserWorkItem( bind( &Scene::FixedUpdate1, this, placeholders::_1, i.second ), nullptr );
 		}
 
-		// 주 스레드 작업은 여기서 진행합니다.
-		for ( auto go : mCoreThreadSceneGraph )
-		{
-			go->FixedUpdate( time );
-		}
+		// 주 스레드 아이템을 업데이트합니다.
+		FixedUpdate1( nullptr, mCoreThreadSceneGraph );
 
-		// 모든 스레드가 작업을 마칠 때까지 대기합니다.
-		while ( locker != ( int )mThreadSceneGraph.size() );
+		// 모든 스레드가 완료될 때까지 대기합니다.
+		mCompletedEvent.WaitForSingleObject();
 	}
 	else
 	{
@@ -337,7 +303,7 @@ void Scene::FixedUpdate()
 	}
 
 	pxScene->simulate( 1.0f / GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds );
-	pxScene->fetchResults( true );
+	mFetchResults = pxScene->fetchResults( false );
 }
 
 void Scene::Load( RefPtr<IAsyncLoad> asyncLoad )
@@ -350,21 +316,17 @@ void Scene::Unload()
 
 }
 
-void Scene::Render( RefPtr<CDeviceContext>& deviceContext )
+void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
 {
 	for ( auto go : mSceneGraph )
 	{
-		go->Render( deviceContext );
+		go->Render( deviceContext, frameIndex, fixedFrameIndex );
 	}
 }
 
 void Scene::PopulateSceneGraph()
 {
-	mSceneGraph.clear();
-	mSceneCameras.clear();
-	mSceneLights.clear();
-	mThreadSceneGraph.clear();
-	mpSkinnedMeshRendererQueue->Clear();
+	ClearSceneGraph();
 
 	// 장면 종속 관계를 풀어놓습니다.
 	for ( int i = 0, count = ( int )gameObjects.size(); i < count; ++i )
@@ -372,6 +334,40 @@ void Scene::PopulateSceneGraph()
 		InsertSceneGraph( mSceneGraph, gameObjects[i].Get(), 0 );
 	}
 
+	SearchComponents();
+}
+
+void Scene::ClearSceneGraph()
+{
+	mSceneGraph.clear();
+	mSceneCameras.clear();
+	mSceneLights.clear();
+	mThreadSceneGraph.clear();
+	mpSkinnedMeshRendererQueue->Clear();
+}
+
+void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )
+{
+	mSceneGraph.push_back( pGameObject );
+
+	if ( auto t = pGameObject->GetComponent<ThreadDispatcher>(); t )
+	{
+		threadId = t->ThreadID;
+	}
+
+	if ( threadId == 0 )
+		mCoreThreadSceneGraph.push_back( pGameObject );
+	else
+		mThreadSceneGraph[threadId].push_back( pGameObject );
+
+	for ( int i = 0, count = pGameObject->NumChilds; i < count; ++i )
+	{
+		InsertSceneGraph( sceneGraph, pGameObject->Childs[i], threadId );
+	}
+}
+
+void Scene::SearchComponents()
+{
 	// 특수 컴포넌트 그래프를 미리 계산합니다.
 	for ( auto i : mSceneGraph )
 	{
@@ -397,102 +393,38 @@ void Scene::PopulateSceneGraph()
 	}
 
 	mpSkinnedMeshRendererQueue->PushAnimator( nullptr );
-
-	// 장면 렌더링 명령을 미리 쿼리합니다.
-	auto& pDevice = *GlobalVar.device->pDevice.Get();
-
-	auto frameIndexPrev = GlobalVar.frameIndex;
-	auto fixedFrameIndexPrev = GlobalVar.fixedFrameIndex;
-
-	if ( !mSceneCameras.empty() )
-	{
-		while ( true )
-		{
-			CDeviceContext* pCurrentBundle = nullptr;
-
-			try
-			{
-				if ( pCommandAllocator )
-				{
-					GC.Add( pCommandAllocator );
-				}
-
-				HR( pDevice.CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS( &pCommandAllocator ) ) );
-				mVisibleViewStorage->Reset();
-
-				for ( int i = 0; i < 4; ++i )
-				{
-					auto fi = GlobalVar.frameIndex = i % 2;
-					auto ffi = GlobalVar.fixedFrameIndex = i / 2;
-
-					mSceneBundleRender[fi][ffi]->Reset( nullptr, pCommandAllocator.Get() );
-					pCurrentBundle = mSceneBundleRender[fi][ffi].Get();
-					auto& pCommandList = *mSceneBundleRender[fi][ffi]->pCommandList.Get();
-
-					pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
-					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ColorShader.Get() );
-					mSceneBundleRender[fi][ffi]->SetVisibleViewStorage( mVisibleViewStorage );
-
-					Render( mSceneBundleRender[fi][ffi] );
-
-					mSceneBundleRender[fi][ffi]->Close();
-				}
-
-				for ( int i = 0; i < 4; ++i )
-				{
-					auto fi = GlobalVar.frameIndex = i % 2;
-					auto ffi = GlobalVar.fixedFrameIndex = i / 2;
-
-					mSceneBundleLight[fi][ffi]->Reset( nullptr, pCommandAllocator.Get() );
-					pCurrentBundle = mSceneBundleLight[fi][ffi].Get();
-					auto& pCommandList = *mSceneBundleLight[fi][ffi]->pCommandList.Get();
-
-					pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
-					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
-					mSceneBundleLight[fi][ffi]->SetVisibleViewStorage( mVisibleViewStorage );
-
-					Render( mSceneBundleLight[fi][ffi] );
-
-					mSceneBundleLight[fi][ffi]->Close();
-				}
-
-				break;
-			}
-			catch ( Exception * e )
-			{
-				if ( auto isStorage = dynamic_cast< ViewStorageException* >( e ); isStorage )
-				{
-					pCurrentBundle->Close();
-					delete isStorage;
-				}
-				else
-				{
-					throw e;
-				}
-			}
-		}
-	}
-
-	GlobalVar.frameIndex = frameIndexPrev;
-	GlobalVar.fixedFrameIndex = fixedFrameIndexPrev;
 }
 
-void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )
+void Scene::UpdateAndLateUpdate( object, list<GameObject*>& batch )
 {
-	mSceneGraph.push_back( pGameObject );
-
-	if ( auto t = pGameObject->GetComponent<ThreadDispatcher>(); t )
+	for ( auto go : batch )
 	{
-		threadId = t->ThreadID;
+		go->Update( time, input );
 	}
 
-	if ( threadId == 0 )
-		mCoreThreadSceneGraph.push_back( pGameObject );
-	else
-		mThreadSceneGraph[threadId].push_back( pGameObject );
-
-	for ( int i = 0, count = pGameObject->NumChilds; i < count; ++i )
+	for ( auto go : batch )
 	{
-		InsertSceneGraph( sceneGraph, pGameObject->Childs[i], threadId );
+		go->LateUpdate( time, input );
+	}
+
+	FetchAndSetThread();
+}
+
+void Scene::FixedUpdate1( object, list<GameObject*>& batch )
+{
+	for ( auto go : batch )
+	{
+		go->FixedUpdate( time );
+	}
+
+	FetchAndSetThread();
+}
+
+void Scene::FetchAndSetThread()
+{
+	mCompletedValue.fetch_add( 1 );
+	if ( mCompletedValue >= mCompletedGoal )
+	{
+		mCompletedEvent.Set();
 	}
 }

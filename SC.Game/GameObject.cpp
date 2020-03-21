@@ -325,15 +325,15 @@ void GameObject::LateUpdate( Time& time, Input& input )
 	}
 }
 
-void GameObject::Render( RefPtr<CDeviceContext>& deviceContext )
+void GameObject::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
 {
-	transform->SetGraphicsRootConstantBufferView( deviceContext );
+	transform->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
 
 	for ( auto i : components )
 	{
 		auto cmp = i.second.Get();
 		if ( cmp->IsEnabled )
-			cmp->Render( deviceContext );
+			cmp->Render( deviceContext, frameIndex, fixedFrameIndex );
 	}
 }
 

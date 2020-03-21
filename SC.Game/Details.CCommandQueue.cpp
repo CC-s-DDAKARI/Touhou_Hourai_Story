@@ -21,9 +21,14 @@ CCommandQueue::CCommandQueue( CDevice* device, D3D12_COMMAND_LIST_TYPE type ) : 
 
 void CCommandQueue::Execute( RefPtr<CDeviceContext>& deviceContext )
 {
-	if ( !deviceContext->Failure )
+	Execute( deviceContext.Get() );
+}
+
+void CCommandQueue::Execute( CDeviceContext* pDeviceContext )
+{
+	if ( !pDeviceContext->Failure )
 	{
-		ID3D12CommandList* ppCommandLists[]{ deviceContext->pCommandList.Get() };
+		ID3D12CommandList* ppCommandLists[]{ pDeviceContext->pCommandList.Get() };
 		pCommandQueue->ExecuteCommandLists( 1, ppCommandLists );
 	}
 }

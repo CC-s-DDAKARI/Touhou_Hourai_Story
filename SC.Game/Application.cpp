@@ -4,13 +4,14 @@ using namespace SC::Game;
 using namespace SC::Game::UI;
 using namespace SC::Game::Details;
 using namespace SC::Drawing;
+using namespace SC::Threading;
 
 using namespace std;
 using namespace std::chrono_literals;
 
 #define CW_USEDEFAULT_ALL CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT
 
-Event<RefPtr<UnhandledErrorDetectedEventArgs>> Application::UnhandledErrorDetected;
+SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> Application::UnhandledErrorDetected;
 
 inline Drawing::Point<int> LPARAMToPoint( LPARAM lParam )
 {
@@ -48,6 +49,8 @@ Application::Application( AppConfiguration appConfig )
 	DXGI_ADAPTER_DESC1 desc;
 	pAdapter->GetDesc1( &desc );
 	this->appConfig.deviceName = String::Format( "{0} ({1})", ( const wchar_t* )desc.Description, desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ? L"Software" : L"Hardware" );
+
+	mRenderThreadEvent.Set();
 }
 
 Application::~Application()
@@ -289,6 +292,14 @@ void Application::IdleProcess()
 
 void Application::Update()
 {
+	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
+	if ( SceneManager::currentScene.Get() )
+	{
+		mRenderThreadEvent.WaitForSingleObject();
+		GlobalVar.gameLogic->currentScene = move( SceneManager::currentScene );
+		mRenderThreadEvent.Set();
+	}
+
 	GlobalVar.gameLogic->Update();
 
 	RECT rc;
@@ -303,74 +314,85 @@ void Application::Update()
 void Application::Render()
 {
 	int frameIndex = GlobalVar.frameIndex;
-	auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+	int fixedFrameIndex = GlobalVar.fixedFrameIndex;
+	
+	mRenderThreadEvent.WaitForSingleObject();
 
-	// 사전 글리프 렌더링을 시작합니다.
-	for ( auto i : GlobalVar.glyphBuffers )
-	{
-		i->LockGlyphs();
-		i->Restart();
-	}
+	ThreadPool::QueueUserWorkItem( [&, frameIndex, fixedFrameIndex]( object )
+		{
+			auto directQueue = GlobalVar.device->DirectQueue[0].Get();
 
-	GlobalVar.gameLogic->Render();
+			// 사전 글리프 렌더링을 시작합니다.
+			for ( auto i : GlobalVar.glyphBuffers )
+			{
+				i->LockGlyphs();
+				i->Restart();
+			}
 
-	// 렌더링을 실행하기 전 장치를 초기화합니다.
-	visibleViewStorage->Reset();
+			GlobalVar.gameLogic->Render( frameIndex, fixedFrameIndex );
 
-	HR( pCommandAllocators[frameIndex]->Reset() );
-	deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex].Get(), nullptr );
-	deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
+			// 렌더링을 실행하기 전 장치를 초기화합니다.
+			visibleViewStorage->Reset();
 
-	// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
-	auto idx = GlobalVar.swapChain->Index;
-	auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
-	auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
-	auto pCommandList = deviceContextUI->pCommandList.Get();
-	pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
+			HR( pCommandAllocators[frameIndex]->Reset() );
+			deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex].Get(), nullptr );
+			deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
+			deviceContextUI->FrameIndex = frameIndex;
 
-	pCommandList->RSSetViewports( 1, &viewport );
-	pCommandList->RSSetScissorRects( 1, &scissor );
+			// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
+			auto idx = GlobalVar.swapChain->Index;
+			auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
+			auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+			auto pCommandList = deviceContextUI->pCommandList.Get();
+			pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
 
-	// 통합 렌더링 셰이더를 불러옵니다.
-	ShaderBuilder::IntegratedUIShader_get().SetAll( deviceContextUI );
-	ShaderBuilder::TextAndRectShader_get().SetAll( deviceContextUI );
+			pCommandList->RSSetViewports( 1, &viewport );
+			pCommandList->RSSetScissorRects( 1, &scissor );
 
-	// 기본 매개변수를 입력합니다.
-	if ( auto slot = deviceContextUI->Slot["ScreenRes"]; slot != -1 )
-	{
-		float resolution[2] = { viewport.Width, viewport.Height };
-		pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-	}
+			// 통합 렌더링 셰이더를 불러옵니다.
+			ShaderBuilder::IntegratedUIShader_get().SetAll( deviceContextUI );
+			ShaderBuilder::TextAndRectShader_get().SetAll( deviceContextUI );
 
-	if ( auto slot = deviceContextUI->Slot["Cursor"]; slot != -1 )
-	{
-		POINT cursor;
-		GetCursorPos( &cursor );
-		ScreenToClient( GlobalVar.hWnd, &cursor );
-		float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
-		pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-	}
+			// 기본 매개변수를 입력합니다.
+			if ( auto slot = deviceContextUI->Slot["ScreenRes"]; slot != -1 )
+			{
+				float resolution[2] = { viewport.Width, viewport.Height };
+				pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
+			}
 
-	// 프레임을 렌더링합니다.
-	frame->Render( deviceContextUI );
+			if ( auto slot = deviceContextUI->Slot["Cursor"]; slot != -1 )
+			{
+				POINT cursor;
+				GetCursorPos( &cursor );
+				ScreenToClient( GlobalVar.hWnd, &cursor );
+				float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
+				pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
+			}
 
-	// 스왑 체인의 후면 버퍼를 원래 상태로 복구합니다.
-	deviceContextUI->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, 0 );
+			// 프레임을 렌더링합니다.
+			frame->Render( deviceContextUI );
 
-	// 명령 목록을 닫고 푸쉬합니다.
-	deviceContextUI->Close();
-	directQueue->Execute( deviceContextUI );
+			// 스왑 체인의 후면 버퍼를 원래 상태로 복구합니다.
+			deviceContextUI->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, 0 );
 
-	GlobalVar.swapChain->Present( appConfig.verticalSync );
+			// 명령 목록을 닫고 푸쉬합니다.
+			deviceContextUI->Close();
+			directQueue->Execute( deviceContextUI );
 
-	// 마지막 명령 번호를 저장합니다.
-	lastPending[frameIndex] = directQueue->Signal();
+			GlobalVar.swapChain->Present( appConfig.verticalSync );
 
-	// 이전 명령이 실행 완료되었는지 검사합니다. 완료되지 않았을 경우 대기합니다.
-	if ( directQueue->pFence->GetCompletedValue() < lastPending[!frameIndex] )
-	{
-		directQueue->WaitFor( lastPending[!frameIndex], waitingHandle );
-	}
+			// 마지막 명령 번호를 저장합니다.
+			lastPending[frameIndex] = directQueue->Signal();
+
+			// 이전 명령이 실행 완료되었는지 검사합니다. 완료되지 않았을 경우 대기합니다.
+			if ( directQueue->pFence->GetCompletedValue() < lastPending[!frameIndex] )
+			{
+				directQueue->WaitFor( lastPending[!frameIndex], waitingHandle );
+			}
+
+			mRenderThreadEvent.Set();
+		}
+	, nullptr );
 }
 
 void Application::LoadSystemFont()

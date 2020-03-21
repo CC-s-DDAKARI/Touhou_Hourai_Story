@@ -5,7 +5,9 @@ namespace SC::Game::Details
 	class GarbageCollector
 	{
 		std::mutex lock;
-		std::queue<object> garbages[2];
+		std::queue<std::pair<object, int>> garbages;
+
+		int frameIndex = 0;
 
 	public:
 		void Add( const object& garbage );

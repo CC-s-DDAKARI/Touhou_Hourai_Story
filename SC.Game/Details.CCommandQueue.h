@@ -10,6 +10,7 @@ namespace SC::Game::Details
 		CCommandQueue( CDevice* device, D3D12_COMMAND_LIST_TYPE type );
 
 		void Execute( RefPtr<CDeviceContext>& deviceContext );
+		void Execute( CDeviceContext* pDeviceContext );
 		void Execute( int numContexts, CDeviceContext* const* ppDeviceContexts );
 
 		uint64 Signal();

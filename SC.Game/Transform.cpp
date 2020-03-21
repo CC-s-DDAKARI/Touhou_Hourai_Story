@@ -4,12 +4,10 @@ using namespace SC::Game::Details;
 
 using namespace physx;
 
-void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext )
+void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
 {
 	if ( hasBuffer )
 	{
-		int frameIndex = GlobalVar.frameIndex;
-
 		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, dynamicBuffer[frameIndex]->VirtualAddress );
 	}
 }

@@ -17,7 +17,7 @@ namespace SC::Game
 		Component();
 
 		/// <summary> (내부 구성 요소) 컴포넌트의 렌더링 작업을 진행합니다. </summary>
-		virtual void Render( RefPtr<Details::CDeviceContext>& deviceContext );
+		virtual void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
 
 	public:
 		/// <summary> 컴포넌트가 개체와 연결될 때 호출됩니다. </summary>

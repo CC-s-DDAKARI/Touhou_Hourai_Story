@@ -13,6 +13,8 @@ namespace SC::Game
 		friend class Details::GameLogic;
 		friend class GameObject;
 
+		static constexpr const int NumThreadsForLight = 4;
+
 		std::vector<RefPtr<GameObject>> gameObjects;
 
 		Time time;
@@ -24,6 +26,7 @@ namespace SC::Game
 
 		bool firstUpdate = false;
 		bool updateSceneGraph = true;
+		bool mFetchResults = true;
 
 		std::list<GameObject*> mSceneGraph;
 		std::list<Camera*> mSceneCameras;
@@ -33,11 +36,17 @@ namespace SC::Game
 		std::map<int, std::list<GameObject*>> mThreadSceneGraph;
 		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueue;
 
-		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mVisibleViewStorage;
-		sc_game_export_object( ComPtr<ID3D12CommandAllocator> ) pCommandAllocator;
-		RefPtr<Details::CDeviceContext> mSceneBundleRender[2][2];
-		RefPtr<Details::CDeviceContext> mSceneBundleLight[2][2];
+		RefPtr<Details::CDeviceContext> mDeviceContextForSkinning;
+		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mViewStoragesForLight[NumThreadsForLight];
+		RefPtr<Details::CDeviceContext> mDeviceContextsForLight[NumThreadsForLight];
+		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mViewStorageForRender;
+		RefPtr<Details::CDeviceContext> mDeviceContextForRender;
 
+		std::atomic<int> mCompletedValue;
+		Threading::Event mCompletedEvent;
+		int mCompletedGoal;
+
+#pragma region public
 	public:
 		/// <summary> <see cref="Scene"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		Scene();
@@ -134,11 +143,18 @@ namespace SC::Game
 		/// <summary> 장면이 언로드될 때 호출되는 함수입니다. </summary>
 		/// <param name="progress"> 작업의 진행률을 보고할 포인터 변수입니다. </param>
 		virtual void Unload();
+#pragma endregion
 
 	private:
-		void Render( RefPtr<Details::CDeviceContext>& deviceContext );
-		void PopulateSceneGraph();
+		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
 
+		void PopulateSceneGraph();
+		void ClearSceneGraph();
 		void InsertSceneGraph( std::list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId );
+		void SearchComponents();
+
+		void UpdateAndLateUpdate( object, std::list<GameObject*>& batch );
+		void FixedUpdate1( object, std::list<GameObject*>& batch );
+		void FetchAndSetThread();
 	};
 }

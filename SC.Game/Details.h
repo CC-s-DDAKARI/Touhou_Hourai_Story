@@ -13,6 +13,7 @@
 #include "Details.IntegratedFactory.h"
 #include "Details.CDevice.h"
 #include "Details.CDeviceContext.h"
+#include "Details.CDeviceContextAndAllocator.h"
 #include "Details.CCommandQueue.h"
 #include "Details.CSwapChain.h"
 

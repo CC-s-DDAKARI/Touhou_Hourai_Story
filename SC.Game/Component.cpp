@@ -7,7 +7,7 @@ Component::Component()
 
 }
 
-void Component::Render( RefPtr<CDeviceContext>& deviceContext )
+void Component::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
 {
 
 }

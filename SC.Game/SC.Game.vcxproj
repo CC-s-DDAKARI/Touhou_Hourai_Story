@@ -210,6 +210,7 @@
     <ClCompile Include="Details.CCommandQueue.cpp" />
     <ClCompile Include="Details.CDevice.cpp" />
     <ClCompile Include="Details.CDeviceContext.cpp" />
+    <ClCompile Include="Details.CDeviceContextAndAllocator.cpp" />
     <ClCompile Include="Details.CDynamicBuffer.cpp" />
     <ClCompile Include="Details.CShaderResourceView.cpp" />
     <ClCompile Include="Details.CSwapChain.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="..\Include\SC.Game\UI.ViewBase.h" />
     <ClInclude Include="..\Include\SC.Game\Vector.h" />
     <ClInclude Include="..\Include\SC.Game\Vertex.h" />
+    <ClInclude Include="Details.CDeviceContextAndAllocator.h" />
     <ClInclude Include="Details.CView.h" />
     <ClInclude Include="Details.CDynamicBuffer.h" />
     <ClInclude Include="Details.AssimpParser.h" />

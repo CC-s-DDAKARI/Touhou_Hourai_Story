@@ -48,9 +48,7 @@ int VisibleViewStorage::Lock()
 			capacity *= 2;
 
 			failure = true;
-
-			// 예외를 발생시켜 처리 작업을 진행하도록 합니다.
-			throw new ViewStorageException();
+			return -1;
 		}
 
 		return lockId++;

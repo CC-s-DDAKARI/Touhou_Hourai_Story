@@ -250,7 +250,6 @@ void GlyphBuffer::LockGlyphs()
 
 void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float baselineX, float baselineY, const DWRITE_GLYPH_RUN* glyphRun )
 {
-	int frameIndex = GlobalVar.frameIndex;
 	auto directQueue = GlobalVar.device->DirectQueue[3].Get();
 	auto pCommandList = clientDrawingContext->pCommandList.Get();
 

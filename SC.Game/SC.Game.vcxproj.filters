@@ -373,6 +373,9 @@
     <ClInclude Include="..\Include\SC.Game\ThreadDispatcher.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Details.CDeviceContextAndAllocator.h">
+      <Filter>Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -675,6 +678,9 @@
     </ClCompile>
     <ClCompile Include="ThreadDispatcher.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.CDeviceContextAndAllocator.cpp">
+      <Filter>Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

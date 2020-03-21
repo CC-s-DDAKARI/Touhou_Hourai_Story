@@ -10,6 +10,8 @@ Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 {
 	if ( ( clientRect != prevClient || contentChanged ) && pLayout )
 	{
+		lock_guard<mutex> lock( locker );
+
 		prevClient = clientRect;
 		computed = clientRect;
 
@@ -60,6 +62,7 @@ void TextBlock::OnRender( RefPtr<CDeviceContext>& deviceContext )
 	if ( pLayout )
 	{
 		auto rect = ( Drawing::Rect<float> )ActualContentRect;
+		lock_guard<mutex> lock( locker );
 		pLayout->Draw( deviceContext.Get(), glyphRenderer.Get(), rect.Left, rect.Top );
 	}
 }

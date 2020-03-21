@@ -52,7 +52,7 @@ namespace SC::Game
 		bool keyframeUpdated = false;
 
 	protected:
-		void SetInput( RefPtr<Details::CDeviceContext>& deviceContext );
+		void SetInput( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
 
 	public:
 		/// <summary> <see cref="Animator"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

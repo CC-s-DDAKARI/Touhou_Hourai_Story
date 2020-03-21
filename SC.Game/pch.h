@@ -42,6 +42,7 @@ namespace SC::Game::Details
 	class IntegratedFactory;
 	struct CDevice;
 	class CDeviceContext;
+	class CDeviceContextAndAllocator;
 	class CCommandQueue;
 	class CSwapChain;
 

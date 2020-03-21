@@ -4,12 +4,6 @@ namespace SC::Game::Details
 {
 	class CDeviceContext : virtual public Object, virtual public IDeviceChild
 	{
-		struct tag_WaitPair
-		{
-			ID3D12Fence* pFence;
-			uint64 FenceValue;
-		};
-
 		IDevice* pDeviceParent = nullptr;
 
 		const D3D12_COMMAND_LIST_TYPE type;
@@ -28,7 +22,7 @@ namespace SC::Game::Details
 
 		void CreateShaderInfoBuffers( int capacity = 2048 );
 		
-		void Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pAllocator, ID3D12PipelineState* pInitialPipelineState = nullptr );
+		virtual void Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pAllocator, ID3D12PipelineState* pInitialPipelineState = nullptr );
 		void Close();
 		void SetVisibleViewStorage( RefPtr<VisibleViewStorage>& srvStorage );
 		void SetSlotMap( const std::map<std::string, int, std::less<>>& slotMap );
@@ -46,6 +40,7 @@ namespace SC::Game::Details
 		CCommandQueue* pCommandQueue = nullptr;
 		ComPtr<ID3D12GraphicsCommandList> pCommandList;
 		bool Failure = false;
+		int FrameIndex = 0;
 
 		vs_property_get( int, Slot )[];
 		int Slot_get( const std::string_view& param0 );

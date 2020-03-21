@@ -7,28 +7,32 @@ void GarbageCollector::Add( const object& garbage )
 {
 	lock_guard<mutex> locker( lock );
 	if ( !AppShutdown )
-		garbages[GlobalVar.frameIndex].push( garbage );
+		garbages.push( { garbage, frameIndex } );
 }
 
 void GarbageCollector::Collect()
 {
 	lock_guard<mutex> locker( lock );
-	while ( garbages[GlobalVar.frameIndex].size() )
+	while ( garbages.size() )
 	{
-		garbages[GlobalVar.frameIndex].pop();
+		if ( garbages.front().second <= frameIndex - 4 )
+		{
+			garbages.pop();
+		}
+		else
+		{
+			break;
+		}
 	}
+
+	frameIndex += 1;
 }
 
 void GarbageCollector::CollectAll()
 {
 	lock_guard<mutex> locker( lock );
-	while ( garbages[0].size() )
+	while ( garbages.size() )
 	{
-		garbages[0].pop();
-	}
-
-	while ( garbages[1].size() )
-	{
-		garbages[1].pop();
+		garbages.pop();
 	}
 }

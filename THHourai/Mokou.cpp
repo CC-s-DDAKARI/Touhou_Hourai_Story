@@ -1,6 +1,6 @@
 using namespace Touhou;
 
-Mokou::Mokou( String name ) : PlayableCharacterBase( name, "Mokou.mdl" )
+Mokou::Mokou( String name ) : PlayableCharacterBase( name, "Syameimaru_Aya.mdl" )
 {
 	LoadAssets();
 	LoadAnimatorController();
@@ -13,7 +13,7 @@ Mokou::Mokou( String name ) : PlayableCharacterBase( name, "Mokou.mdl" )
 
 void Mokou::LoadAssets()
 {
-	ayaOriginal = AssetBundle::LoadModelAssetsAsync( "Assets/Model/Mokou/Mokou.mdl" )->GetResults().As<GameObject>();
+	ayaOriginal = AssetBundle::LoadModelAssetsAsync( "Assets/Model/Syameimaru_Aya/Syameimaru_Aya.mdl" )->GetResults().As<GameObject>();
 	ayaOriginal->RemoveComponent<Animator>();
 	
 	IsLocked = true;

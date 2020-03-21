@@ -405,9 +405,7 @@ void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, int numViews,
 
 void CDeviceContext::DispatchShaderInfo( int numStructs, const tag_ShaderInfo* pShaderInfos )
 {
-	int frameIndex = GlobalVar.frameIndex;
-
-	auto pBlock = ( tag_ShaderInfo* )uiShaderInfos[frameIndex]->pBlock;
+	auto pBlock = ( tag_ShaderInfo* )uiShaderInfos[FrameIndex]->pBlock;
 	memcpy( pBlock + uiShaderInfoOffset, pShaderInfos, sizeof( tag_ShaderInfo ) * numStructs );
 
 #if defined( _DEBUG )
@@ -417,7 +415,7 @@ void CDeviceContext::DispatchShaderInfo( int numStructs, const tag_ShaderInfo* p
 	}
 #endif
 
-	pCommandList->SetGraphicsRootShaderResourceView( ( UINT )Slot["ShaderInfo"], uiShaderInfos[frameIndex]->VirtualAddress + sizeof( tag_ShaderInfo ) * uiShaderInfoOffset );
+	pCommandList->SetGraphicsRootShaderResourceView( ( UINT )Slot["ShaderInfo"], uiShaderInfos[FrameIndex]->VirtualAddress + sizeof( tag_ShaderInfo ) * uiShaderInfoOffset );
 	uiShaderInfoOffset += numStructs;
 
 	pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );

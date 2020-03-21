@@ -44,8 +44,8 @@ namespace SC::Game
 	private:
 		Light();
 
-		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext );
-		void SetGraphicsRootShaderResources( RefPtr<Details::CDeviceContext>& deviceContext );
+		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void SetGraphicsRootShaderResources( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
 
 	protected:
 		void SetDepthBuffer( void* pResource );
