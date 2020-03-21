@@ -27,7 +27,7 @@ namespace SC::Game
 		bool updated = false;
 
 	private:
-		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 		void CreateBuffer();
 
 	public:

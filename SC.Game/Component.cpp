@@ -7,7 +7,7 @@ Component::Component()
 
 }
 
-void Component::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void Component::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 
 }
@@ -37,9 +37,9 @@ void Component::LateUpdate( Time& time, Input& input )
 
 }
 
-RefPtr<GameObject> Component::Linked_get()
+GameObject* Component::Linked_get()
 {
-	return gameObject.ResolveAs<GameObject>();
+	return gameObject;
 }
 
 RefPtr<Transform> Component::Transform_get()

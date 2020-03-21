@@ -19,7 +19,6 @@ namespace SC::Game::Details
 		std::set<GlyphBuffer*> glyphBuffers;
 
 		int frameIndex = 0;
-		int fixedFrameIndex = 0;
 
 		physx::PxDefaultAllocator pxDefaultAllocator;
 		physx::PxDefaultErrorCallback pxDefaultErrorCallback;

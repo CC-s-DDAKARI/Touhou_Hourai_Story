@@ -20,6 +20,6 @@ namespace SC::Game::Details
 
 		ComPtr<ID3D12CommandQueue> pCommandQueue;
 		ComPtr<ID3D12Fence> pFence;
-		uint64 LastPending = 0;
+		std::atomic<uint64> LastPending = 0;
 	};
 }

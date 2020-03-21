@@ -8,10 +8,9 @@ using namespace std;
 
 Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 {
+	lock_guard<mutex> lock( locker );
 	if ( ( clientRect != prevClient || contentChanged ) && pLayout )
 	{
-		lock_guard<mutex> lock( locker );
-
 		prevClient = clientRect;
 		computed = clientRect;
 
@@ -59,10 +58,10 @@ Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 
 void TextBlock::OnRender( RefPtr<CDeviceContext>& deviceContext )
 {
+	lock_guard<mutex> lock( locker );
 	if ( pLayout )
 	{
 		auto rect = ( Drawing::Rect<float> )ActualContentRect;
-		lock_guard<mutex> lock( locker );
 		pLayout->Draw( deviceContext.Get(), glyphRenderer.Get(), rect.Left, rect.Top );
 	}
 }
@@ -78,7 +77,9 @@ TextBlock::TextBlock( String name ) : Element( name )
 
 TextBlock::~TextBlock()
 {
-
+	lock_guard<mutex> lock( locker );
+	pLayout = nullptr;
+	glyphRenderer = nullptr;
 }
 
 RefPtr<TextFormat> TextBlock::Format_get()
@@ -152,6 +153,7 @@ Color TextBlock::Color_get()
 
 void TextBlock::Color_set( Drawing::Color value )
 {
+	lock_guard<mutex> lock( locker );
 	glyphRenderer->FillColor = value;
 }
 
@@ -162,6 +164,7 @@ double TextBlock::Opacity_get()
 
 void TextBlock::Opacity_set( double value )
 {
+	lock_guard<mutex> lock( locker );
 	glyphRenderer->Opacity = value;
 }
 
@@ -172,6 +175,7 @@ bool TextBlock::IsRichText_get()
 
 void TextBlock::IsRichText_set( bool value )
 {
+	lock_guard<mutex> lock( locker );
 	isRichText = value;
 }
 
@@ -213,6 +217,7 @@ void TextBlock::OnFormatChanged()
 
 void TextBlock::OnContentChanged( object sender, object content )
 {
+	lock_guard<mutex> lock( locker );
 	if ( content.IsValid )
 	{
 		auto str = content->ToString();

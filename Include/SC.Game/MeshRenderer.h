@@ -10,7 +10,7 @@ namespace SC::Game
 		RefPtr<Material> material;
 
 	protected:
-		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex ) override;
+		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex ) override;
 
 	public:
 		/// <summary> <see cref="MeshRenderer"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

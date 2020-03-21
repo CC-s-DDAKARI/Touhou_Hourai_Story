@@ -38,12 +38,10 @@ namespace SC::Game::Details
 		static ComPtr<ID3D12PipelineState> pPipelineState_SkyboxShader;
 
 	private:
-		static ShaderModule colorShader;
 		static ShaderModule skyboxShader;
 		static ShaderModule hdrShader;
 		static ShaderModule hdrColorShader;
 		static ShaderModule toneMappingShader;
-		static ShaderModule shadowCastShader;
 		static ShaderModule hdrComputeShader[3];
 
 		static ShaderModule integratedUIShader;
@@ -52,12 +50,10 @@ namespace SC::Game::Details
 	public:
 		static void Initialize();
 
-		static ShaderModule ColorShader_get();
 		static ShaderModule SkyboxShader_get();
 		static ShaderModule HDRShader_get();
 		static ShaderModule HDRColorShader_get();
 		static ShaderModule ToneMappingShader_get();
-		static ShaderModule ShadowCastShader_get();
 		static ShaderModule HDRComputeShader_get( int param0 );
 
 		static ShaderModule IntegratedUIShader_get();
@@ -67,12 +63,10 @@ namespace SC::Game::Details
 		static void LoadSkinningShader();
 		static void LoadRenderingShader();
 
-		static void LoadColorShader();
 		static void LoadSkyboxShader();
 		static void LoadHDRShader();
 		static void LoadHDRColorShader();
 		static void LoadToneMappingShader();
-		static void LoadShadowCastShader();
 		static void LoadHDRComputeShader();
 
 		static void LoadIntegratedUIShader();

@@ -32,6 +32,8 @@ namespace SC::Game
 		std::list<Camera*> mSceneCameras;
 		std::list<Light*> mSceneLights;
 
+		std::vector<RefPtr<GameObject>> mSceneGraphBackup;
+
 		std::list<GameObject*> mCoreThreadSceneGraph;
 		std::map<int, std::list<GameObject*>> mThreadSceneGraph;
 		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueue;
@@ -146,7 +148,7 @@ namespace SC::Game
 #pragma endregion
 
 	private:
-		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 
 		void PopulateSceneGraph();
 		void ClearSceneGraph();

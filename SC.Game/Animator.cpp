@@ -4,11 +4,11 @@ using namespace SC::Game::Details;
 
 using namespace std;
 
-void Animator::SetInput( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void Animator::SetInput( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	if ( boneTransform.size() )
 	{
-		deviceContext->pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_BoneTransform, finalTransformBuffer[fixedFrameIndex]->VirtualAddress );
+		deviceContext->pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_BoneTransform, finalTransformBuffer[frameIndex]->VirtualAddress );
 	}
 }
 
@@ -43,18 +43,13 @@ void Animator::Start()
 	int numBones = ( int )Linked->GetComponentsInChildren<Bone>().size();
 
 	boneTransform.resize( numBones );
+	finalTransform.resize( numBones );
 
 	if ( numBones )
 	{
 		finalTransformBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
 		finalTransformBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
 		InitializeOffset( Linked );
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{ };
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Buffer.NumElements = numBones;
-		srvDesc.Buffer.StructureByteStride = sizeof( tag_BoneTransform );
 	}
 	else
 	{
@@ -65,7 +60,17 @@ void Animator::Start()
 
 void Animator::Update( Time& time, Input& input )
 {
+	auto frameIndex = GlobalVar.frameIndex;
 
+	if ( finalTransformBuffer[frameIndex] )
+	{
+		auto block = ( tag_BoneTransform* )finalTransformBuffer[frameIndex]->pBlock;
+
+		for ( int i = 0, count = ( int )finalTransform.size(); i < count; ++i )
+		{
+			block[i].World = finalTransform[i].World;
+		}
+	}
 }
 
 void Animator::FixedUpdate( Time& time )
@@ -155,16 +160,9 @@ void Animator::InitializeOffset( RefPtr<GameObject> gameObject, int parent )
 			XMMatrixRotationQuaternion( XMVectorSet( ( float )quat.X, ( float )quat.Y, ( float )quat.Z, ( float )quat.W ) ) *
 			XMMatrixTranslation( ( float )pos.X, ( float )pos.Y, ( float )pos.Z );
 
-		tag_BoneTransform* finalTransform[]
-		{
-			( tag_BoneTransform* )finalTransformBuffer[0]->pBlock,
-			( tag_BoneTransform* )finalTransformBuffer[1]->pBlock
-		};
-
 		XMStoreFloat4x4( &boneTransform[idx].Offset, offset );
 		XMStoreFloat4x4( &boneTransform[idx].ToRoot, XMMatrixIdentity() );
-		XMStoreFloat4x4( &finalTransform[0][idx].World, XMMatrixIdentity() );
-		XMStoreFloat4x4( &finalTransform[1][idx].World, XMMatrixIdentity() );
+		XMStoreFloat4x4( &finalTransform[idx].World, XMMatrixIdentity() );
 
 		parent = idx;
 	}
@@ -225,12 +223,9 @@ void Animator::UpdateToRoot( RefPtr<GameObject> gameObject, int parent )
 
 void Animator::ReplaceToRoot()
 {
-	int fixedFrameIndex = GlobalVar.fixedFrameIndex;
-
 	for ( int i = 0, count = ( int )boneTransform.size(); i < count; ++i )
 	{
 		auto& bt = boneTransform[i];
-		auto finalTransform = ( tag_BoneTransform* )finalTransformBuffer[fixedFrameIndex]->pBlock;
 
 		XMMATRIX offset = XMLoadFloat4x4( &bt.Offset );
 		XMMATRIX toRoot = XMLoadFloat4x4( &bt.ToRoot );

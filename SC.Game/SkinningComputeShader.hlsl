@@ -12,7 +12,7 @@ struct SkinningConstants
 	int VertexCount;
 };
 
-StructuredBuffer<SkinnedVertexBuffer> gSkinnedVertexBuffer : register( t0 );
+StructuredBuffer<SkinnedVertex> gSkinnedVertexBuffer : register( t0 );
 StructuredBuffer<BoneTransform> gBoneTransform : register( t1 );
 ConstantBuffer<SkinningConstants> gSkinningConstant : register( b0 );
 
@@ -23,7 +23,7 @@ void main( uint3 tid : SV_DispatchThreadID )
 {
 	if ( tid.x < ( uint )gSkinningConstant.VertexCount )
 	{
-		SkinnedVertexBuffer sv = gSkinnedVertexBuffer[tid.x];
+		SkinnedVertex sv = gSkinnedVertexBuffer[tid.x];
 		Vertex v;
 
 		// 기본 정보는 바로 넘깁니다.
@@ -36,8 +36,8 @@ void main( uint3 tid : SV_DispatchThreadID )
 
 		// 뼈대 색인을 배열 형식으로 가져옵니다.
 		uint indices[4] = { 0, 0, 0, 0 };
-		UInt_Sep( sv.Indices.x, indices[0], indices[1] );
-		UInt_Sep( sv.Indices.y, indices[2], indices[3] );
+		UInt_Sep( sv.Indices.x, indices[1], indices[0] );
+		UInt_Sep( sv.Indices.y, indices[3], indices[2] );
 
 		v.Pos = 0;
 		v.Normal = 0;

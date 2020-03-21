@@ -9,12 +9,10 @@ ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_ColorShader;
 ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_ShadowCastShader;
 ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_SkyboxShader;
 
-ShaderModule ShaderBuilder::colorShader;
 ShaderModule ShaderBuilder::skyboxShader;
 ShaderModule ShaderBuilder::hdrShader;
 ShaderModule ShaderBuilder::hdrColorShader;
 ShaderModule ShaderBuilder::toneMappingShader;
-ShaderModule ShaderBuilder::shadowCastShader;
 ShaderModule ShaderBuilder::hdrComputeShader[3];
 
 ShaderModule ShaderBuilder::integratedUIShader;
@@ -53,21 +51,14 @@ void ShaderBuilder::Initialize()
 	LoadSkinningShader();
 	LoadRenderingShader();
 
-	//LoadColorShader();
 	//LoadSkyboxShader();
 	LoadHDRShader();
 	LoadHDRColorShader();
 	LoadToneMappingShader();
-	//LoadShadowCastShader();
 	LoadHDRComputeShader();
 
 	LoadIntegratedUIShader();
 	LoadTextAndRectShader();
-}
-
-ShaderModule ShaderBuilder::ColorShader_get()
-{
-	return colorShader;
 }
 
 ShaderModule ShaderBuilder::SkyboxShader_get()
@@ -88,11 +79,6 @@ ShaderModule ShaderBuilder::HDRColorShader_get()
 ShaderModule ShaderBuilder::ToneMappingShader_get()
 {
 	return toneMappingShader;
-}
-
-ShaderModule ShaderBuilder::ShadowCastShader_get()
-{
-	return shadowCastShader;
 }
 
 ShaderModule ShaderBuilder::HDRComputeShader_get( int param0 )

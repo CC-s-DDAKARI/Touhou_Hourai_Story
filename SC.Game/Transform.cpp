@@ -4,7 +4,7 @@ using namespace SC::Game::Details;
 
 using namespace physx;
 
-void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	if ( hasBuffer )
 	{

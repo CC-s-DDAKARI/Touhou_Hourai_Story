@@ -5,7 +5,7 @@ using namespace SC::Drawing;
 
 using namespace std;
 
-void Camera::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void Camera::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Camera, dynamicBuffer[frameIndex]->VirtualAddress );
 }

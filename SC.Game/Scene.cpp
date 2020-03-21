@@ -55,6 +55,11 @@ Scene::~Scene()
 		GlobalVar.pxSceneList.erase( pxScene );
 		GlobalVar.globalMutex.unlock();
 
+		if ( !mFetchResults )
+		{
+			mFetchResults = pxScene->fetchResults( true );
+		}
+
 		pxScene->release();
 		pxScene = nullptr;
 	}
@@ -316,16 +321,20 @@ void Scene::Unload()
 
 }
 
-void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	for ( auto go : mSceneGraph )
 	{
-		go->Render( deviceContext, frameIndex, fixedFrameIndex );
+		go->Render( deviceContext, frameIndex );
 	}
 }
 
 void Scene::PopulateSceneGraph()
 {
+	// 장면 그래프를 변경하기 전 마지막 렌더링과 동기화합니다.
+	GlobalVar.pApp->mRenderThreadEvent.WaitForSingleObject();
+	GlobalVar.pApp->mRenderThreadEvent.Set();
+
 	ClearSceneGraph();
 
 	// 장면 종속 관계를 풀어놓습니다.
@@ -335,6 +344,15 @@ void Scene::PopulateSceneGraph()
 	}
 
 	SearchComponents();
+
+	// 그래프의 렌더링 의존을 위해 레퍼런스 형식으로 저장합니다.
+	mSceneGraphBackup.resize( mSceneGraph.size() );
+	auto iter = mSceneGraph.begin();
+	for ( int i = 0, count = ( int )mSceneGraphBackup.size(); i < count; ++i )
+	{
+		mSceneGraphBackup[i] = *iter;
+		++iter;
+	}
 }
 
 void Scene::ClearSceneGraph()

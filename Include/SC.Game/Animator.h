@@ -47,12 +47,13 @@ namespace SC::Game
 		double blendTime = 0;
 
 		std::vector<tag_Bone> boneTransform;
+		std::vector<tag_BoneTransform> finalTransform;
 		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> finalTransformBuffer;
 
 		bool keyframeUpdated = false;
 
 	protected:
-		void SetInput( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void SetInput( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 
 	public:
 		/// <summary> <see cref="Animator"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

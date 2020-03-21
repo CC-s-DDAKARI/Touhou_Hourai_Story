@@ -235,7 +235,7 @@ object GameObject::Clone()
 {
 	RefPtr gameObject = new GameObject( String::Format( "{0} Clone", Name ) );
 	gameObject->transform = transform->Clone().As<Game::Transform>();
-	gameObject->transform->Component::gameObject = gameObject;
+	gameObject->transform->Component::gameObject = gameObject.Get();
 	gameObject->transform->gameObject = gameObject.Get();
 
 	for ( int i = 0, count = ( int )components.size(); i < count; ++i )
@@ -325,15 +325,15 @@ void GameObject::LateUpdate( Time& time, Input& input )
 	}
 }
 
-void GameObject::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void GameObject::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
-	transform->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
+	transform->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
 
 	for ( auto i : components )
 	{
 		auto cmp = i.second.Get();
 		if ( cmp->IsEnabled )
-			cmp->Render( deviceContext, frameIndex, fixedFrameIndex );
+			cmp->Render( deviceContext, frameIndex );
 	}
 }
 

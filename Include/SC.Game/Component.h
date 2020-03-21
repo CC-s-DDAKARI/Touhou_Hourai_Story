@@ -7,7 +7,7 @@ namespace SC::Game
 	{
 		friend class GameObject;
 
-		WeakPtr gameObject;
+		GameObject* gameObject;
 
 		bool isEnabled = true;
 		bool isFirst = true;
@@ -17,7 +17,7 @@ namespace SC::Game
 		Component();
 
 		/// <summary> (내부 구성 요소) 컴포넌트의 렌더링 작업을 진행합니다. </summary>
-		virtual void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		virtual void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 
 	public:
 		/// <summary> 컴포넌트가 개체와 연결될 때 호출됩니다. </summary>
@@ -44,7 +44,7 @@ namespace SC::Game
 		template< class T, class... CtorArgs, std::enable_if_t<where<Component, T>> * = nullptr >
 		RefPtr<T> AddComponent( CtorArgs&&... ctorArgs )
 		{
-			if ( gameObject.IsValid )
+			if ( gameObject )
 			{
 				auto go = gameObject.ResolveAs<GameObject>();
 				return go->AddComponent<T>( ctorArgs... );
@@ -59,10 +59,9 @@ namespace SC::Game
 		template< class T >
 		RefPtr<T> GetComponent()
 		{
-			if ( gameObject.IsValid )
+			if ( gameObject )
 			{
-				auto go = gameObject.ResolveAs<GameObject>();
-				return go->GetComponent<T>();
+				return gameObject->GetComponent<T>();
 			}
 			else
 			{
@@ -71,10 +70,10 @@ namespace SC::Game
 		}
 
 		/// <summary> (Visual Studio 전용) 연결된 게임 개체를 가져옵니다. </summary>
-		vs_property_get( RefPtr<GameObject>, Linked );
+		vs_property_get( GameObject*, Linked );
 
 		/// <summary> 연결된 게임 개체를 가져옵니다. </summary>
-		RefPtr<GameObject> Linked_get();
+		GameObject* Linked_get();
 
 		/// <summary> (Visual Studio 전용) 연결된 게임 개체의 변환 상태를 가져옵니다. </summary>
 		vs_property_get( RefPtr<Game::Transform>, Transform );

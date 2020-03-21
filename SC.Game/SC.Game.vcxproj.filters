@@ -385,9 +385,6 @@
     <ClCompile Include="Details.ShaderBuilder.SkyboxShader.cpp">
       <Filter>Shaders\SkyboxShader</Filter>
     </ClCompile>
-    <ClCompile Include="Details.ShaderBuilder.ColorShader.cpp">
-      <Filter>Shaders\ColorShader</Filter>
-    </ClCompile>
     <ClCompile Include="Details.ShaderBuilder.ToneMappingShader.cpp">
       <Filter>Shaders\ToneMappingShader</Filter>
     </ClCompile>
@@ -396,9 +393,6 @@
     </ClCompile>
     <ClCompile Include="Details.ShaderBuilder.HDRColorShader.cpp">
       <Filter>Shaders\HDRColorShader</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.ShaderBuilder.ShadowCastShader.cpp">
-      <Filter>Shaders\ShadowCastShader</Filter>
     </ClCompile>
     <ClCompile Include="Details.ShaderBuilder.HDRComputeShader.cpp">
       <Filter>Shaders\HDRComputeShader</Filter>
@@ -687,9 +681,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{fccb02da-7d5e-4226-9175-af72357c3379}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\ColorShader">
-      <UniqueIdentifier>{2a8b0285-0746-4f51-82fe-0d12bb28d734}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\SkyboxShader">
       <UniqueIdentifier>{50747596-9a11-4554-9c92-7913b5e97eff}</UniqueIdentifier>
     </Filter>
@@ -755,12 +746,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="ColorVertexShader.hlsl">
-      <Filter>Shaders\ColorShader</Filter>
-    </FxCompile>
-    <FxCompile Include="ColorPixelShader.hlsl">
-      <Filter>Shaders\ColorShader</Filter>
-    </FxCompile>
     <FxCompile Include="SkyboxVertexShader.hlsl">
       <Filter>Shaders\SkyboxShader</Filter>
     </FxCompile>
@@ -785,12 +770,6 @@
     <FxCompile Include="HDRColorPixelShader.hlsl">
       <Filter>Shaders\HDRColorShader</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowCastVertexShader.hlsl">
-      <Filter>Shaders\ShadowCastShader</Filter>
-    </FxCompile>
-    <FxCompile Include="ShadowCastPixelShader.hlsl">
-      <Filter>Shaders\ShadowCastShader</Filter>
-    </FxCompile>
     <FxCompile Include="HDRComputeSamplingShader.hlsl">
       <Filter>Shaders\HDRComputeShader</Filter>
     </FxCompile>
@@ -808,6 +787,18 @@
     </FxCompile>
     <FxCompile Include="SkinningComputeShader.hlsl">
       <Filter>Shaders\SkinningShader</Filter>
+    </FxCompile>
+    <FxCompile Include="ColorVertexShader.hlsl">
+      <Filter>Shaders\RenderingShader</Filter>
+    </FxCompile>
+    <FxCompile Include="ColorPixelShader.hlsl">
+      <Filter>Shaders\RenderingShader</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowCastPixelShader.hlsl">
+      <Filter>Shaders\RenderingShader</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowCastVertexShader.hlsl">
+      <Filter>Shaders\RenderingShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

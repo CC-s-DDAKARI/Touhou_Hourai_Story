@@ -253,6 +253,8 @@ void Application::ResizeBuffers( uint32 width, uint32 height )
 	if ( width != 0 && height != 0 )
 	{
 		WaitPrimaryQueue();
+		mRenderThreadEvent.WaitForSingleObject();
+		mRenderThreadEvent.Set();
 
 		GlobalVar.swapChain->ResizeBuffers( width, height );
 		GlobalVar.gameLogic->ResizeBuffers( width, height );
@@ -314,13 +316,17 @@ void Application::Update()
 void Application::Render()
 {
 	int frameIndex = GlobalVar.frameIndex;
-	int fixedFrameIndex = GlobalVar.fixedFrameIndex;
 	
 	mRenderThreadEvent.WaitForSingleObject();
 
-	ThreadPool::QueueUserWorkItem( [&, frameIndex, fixedFrameIndex]( object )
+	// 이전 명령이 실행 완료되었는지 검사합니다. 완료되지 않았을 경우 대기합니다.
+	auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+	directQueue->WaitFor( lastPending[frameIndex], waitingHandle );
+
+	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
 			auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+			int frameIndex_ = frameIndex;
 
 			// 사전 글리프 렌더링을 시작합니다.
 			for ( auto i : GlobalVar.glyphBuffers )
@@ -329,15 +335,15 @@ void Application::Render()
 				i->Restart();
 			}
 
-			GlobalVar.gameLogic->Render( frameIndex, fixedFrameIndex );
+			GlobalVar.gameLogic->Render( frameIndex_ );
 
 			// 렌더링을 실행하기 전 장치를 초기화합니다.
 			visibleViewStorage->Reset();
 
-			HR( pCommandAllocators[frameIndex]->Reset() );
-			deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex].Get(), nullptr );
+			HR( pCommandAllocators[frameIndex_]->Reset() );
+			deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex_].Get(), nullptr );
 			deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
-			deviceContextUI->FrameIndex = frameIndex;
+			deviceContextUI->FrameIndex = frameIndex_;
 
 			// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
 			auto idx = GlobalVar.swapChain->Index;
@@ -382,13 +388,7 @@ void Application::Render()
 			GlobalVar.swapChain->Present( appConfig.verticalSync );
 
 			// 마지막 명령 번호를 저장합니다.
-			lastPending[frameIndex] = directQueue->Signal();
-
-			// 이전 명령이 실행 완료되었는지 검사합니다. 완료되지 않았을 경우 대기합니다.
-			if ( directQueue->pFence->GetCompletedValue() < lastPending[!frameIndex] )
-			{
-				directQueue->WaitFor( lastPending[!frameIndex], waitingHandle );
-			}
+			lastPending[frameIndex_] = directQueue->Signal();
 
 			mRenderThreadEvent.Set();
 		}
@@ -449,7 +449,7 @@ void Application::WaitAllQueues()
 	for ( int i = 0; i < ARRAYSIZE( ppCommandQueues ); ++i )
 	{
 		auto pFence = ppCommandQueues[i]->pFence.Get();
-		auto lastPending = ppCommandQueues[i]->LastPending;
+		auto lastPending = ppCommandQueues[i]->LastPending.load();
 		if ( pFence->GetCompletedValue() < lastPending )
 		{
 			HR( pFence->SetEventOnCompletion( lastPending, handle->Handle ) );

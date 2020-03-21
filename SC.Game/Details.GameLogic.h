@@ -16,7 +16,6 @@ namespace SC::Game::Details
 		RefPtr<Diagnostics::StepTimer> physicsTimer;
 
 		ComPtr<ID3D12CommandAllocator> pCommandAllocator[2];
-		uint64 lastPending[2]{ };
 		RefPtr<CDeviceContext> deviceContext;
 		RefPtr<VisibleViewStorage> visibleViewStorage;
 		RefPtr<Threading::Event> waitingHandle;
@@ -43,13 +42,13 @@ namespace SC::Game::Details
 
 		void Update();
 		void FixedUpdate();
-		void Render( int frameIndex, int fixedFrameIndex );
+		void Render( int frameIndex );
 		void ResizeBuffers( uint32 width, uint32 height );
 
-		void MeshSkinning( int frameIndex, int fixedFrameIndex );
-		void GeometryWriting( int frameIndex, int fixedFrameIndex );
+		void MeshSkinning( int frameIndex );
+		void GeometryWriting( int frameIndex );
 
-		void RenderSceneGraphForEachThreads( object, int threadIndex, std::list<Light*>& lights, int frameIndex, int fixedFrameIndex );
+		void RenderSceneGraphForEachThreads( object, int threadIndex, std::list<Light*>& lights, int frameIndex );
 		void FetchAndSetThread();
 	};
 }

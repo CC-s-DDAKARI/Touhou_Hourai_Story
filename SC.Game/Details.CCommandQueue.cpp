@@ -53,8 +53,9 @@ void CCommandQueue::Execute( int numContexts, CDeviceContext* const* ppDeviceCon
 
 uint64 CCommandQueue::Signal()
 {
-	HR( pCommandQueue->Signal( pFence.Get(), ++LastPending ) );
-	return LastPending;
+	uint64 lastPending = ++LastPending;
+	HR( pCommandQueue->Signal( pFence.Get(), lastPending ) );
+	return lastPending;
 }
 
 void CCommandQueue::Signal( ID3D12Fence* pFence, uint64 fenceValue )

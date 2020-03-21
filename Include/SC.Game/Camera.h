@@ -23,7 +23,7 @@ namespace SC::Game
 		double aspectRatio = 0;
 
 	private:
-		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 
 	public:
 		/// <summary> <see cref="Camera"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

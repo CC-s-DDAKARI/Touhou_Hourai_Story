@@ -58,14 +58,11 @@ void GameLogic::Update()
 
 void GameLogic::FixedUpdate()
 {
-	GlobalVar.fixedFrameIndex += 1;
-	if ( GlobalVar.fixedFrameIndex >= 2 ) GlobalVar.fixedFrameIndex = 0;
-
 	// 장면의 물리 갱신 함수를 호출합니다.
 	currentScene->FixedUpdate();
 }
 
-void GameLogic::Render( int frameIndex, int fixedFrameIndex )
+void GameLogic::Render( int frameIndex )
 {
 	auto directQueue = GlobalVar.device->DirectQueue[0].Get();
 	auto& pCommandQueue = *directQueue->pCommandQueue.Get();
@@ -87,8 +84,8 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 		mCompletedValue = 0;
 		mCompletedGoal = 1 + Scene::NumThreadsForLight;
 
-		MeshSkinning( frameIndex, fixedFrameIndex );
-		GeometryWriting( frameIndex, fixedFrameIndex );
+		MeshSkinning( frameIndex );
+		GeometryWriting( frameIndex );
 
 		Camera* pViewCamera = nullptr;
 
@@ -114,7 +111,7 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 					// 장면이 스카이박스를 사용할 경우 우선 스카이박스 렌더링을 진행합니다.
 					pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_SkyboxShader.Get() );
 
-					i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
+					i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
 					deviceContext->SetGraphicsRootShaderResources( Slot_Rendering_Textures, skybox->SkyboxTexture->pShaderResourceView );
 					skyboxMesh->DrawIndexed( deviceContext );
 				}
@@ -123,8 +120,8 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 				pCommandList.SetPipelineState( ShaderBuilder::pPipelineState_ColorShader.Get() );
 
 				// 장면에 포함된 모든 개체를 렌더링합니다.
-				i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
-				currentScene->Render( deviceContext, frameIndex, fixedFrameIndex );
+				i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
+				currentScene->Render( deviceContext, frameIndex );
 
 				// 기하 버퍼 사용을 종료합니다.
 				geometryBuffer->EndDraw( deviceContext );
@@ -145,7 +142,7 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 		ShaderBuilder::HDRShader_get().SetAll( deviceContext );
 
 		// 매개변수를 입력합니다.
-		pViewCamera->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
+		pViewCamera->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
 		geometryBuffer->SetGraphicsRootShaderResourcesForLayer( deviceContext );
 
 		// 각 조명에 대해 조명 렌더 패스를 진행합니다.
@@ -154,8 +151,8 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 
 		for ( auto i : currentScene->mSceneLights )
 		{
-			i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex, fixedFrameIndex );
-			i->SetGraphicsRootShaderResources( deviceContext, frameIndex, fixedFrameIndex );
+			i->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
+			i->SetGraphicsRootShaderResources( deviceContext );
 			pCommandList.DrawInstanced( 4, 1, 0, 0 );
 		}
 
@@ -232,12 +229,6 @@ void GameLogic::Render( int frameIndex, int fixedFrameIndex )
 	// 명령 목록을 닫고 푸쉬합니다.
 	deviceContext->Close();
 	directQueue->Execute( deviceContext );
-
-	// 마지막 명령 번호를 저장합니다.
-	lastPending[frameIndex++] = directQueue->Signal();
-
-	// 프레임 인덱스를 한정합니다.
-	if ( frameIndex >= 2 ) frameIndex -= 2;
 }
 
 void GameLogic::ResizeBuffers( uint32 width, uint32 height )
@@ -248,9 +239,9 @@ void GameLogic::ResizeBuffers( uint32 width, uint32 height )
 	hdrComputedBuffer->ResizeBuffers( width, height );
 }
 
-void GameLogic::MeshSkinning( int frameIndex, int fixedFrameIndex )
+void GameLogic::MeshSkinning( int frameIndex )
 {
-	ThreadPool::QueueUserWorkItem( [&, frameIndex, fixedFrameIndex]( object )
+	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
 			auto pScene = currentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForSkinning;
@@ -258,14 +249,14 @@ void GameLogic::MeshSkinning( int frameIndex, int fixedFrameIndex )
 
 			auto& skinningCollection = pScene->mpSkinnedMeshRendererQueue->GetCollections();
 
-			mDeviceContext->Reset( computeQueue.Get(), nullptr, ShaderBuilder::pPipelineState_Skinning.Get() );
+			mDeviceContext->Reset( computeQueue.Get(), ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_Skinning.Get() );
 
 			auto& pCommandList = *mDeviceContext->pCommandList.Get();
 			pCommandList.SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
 
 			for ( auto i : skinningCollection )
 			{
-				i.pAnimator->SetInput( mDeviceContext, frameIndex, fixedFrameIndex );
+				i.pAnimator->SetInput( mDeviceContext, frameIndex );
 				for ( auto j : i.SkinnedMeshRenderers )
 				{
 					j->Skinning( mDeviceContext );
@@ -283,7 +274,7 @@ void GameLogic::MeshSkinning( int frameIndex, int fixedFrameIndex )
 	, nullptr );
 }
 
-void GameLogic::GeometryWriting( int frameIndex, int fixedFrameIndex )
+void GameLogic::GeometryWriting( int frameIndex )
 {
 	auto* pScene = currentScene.Get();
 	int threadIndex = 0;
@@ -296,7 +287,7 @@ void GameLogic::GeometryWriting( int frameIndex, int fixedFrameIndex )
 		if ( i < minThreadCount )
 		{
 			auto& mDeviceContext = pScene->mDeviceContextsForLight[i];
-			mDeviceContext->Reset( nullptr, nullptr, ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
+			mDeviceContext->Reset( nullptr, ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
 			mDeviceContext->pCommandList->SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
 
 			auto& mStorage = pScene->mViewStoragesForLight[i];
@@ -324,11 +315,11 @@ void GameLogic::GeometryWriting( int frameIndex, int fixedFrameIndex )
 	// 조명 스레드를 실행합니다.
 	for ( int i = 0; i < minThreadCount; ++i )
 	{
-		ThreadPool::QueueUserWorkItem( bind( &GameLogic::RenderSceneGraphForEachThreads, this, placeholders::_1, i, lightsPerThread[i], frameIndex, fixedFrameIndex ), nullptr );
+		ThreadPool::QueueUserWorkItem( bind( &GameLogic::RenderSceneGraphForEachThreads, this, placeholders::_1, i, lightsPerThread[i], frameIndex ), nullptr );
 	}
 }
 
-void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Light*>& lights, int frameIndex, int fixedFrameIndex )
+void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Light*>& lights, int frameIndex )
 {
 	auto* pScene = currentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextsForLight[threadIndex];
@@ -337,8 +328,8 @@ void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Li
 	for ( auto pLight : lights )
 	{
 		pLight->BeginDraw( mDeviceContext );
-		pLight->SetGraphicsRootConstantBufferView( mDeviceContext, frameIndex, fixedFrameIndex );
-		pScene->Render( mDeviceContext, frameIndex, fixedFrameIndex );
+		pLight->SetGraphicsRootConstantBufferView( mDeviceContext, frameIndex );
+		pScene->Render( mDeviceContext, frameIndex );
 		pLight->EndDraw( mDeviceContext );
 	}
 

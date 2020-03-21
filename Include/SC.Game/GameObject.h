@@ -155,7 +155,7 @@ namespace SC::Game
 		GameObject* Childs_get( int param0 );
 
 	private:
-		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex );
+		void Render( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 		void AddComponent( std::size_t type_hash, Component* component );
 		std::size_t GetComponentIndex( std::size_t beginIndex, std::size_t type_hash, std::function<bool( Component* )> caster );
 		Component* GetComponent( std::size_t type_hash, std::function<bool( Component* )> caster );

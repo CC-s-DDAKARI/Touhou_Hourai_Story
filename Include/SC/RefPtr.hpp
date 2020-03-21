@@ -393,7 +393,9 @@ namespace SC
 	template< class T >
 	inline auto RefPtr<T>::operator=( RefPtr&& other ) noexcept -> RefPtr&
 	{
-		Reset( other.Get() );
+		Release();
+		this->ptr = other.ptr;
+		other.ptr = nullptr;
 		return *this;
 	}
 

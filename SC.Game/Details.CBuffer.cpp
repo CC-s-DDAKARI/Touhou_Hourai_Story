@@ -58,6 +58,7 @@ CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_ST
 
 CBuffer::~CBuffer()
 {
+	GC.Add( pResource );
 	GC.Add( pUploadCommands );
 	GC.Add( pUploadHeap );
 }
@@ -70,8 +71,8 @@ bool CBuffer::Lock( RefPtr<CDeviceContext>& deviceContext, bool sync )
 		if ( auto pFence = deviceRef->CopyQueue->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
 		{
 			copySuccessFlag = true;
-			pUploadCommands = nullptr;
-			pUploadHeap = nullptr;
+			GC.Add( pUploadCommands );
+			GC.Add( pUploadHeap );
 		}
 	}
 

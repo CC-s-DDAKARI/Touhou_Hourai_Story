@@ -10,11 +10,11 @@ bool Texture2D::Lock( RefPtr<CDeviceContext>& deviceContext )
 	if ( !copySuccessFlag )
 	{
 		// 복사가 아직 완료되지 않았을 경우,
-		if ( auto pFence = GlobalVar.device->CopyQueue->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
+		if ( auto pFence = GlobalVar.device->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
 		{
 			copySuccessFlag = true;
-			pUploadCommands = nullptr;
-			pUploadHeap = nullptr;
+			GC.Add( pUploadCommands );
+			GC.Add( pUploadHeap );
 		}
 	}
 
@@ -25,7 +25,7 @@ bool Texture2D::IsValid_get()
 {
 	if ( !copySuccessFlag )
 	{
-		if ( auto pFence = GlobalVar.device->CopyQueue->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
+		if ( auto pFence = GlobalVar.device->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
 		{
 			return false;
 		}
@@ -169,4 +169,5 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, int queueIndex )
 
 	this->width = width;
 	this->height = height;
+	this->queueIndex = queueIndex;
 }

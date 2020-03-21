@@ -232,7 +232,6 @@
     <ClCompile Include="Details.ShaderBuilder.HDRComputeShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.HDRShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.IntegratedUIShader.cpp" />
-    <ClCompile Include="Details.ShaderBuilder.ShadowCastShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.SkinningShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.SkyboxShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.TextAndRectShader.cpp" />
@@ -390,7 +389,6 @@
     <ClInclude Include="UI.Panel.Enumerator.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Details.ShaderBuilder.ColorShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Mesh.cpp" />

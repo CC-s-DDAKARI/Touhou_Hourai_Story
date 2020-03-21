@@ -5,7 +5,7 @@ using namespace SC::Game::Details;
 RefPtr<Material> MeshRenderer::defaultMaterial;
 uint64 MeshRenderer::reference_count = 0;
 
-void MeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void MeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	auto meshFilter = GetComponent<MeshFilter>();
 

@@ -17,6 +17,7 @@ namespace SC::Game
 		uint64 uploadFenceValue = 0;
 
 		bool copySuccessFlag = false;
+		int queueIndex = 0;
 
 		uint32 width;
 		uint32 height;

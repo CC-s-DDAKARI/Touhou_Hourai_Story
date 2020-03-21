@@ -22,7 +22,7 @@ void SkinnedMeshRenderer::Skinning( RefPtr<CDeviceContext>& deviceContext )
 	}
 }
 
-void SkinnedMeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex, int fixedFrameIndex )
+void SkinnedMeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	if ( skinnedMesh.IsValid )
 	{

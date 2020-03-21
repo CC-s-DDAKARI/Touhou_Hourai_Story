@@ -22,15 +22,8 @@ CDeviceContextAndAllocator::~CDeviceContextAndAllocator()
 
 void CDeviceContextAndAllocator::Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pCommandAllocator, ID3D12PipelineState* pInitialPipelineState )
 {
-	auto frameIndex = GlobalVar.frameIndex;
+	auto frameIndex = *( int* )pCommandAllocator;
 
-	if ( pCommandAllocator )
-	{
-		CDeviceContext::Reset( pCommandQueue, pCommandAllocator, pInitialPipelineState );
-	}
-	else
-	{
-		HR( pAllocators[frameIndex]->Reset() );
-		CDeviceContext::Reset( pCommandQueue, pAllocators[frameIndex].Get(), pInitialPipelineState );
-	}
+	HR( pAllocators[frameIndex]->Reset() );
+	CDeviceContext::Reset( pCommandQueue, pAllocators[frameIndex].Get(), pInitialPipelineState );
 }
