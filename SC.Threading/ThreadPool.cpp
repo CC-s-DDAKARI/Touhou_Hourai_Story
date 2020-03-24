@@ -12,9 +12,8 @@ namespace
 	DWORD WINAPI StartRoutine( LPVOID lpThreadParameter )
 	{
 		RefPtr workItem = ( ThreadWorkItem* )lpThreadParameter;
-		workItem->IsLocked = false;
 		workItem->Run();
-
+		workItem->IsLocked = false;
 		return 0;
 	}
 

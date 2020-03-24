@@ -41,7 +41,7 @@ Pixel main( Fragment pIn )
 	}
 
 	px.Color = color;
-	px.Normal = float4( normal, 1.0f );
+	px.Normal = float4( ( normal + 1.0f ) * 0.5f, 1.0f );
 	px.Material = gMaterial.Index;
 	return px;
 }

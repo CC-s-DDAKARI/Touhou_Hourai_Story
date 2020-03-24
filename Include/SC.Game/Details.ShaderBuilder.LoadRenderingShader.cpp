@@ -38,7 +38,7 @@ void ShaderBuilder::LoadRenderingShader()
 	rootSignatureDesc.AddConstantBufferView( 0, D3D12_SHADER_VISIBILITY_VERTEX );  // gCamera
 	rootSignatureDesc.AddConstantBufferView( 1, D3D12_SHADER_VISIBILITY_VERTEX );  // gTransform
 	rootSignatureDesc.AddConstantBufferView( 2, D3D12_SHADER_VISIBILITY_VERTEX );  // gLight
-	rootSignatureDesc.AddConstantBufferView( 3, D3D12_SHADER_VISIBILITY_PIXEL );  // gMaterial
+	rootSignatureDesc.AddConstantBufferView( 3 );  // gMaterial
 	rootSignatureDesc.AddDescriptorTable( textures, D3D12_SHADER_VISIBILITY_PIXEL );  // gDiffuseMap0, 1, gNormalMap0
 
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_WRAP, 16, 0 );
@@ -58,6 +58,7 @@ void ShaderBuilder::LoadRenderingShader()
 	pipelineDesc.AddInputLayout( Vertex::InputElements );
 	pipelineDesc.SetDepthStencilState( true );
 	pipelineDesc.CullMode = D3D12_CULL_MODE_NONE;
+	//pipelineDesc.WireframeMode = true;
 	pipelineDesc.SetBlendState( 0, true, D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD );
 	HR( pDevice->CreateGraphicsPipelineState( pipelineDesc.Get(), IID_PPV_ARGS( &pPipelineState_ColorShader ) ) );
 

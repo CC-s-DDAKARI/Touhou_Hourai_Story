@@ -57,10 +57,14 @@ Material::Material( String name ) : Assets( name )
 {
 	lockIndex = Lock( this );
 
+	XMStoreFloat4x4( &frameResourceConstants.TexWorld, XMMatrixIdentity() );
+
 	Ambient = 1;
 	Diffuse = 1;
 	Specular = 1;
 	SpecExp = 32;
+	TexLocation = 0;
+	TexScale = 1.0;
 
 	constantBuffer = GlobalVar.device->CreateDynamicBuffer( sizeof( Reflection ), 256 );
 
@@ -169,6 +173,28 @@ RenderQueueLayer Material::Layer_get()
 void Material::Layer_set( RenderQueueLayer value )
 {
 	layer = value;
+}
+
+Vector2 Material::TexLocation_get()
+{
+	return Vector2( ( double )frameResourceConstants.TexWorld._41, ( double )frameResourceConstants.TexWorld._42 );
+}
+
+void Material::TexLocation_set( Vector2 value )
+{
+	frameResourceConstants.TexWorld._41 = ( float )value.X;
+	frameResourceConstants.TexWorld._42 = ( float )value.Y;
+}
+
+Vector2 Material::TexScale_get()
+{
+	return Vector2( ( double )frameResourceConstants.TexWorld._11, ( double )frameResourceConstants.TexWorld._22 );
+}
+
+void Material::TexScale_set( Vector2 value )
+{
+	frameResourceConstants.TexWorld._11 = ( float )value.X;
+	frameResourceConstants.TexWorld._22 = ( float )value.Y;
 }
 
 int Material::Lock( Material* ptr )

@@ -5,6 +5,8 @@ namespace SC::Game
 	/// <summary> MeshFilter 컴포넌트에서 지정된 Mesh 개체를 화면에 렌더링합니다. 이 클래스는 상속될 수 없습니다. </summary>
 	class MeshRenderer : public Component
 	{
+		friend class Terrain;
+
 		static RefPtr<Material> defaultMaterial;
 		static uint64 reference_count;
 		RefPtr<Material> material;

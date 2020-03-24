@@ -3,53 +3,49 @@ using namespace SC::Game;
 using namespace SC::Game::Details;
 
 using namespace physx;
+using namespace std;
 
 BoxCollider::BoxCollider() : Collider()
 {
-	PxBoxGeometry boxGeo;
-	boxGeo.halfExtents = PxVec3( 1.0f, 1.0f, 1.0f );
-	
-	pxShape = GlobalVar.pxDevice->createShape( boxGeo, *pxDefaultMat );
+	mHalfExtents = 1;
 
-	changeExtent = 1.0f;
+	auto boxGeo = make_unique<PxBoxGeometry>();
+	boxGeo->halfExtents = PxVec3( 1.0f, 1.0f, 1.0f );
+
+	mGeometry = move( boxGeo );
 }
 
 BoxCollider::~BoxCollider()
 {
-	if ( !AppShutdown && pxShape )
+
+}
+
+void BoxCollider::Update( Time& time, Input& input )
+{
+	if ( mHasUpdate )
 	{
-		pxShape->release();
-		pxShape = nullptr;
+		auto geo = static_cast< PxBoxGeometry* >( mGeometry.get() );
+		geo->halfExtents = ToPhysX( mHalfExtents );
 	}
+
+	Collider::Update( time, input );
 }
 
 object BoxCollider::Clone()
 {
 	var clone = new BoxCollider();
 	Clone( clone.Get() );
-	clone->changeExtent = changeExtent;
+	clone->mHalfExtents = mHalfExtents;
 	return clone;
 }
 
-void BoxCollider::Start()
+Vector3 BoxCollider::HalfExtents_get()
 {
-	auto changeScale = Transform->Scale;
-
-	Vector3 extent = changeExtent * changeScale;
-	PxVec3 extent_ = PxVec3( ( float )extent.X, ( float )extent.Y, ( float )extent.Z );
-	PxBoxGeometry boxGeo;
-	boxGeo.halfExtents = extent_;
-	pxShape->setGeometry( boxGeo );
-
-	return Collider::Start();
+	return mHalfExtents;
 }
 
-Vector3 BoxCollider::Extent_get()
+void BoxCollider::HalfExtents_set( Vector3 value )
 {
-	return changeExtent;
-}
-
-void BoxCollider::Extent_set( Vector3 value )
-{
-	changeExtent = value;
+	mHalfExtents = value;
+	mHasUpdate = true;
 }

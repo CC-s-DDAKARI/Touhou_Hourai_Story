@@ -62,6 +62,50 @@ void Camera::LateUpdate( Time& time, Input& input )
 	XMMatrixDecompose( &scale, &rotation, &trans, world );
 
 	XMStoreFloat3( &frameResource.Pos, trans );
+
+	// 절두체를 계산합니다.
+	XMFLOAT4X4 projection;
+	XMStoreFloat4x4( &projection, proj );
+
+	float zMin = -projection._43 / projection._33;
+	float r = 1000.0f / ( 1000.0f - zMin );
+
+	projection._33 = r;
+	projection._43 = -r * zMin;
+	proj = XMLoadFloat4x4( &projection );
+
+	XMFLOAT4X4 frustumMatrix;
+	XMStoreFloat4x4( &frustumMatrix, XMMatrixMultiply( view, proj ) );
+
+	mPlanes[0].x = frustumMatrix._14 + frustumMatrix._13;
+	mPlanes[0].y = frustumMatrix._24 + frustumMatrix._23;
+	mPlanes[0].z = frustumMatrix._34 + frustumMatrix._33;
+	mPlanes[0].w = frustumMatrix._44 + frustumMatrix._43;
+
+	mPlanes[1].x = frustumMatrix._14 - frustumMatrix._13;
+	mPlanes[1].y = frustumMatrix._24 - frustumMatrix._23;
+	mPlanes[1].z = frustumMatrix._34 - frustumMatrix._33;
+	mPlanes[1].w = frustumMatrix._44 - frustumMatrix._43;
+
+	mPlanes[2].x = frustumMatrix._14 + frustumMatrix._11;
+	mPlanes[2].y = frustumMatrix._24 + frustumMatrix._21;
+	mPlanes[2].z = frustumMatrix._34 + frustumMatrix._31;
+	mPlanes[2].w = frustumMatrix._44 + frustumMatrix._41;
+
+	mPlanes[3].x = frustumMatrix._14 - frustumMatrix._11;
+	mPlanes[3].y = frustumMatrix._24 - frustumMatrix._21;
+	mPlanes[3].z = frustumMatrix._34 - frustumMatrix._31;
+	mPlanes[3].w = frustumMatrix._44 - frustumMatrix._41;
+
+	mPlanes[4].x = frustumMatrix._14 - frustumMatrix._12;
+	mPlanes[4].y = frustumMatrix._24 - frustumMatrix._22;
+	mPlanes[4].z = frustumMatrix._34 - frustumMatrix._32;
+	mPlanes[4].w = frustumMatrix._44 - frustumMatrix._42;
+
+	mPlanes[5].x = frustumMatrix._14 + frustumMatrix._12;
+	mPlanes[5].y = frustumMatrix._24 + frustumMatrix._22;
+	mPlanes[5].z = frustumMatrix._34 + frustumMatrix._32;
+	mPlanes[5].w = frustumMatrix._44 + frustumMatrix._42;
 }
 
 Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
@@ -115,6 +159,34 @@ Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
 	ray.MaxDepth = 1000.0;
 
 	return ray;
+}
+
+bool Camera::IntersectPoint( Vector3 point )
+{
+	auto pos = XMVectorSet( ( float )point.X, ( float )point.Y, ( float )point.Z, 1.0f );
+
+	for ( int i = 0; i < 6; ++i )
+	{
+		auto plane = XMLoadFloat4( &mPlanes[i] );
+		if ( XMVectorGetX( XMPlaneDotCoord( plane, pos ) ) < 0.0f )
+			return false;
+	}
+
+	return true;
+}
+
+bool Camera::IntersectSphere( Sphere sphere )
+{
+	auto pos = XMVectorSet( ( float )sphere.Center.X, ( float )sphere.Center.Y, ( float )sphere.Center.Z, 1.0f );
+
+	for ( int i = 0; i < 6; ++i )
+	{
+		auto plane = XMLoadFloat4( &mPlanes[i] );
+		if ( XMVectorGetX( XMPlaneDotCoord( plane, pos ) ) < -( float )sphere.Radius )
+			return false;
+	}
+
+	return true;
 }
 
 RefPtr<CameraClearMode> Camera::ClearMode_get()

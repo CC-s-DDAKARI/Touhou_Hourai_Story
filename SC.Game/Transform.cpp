@@ -55,7 +55,7 @@ void Transform::Update( Time& time, Input& input )
 	}
 
 	bool flag = hasUpdate;
-	if ( ( gameObject && gameObject->parent && gameObject->parent->transform->updated ) || gameObject->pxRigidbody )
+	if ( ( gameObject && gameObject->parent && gameObject->parent->transform->updated ) || gameObject->CheckRigidbody() )
 	{
 		flag = true;
 	}
@@ -170,7 +170,7 @@ void Transform::Position_set( Vector3 value )
 {
 	position = value;
 
-	if ( gameObject->pxRigidbody )
+	if ( gameObject->CheckRigidbody() )
 	{
 		XMMATRIX parent = XMMatrixIdentity();
 		XMVECTOR pos;
@@ -185,13 +185,36 @@ void Transform::Position_set( Vector3 value )
 		pos = ToXMVec( value );
 		pos = XMVector3Transform( pos, parent );
 
+		if ( gameObject->pScene )
+		{
+			gameObject->pScene->pxScene->lockWrite();
+		}
+
 		// 리지드바디의 위치를 설정합니다.
-		auto gp = gameObject->pxRigidbody->getGlobalPose();
+		PxTransform gp;
 		gp.p = ToPhysX3( pos );
+		gp.q = { mGlobalQuat[0], mGlobalQuat[1], mGlobalQuat[2], mGlobalQuat[3] };
 		gameObject->pxRigidbody->setGlobalPose( gp );
+
+		mGlobalPos[0] = gp.p.x;
+		mGlobalPos[1] = gp.p.y;
+		mGlobalPos[2] = gp.p.z;
+
+		if ( gameObject->pScene )
+		{
+			gameObject->pScene->pxScene->unlockWrite();
+		}
 	}
 
 	hasUpdate = true;
+}
+
+Vector3 Transform::ActualPosition_get()
+{
+	XMVECTOR actScale, actQuat, actTrans;
+	XMMatrixDecompose( &actScale, &actQuat, &actTrans, XMLoadFloat4x4( &world ) );
+
+	return ToVector( actTrans );
 }
 
 Vector3 Transform::Scale_get()
@@ -206,6 +229,14 @@ void Transform::Scale_set( Vector3 value )
 	hasUpdate = true;
 }
 
+Vector3 Transform::ActualScale_get()
+{
+	XMVECTOR actScale, actQuat, actTrans;
+	XMMatrixDecompose( &actScale, &actQuat, &actTrans, XMLoadFloat4x4( &world ) );
+
+	return ToVector( actScale );
+}
+
 Quaternion Transform::Rotation_get()
 {
 	return rotation;
@@ -215,7 +246,7 @@ void Transform::Rotation_set( Quaternion value )
 {
 	rotation = value;
 
-	if ( gameObject->pxRigidbody )
+	if ( gameObject->CheckRigidbody() )
 	{
 		XMMATRIX parent = XMMatrixIdentity();
 
@@ -230,16 +261,46 @@ void Transform::Rotation_set( Quaternion value )
 		XMMatrixDecompose( &scale, &quat, &pos, parent );
 		quat = XMQuaternionMultiply( ToXMVec( value ), quat );
 
+		if ( gameObject->pScene )
+		{
+			gameObject->pScene->pxScene->lockWrite();
+		}
+
 		// 리지드바디의 위치를 설정합니다.
-		auto gp = gameObject->pxRigidbody->getGlobalPose();
+		PxTransform gp;
+		gp.p = { mGlobalPos[0], mGlobalPos[1], mGlobalPos[2] };
 		gp.q = ToPhysX4( quat );
 		gameObject->pxRigidbody->setGlobalPose( gp );
+
+		mGlobalQuat[0] = gp.q.x;
+		mGlobalQuat[1] = gp.q.y;
+		mGlobalQuat[2] = gp.q.z;
+		mGlobalQuat[3] = gp.q.w;
+
+		if ( gameObject->pScene )
+		{
+			gameObject->pScene->pxScene->unlockWrite();
+		}
 	}
 
 	hasUpdate = true;
 }
 
+Quaternion Transform::ActualRotation_get()
+{
+	XMVECTOR actScale, actQuat, actTrans;
+	XMMatrixDecompose( &actScale, &actQuat, &actTrans, XMLoadFloat4x4( &world ) );
+
+	return ToQuat( actQuat );
+}
+
 Vector3 Transform::Forward_get()
 {
 	return ( rotation * Quaternion( Vector3::Forward, 0 ) * rotation.Conjugate ).V;
+}
+
+Vector3 Transform::ActualForward_get()
+{
+	auto actualRotation = ActualRotation;
+	return ( actualRotation * Quaternion( Vector3::Forward, 0 ) * actualRotation.Conjugate ).V;
 }

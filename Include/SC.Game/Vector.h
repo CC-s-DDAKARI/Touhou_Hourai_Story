@@ -42,6 +42,12 @@ namespace SC::Game
 
 		}
 
+		/// <summary> 대상 벡터와 비교 연산을 수행합니다. </summary>
+		constexpr bool Equals( const Vector3& right, double epsilon = 0.0001 ) const
+		{
+			return abs( X - right.X ) < epsilon && abs( Y - right.Y ) < epsilon && abs( Z - right.Z ) < epsilon;
+		}
+
 		/// <summary> 대상 벡터와 내적 연산 결과를 가져옵니다. </summary>
 		constexpr double Dot( const Vector3& value ) const
 		{
@@ -148,6 +154,12 @@ namespace SC::Game
 
 		/// <summary> 값이 1로 채워진 벡터를 가져옵니다. </summary>
 		static const Vector3 One;
+
+	private:
+		static constexpr double abs( double v )
+		{
+			return v < 0 ? -v : v;
+		}
 	};
 
 	/// <summary> 2차원 실수 형식을 사용하여 데이터를 표현합니다. </summary>
@@ -181,6 +193,12 @@ namespace SC::Game
 			, Y( y )
 		{
 
+		}
+
+		/// <summary> 대상 벡터와 비교 연산을 수행합니다. </summary>
+		constexpr bool Equals( const Vector2& right, double epsilon = 0.0001 ) const
+		{
+			return abs( X - right.X ) < epsilon && abs( Y - right.Y ) < epsilon;
 		}
 
 		/// <summary> 대상 벡터와 내적 연산 결과를 가져옵니다. </summary>
@@ -274,6 +292,12 @@ namespace SC::Game
 
 		/// <summary> 값이 1로 채워진 벡터를 가져옵니다. </summary>
 		static const Vector2 One;
+
+	private:
+		static constexpr double abs( double v )
+		{
+			return v < 0 ? -v : v;
+		}
 	};
 #pragma pack( pop )
 }

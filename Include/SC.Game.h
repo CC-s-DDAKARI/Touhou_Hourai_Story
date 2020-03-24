@@ -37,6 +37,7 @@ namespace SC::Game
 	class Mesh;
 	class SkinnedMesh;
 	class Texture2D;
+	class HeightMap;
 	class RenderTexture2D;
 	class Material;
 	class PhysicsMaterial;
@@ -62,6 +63,8 @@ namespace SC::Game
 	class BoxCollider;
 	class CapsuleCollider;
 	class ThreadDispatcher;
+	class Terrain;
+	class TerrainCollider;
 
 	namespace UI
 	{
@@ -107,6 +110,7 @@ namespace SC::Game
 /* Enum */
 #include "SC.Game/KeyCode.h"
 #include "SC.Game/RenderQueueLayer.h"
+#include "SC.Game/TextureFormat.h"
 #include "SC.Game/UI.Anchor.h"
 #include "SC.Game/UI.DispatcherEventType.h"
 #include "SC.Game/UI.TextAlignment.h"
@@ -135,6 +139,7 @@ namespace SC::Game
 #include "SC.Game/Trigger.h"
 #include "SC.Game/AnimVar.h"
 #include "SC.Game/AnimationTransitionCondition.h"
+#include "SC.Game/Sphere.h"
 #include "SC.Game/UI.Thickness.h"
 #include "SC.Game/UI.DependencyProperty.h"
 #include "SC.Game/UI.MouseMoveEventArgs.h"
@@ -151,6 +156,7 @@ namespace SC::Game
 #include "SC.Game/Scene.h"
 #include "SC.Game/Mesh.h"
 #include "SC.Game/Texture2D.h"
+#include "SC.Game/HeightMap.h"
 #include "SC.Game/RenderTexture2D.h"
 #include "SC.Game/Material.h"
 #include "SC.Game/PhysicsMaterial.h"
@@ -176,6 +182,8 @@ namespace SC::Game
 #include "SC.Game/BoxCollider.h"
 #include "SC.Game/CapsuleCollider.h"
 #include "SC.Game/ThreadDispatcher.h"
+#include "SC.Game/Terrain.h"
+#include "SC.Game/TerrainCollider.h"
 #include "SC.Game/UI.EventDispatcher.h"
 #include "SC.Game/UI.DispatcherEventArgs.h"
 #include "SC.Game/UI.Brush.h"

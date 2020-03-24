@@ -1,6 +1,9 @@
 using namespace SC;
 using namespace SC::Game::Details;
 
+ComPtr<ID3D12RootSignature> ShaderBuilder::pRootSignature_Terrain;
+ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_Terrain;
+
 ComPtr<ID3D12RootSignature> ShaderBuilder::pRootSignature_Skinning;
 ComPtr<ID3D12PipelineState> ShaderBuilder::pPipelineState_Skinning;
 
@@ -48,6 +51,7 @@ void ShaderModule::SetAll( RefPtr<CDeviceContext>& deviceContext )
 
 void ShaderBuilder::Initialize()
 {
+	LoadTerrainShader();
 	LoadSkinningShader();
 	LoadRenderingShader();
 

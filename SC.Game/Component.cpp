@@ -37,6 +37,31 @@ void Component::LateUpdate( Time& time, Input& input )
 
 }
 
+void Component::OnCollisionEnter( GameObject* pCollisionTarget )
+{
+
+}
+
+void Component::OnCollisionExit( GameObject* pCollisionTarget )
+{
+
+}
+
+void Component::OnCollisionStay( GameObject* pCollisionTarget )
+{
+
+}
+
+void Component::OnTriggerEnter( Collider* pCollisionTarget )
+{
+
+}
+
+void Component::OnTriggerExit( Collider* pCollisionTarget )
+{
+
+}
+
 GameObject* Component::Linked_get()
 {
 	return gameObject;

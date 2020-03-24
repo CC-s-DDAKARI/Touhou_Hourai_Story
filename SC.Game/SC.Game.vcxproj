@@ -212,6 +212,7 @@
     <ClCompile Include="Details.CDeviceContext.cpp" />
     <ClCompile Include="Details.CDeviceContextAndAllocator.cpp" />
     <ClCompile Include="Details.CDynamicBuffer.cpp" />
+    <ClCompile Include="Details.ContactCallback.cpp" />
     <ClCompile Include="Details.CShaderResourceView.cpp" />
     <ClCompile Include="Details.CSwapChain.cpp" />
     <ClCompile Include="Details.CUnorderedAccessView.cpp" />
@@ -232,6 +233,7 @@
     <ClCompile Include="Details.ShaderBuilder.HDRComputeShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.HDRShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.IntegratedUIShader.cpp" />
+    <ClCompile Include="Details.ShaderBuilder.LoadTerrainShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.SkinningShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.SkyboxShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.TextAndRectShader.cpp" />
@@ -242,6 +244,7 @@
     <ClCompile Include="Details.ViewStorageException.cpp" />
     <ClCompile Include="Details.VisibleViewStorage.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Details.M3DParser.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -250,6 +253,9 @@
     <ClCompile Include="Rigidbody.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
+    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainCollider.cpp" />
     <ClCompile Include="ThreadDispatcher.cpp" />
     <ClCompile Include="UI.KeyboardEventArgs.cpp" />
     <ClCompile Include="UI.RevealBrush.cpp" />
@@ -285,6 +291,7 @@
     <ClInclude Include="..\Include\SC.Game\Details.IResource.h" />
     <ClInclude Include="..\Include\SC.Game\Details.IShaderResourceView.h" />
     <ClInclude Include="..\Include\SC.Game\DirectionalLight.h" />
+    <ClInclude Include="..\Include\SC.Game\HeightMap.h" />
     <ClInclude Include="..\Include\SC.Game\IAsyncLoad.h" />
     <ClInclude Include="..\Include\SC.Game\Details.IView.h" />
     <ClInclude Include="..\Include\SC.Game\Keyframe.h" />
@@ -299,6 +306,9 @@
     <ClInclude Include="..\Include\SC.Game\Rigidbody.h" />
     <ClInclude Include="..\Include\SC.Game\SceneManager.h" />
     <ClInclude Include="..\Include\SC.Game\SkinnedMeshRenderer.h" />
+    <ClInclude Include="..\Include\SC.Game\Terrain.h" />
+    <ClInclude Include="..\Include\SC.Game\TerrainCollider.h" />
+    <ClInclude Include="..\Include\SC.Game\TextureFormat.h" />
     <ClInclude Include="..\Include\SC.Game\ThreadDispatcher.h" />
     <ClInclude Include="..\Include\SC.Game\Trigger.h" />
     <ClInclude Include="..\Include\SC.Game\UI.KeyboardEventArgs.h" />
@@ -349,7 +359,9 @@
     <ClInclude Include="..\Include\SC.Game\UI.ViewBase.h" />
     <ClInclude Include="..\Include\SC.Game\Vector.h" />
     <ClInclude Include="..\Include\SC.Game\Vertex.h" />
+    <ClInclude Include="..\Include\SC.Game\Sphere.h" />
     <ClInclude Include="Details.CDeviceContextAndAllocator.h" />
+    <ClInclude Include="Details.ContactCallback.h" />
     <ClInclude Include="Details.CView.h" />
     <ClInclude Include="Details.CDynamicBuffer.h" />
     <ClInclude Include="Details.AssimpParser.h" />
@@ -570,6 +582,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="TerrainComputeShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="TextAndRectPixelShader.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>

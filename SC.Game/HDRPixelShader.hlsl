@@ -61,7 +61,7 @@ Pixel main( Fragment pIn )
 	Pixel px;
 
 	float4 sampled = gNormalBuffer.Sample( gSampler, pIn.Tex );
-	float3 normal = sampled.xyz;
+	float3 normal = sampled.xyz * 2.0f - 1.0f;
 
 	if ( sampled.w < 0.5f )
 	{

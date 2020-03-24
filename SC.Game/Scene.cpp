@@ -6,6 +6,30 @@ using namespace SC::Threading;
 using namespace physx;
 using namespace std;
 
+PxFilterFlags ContactReportFilterShader(
+	PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize
+	)
+{
+	auto ret = PxDefaultSimulationFilterShader( attributes0, filterData0, attributes1, filterData1, pairFlags, constantBlock, constantBlockSize );
+
+	// all initial and persisting reports for everything, with per-point data
+	pairFlags
+		= PxPairFlag::eSOLVE_CONTACT
+		| PxPairFlag::eDETECT_DISCRETE_CONTACT
+		| PxPairFlag::eNOTIFY_TOUCH_FOUND
+		| PxPairFlag::eNOTIFY_TOUCH_LOST
+		| PxPairFlag::eNOTIFY_CONTACT_POINTS;
+
+	if ( !PxFilterObjectIsTrigger( attributes0 ) && !PxFilterObjectIsTrigger( attributes1 ) )
+	{
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_PERSISTS;
+	}
+
+	return ret;
+}
+
 Scene::Scene()
 {
 	input.keyboardState.resize( 256, false );
@@ -18,13 +42,15 @@ Scene::Scene()
 	input.prevCursorPos = input.cursorPos;
 	input.cursorPos = { cursor.x, cursor.y };
 
+	mSimulationEventCallback = make_unique<ContactCallback>();
 	auto pxSceneDesc = PxSceneDesc( PxTolerancesScale() );
 	pxSceneDesc.gravity = PxVec3( 0.0f, -9.8f, 0.0f );
 	pxSceneDesc.cpuDispatcher = GlobalVar.pxDefaultDispatcher;
-	pxSceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	pxSceneDesc.filterShader = ContactReportFilterShader;
 	pxSceneDesc.cudaContextManager = GlobalVar.pxCudaManager;
-
+	pxSceneDesc.simulationEventCallback = mSimulationEventCallback.get();
 	pxScene = GlobalVar.pxDevice->createScene( pxSceneDesc );
+	pxScene->setSimulationEventCallback( mSimulationEventCallback.get() );
 
 	GlobalVar.globalMutex.lock();
 	GlobalVar.pxSceneList.insert( pxScene );
@@ -32,6 +58,8 @@ Scene::Scene()
 
 	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 
+	mDeviceContextForTerrain = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	mViewStorageForTerrain = new VisibleViewStorage( GlobalVar.device.Get() );
 	mDeviceContextForSkinning = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_COMPUTE );
 	for ( int i = 0; i < NumThreadsForLight; ++i )
 	{
@@ -49,16 +77,16 @@ Scene::~Scene()
 		i->OnSceneDetached( this );
 	}
 
+	if ( !mFetchResults )
+	{
+		mFetchResults = pxScene->fetchResults( true );
+	}
+
 	if ( !AppShutdown && pxScene )
 	{
 		GlobalVar.globalMutex.lock();
 		GlobalVar.pxSceneList.erase( pxScene );
 		GlobalVar.globalMutex.unlock();
-
-		if ( !mFetchResults )
-		{
-			mFetchResults = pxScene->fetchResults( true );
-		}
 
 		pxScene->release();
 		pxScene = nullptr;
@@ -360,6 +388,9 @@ void Scene::ClearSceneGraph()
 	mSceneGraph.clear();
 	mSceneCameras.clear();
 	mSceneLights.clear();
+	mSceneTerrains.clear();
+
+	mCoreThreadSceneGraph.clear();
 	mThreadSceneGraph.clear();
 	mpSkinnedMeshRendererQueue->Clear();
 }
@@ -407,6 +438,11 @@ void Scene::SearchComponents()
 		if ( auto t = i->GetComponent<SkinnedMeshRenderer>(); t )
 		{
 			mpSkinnedMeshRendererQueue->AddRenderer( t );
+		}
+
+		if ( auto t = i->GetComponent<Terrain>(); t )
+		{
+			mSceneTerrains.push_back( t );
 		}
 	}
 

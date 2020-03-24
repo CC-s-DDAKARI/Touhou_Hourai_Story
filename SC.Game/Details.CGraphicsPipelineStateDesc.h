@@ -147,6 +147,7 @@ namespace SC::Game::Details
 		vs_property( D3D12_CULL_MODE, CullMode );
 		vs_property( DXGI_FORMAT, DSVFormat );
 		vs_property( double, SlopeScaledDepthBias );
+		vs_property( bool, WireframeMode );
 
 		ID3D12RootSignature* RootSignature_get()
 		{
@@ -220,6 +221,16 @@ namespace SC::Game::Details
 		void SlopeScaledDepthBias_set( double value )
 		{
 			desc.RasterizerState.SlopeScaledDepthBias = ( float )value;
+		}
+
+		bool WireframeMode_get()
+		{
+			return desc.RasterizerState.FillMode == D3D12_FILL_MODE_WIREFRAME;
+		}
+
+		void WireframeMode_set( bool value )
+		{
+			desc.RasterizerState.FillMode = value ? D3D12_FILL_MODE_WIREFRAME : D3D12_FILL_MODE_SOLID;
 		}
 
 		CGraphicsPipelineStateDesc& operator=( CGraphicsPipelineStateDesc&& right )

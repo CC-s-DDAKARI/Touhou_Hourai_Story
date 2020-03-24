@@ -5,27 +5,6 @@ using namespace SC::Game::Details;
 using namespace std;
 using namespace physx;
 
-void GameObject::AttachCollider( Collider* pCol )
-{
-	if ( pxRigidbody )
-	{
-		pxRigidbody->attachShape( *pCol->pxShape );
-	}
-	else
-	{
-		auto pos = transform->position;
-		auto quat = transform->rotation;
-
-		PxTransform gp;
-		gp.p = ToPhysX( pos );
-		gp.q = ToPhysX( quat );
-
-		auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
-		pxRigid->attachShape( *pCol->pxShape );
-		RigidSwap( ( PxRigidActor* )pxRigid );
-	}
-}
-
 bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 {
 	if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); pIsRigid )
@@ -55,7 +34,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		auto colliders = GetComponentsInChildren<Collider>();
 		for ( int i = 0, count = ( int )colliders.size(); i < count; ++i )
 		{
-			pxRigid->attachShape( *colliders[i]->pxShape );
+			colliders[i]->AttachToActor( pxRigidbody );
 		}
 
 		pIsRigid->pxRigidbody = pxRigid->is<PxRigidDynamic>();
@@ -102,26 +81,36 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		}
 	}
 
+	else if ( Terrain* pIsTerrain = dynamic_cast< Terrain* >( pComponent ); pIsTerrain )
+	{
+		transform->CreateBuffer();
+	}
+	
+	else if ( Collider* pIsCol = dynamic_cast< Collider* >( pComponent ); pIsCol )
+	{
+		if ( !pxRigidbody )
+		{
+			auto pos = transform->position;
+			auto quat = transform->rotation;
+
+			PxTransform gp;
+			gp.p = ToPhysX( pos );
+			gp.q = ToPhysX( quat );
+
+			auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
+			RigidSwap( ( PxRigidActor* )pxRigid );
+		}
+
+		pIsCol->AttachToActor( pxRigidbody );
+	}
+
 	return true;
 }
 
 bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 {
-	if ( Collider* pIsCol = dynamic_cast< Collider* >( pComponent ); !AppShutdown && pIsCol )
+	if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); !AppShutdown && pIsRigid )
 	{
-		pxRigidbody->detachShape( *pIsCol->pxShape );
-	}
-
-	else if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); !AppShutdown && pIsRigid )
-	{
-		vector<PxShape*> pxShapes;
-
-		if ( pxRigidbody )
-		{
-			pxShapes.resize( ( size_t )pxRigidbody->getNbShapes() );
-			pxRigidbody->getShapes( pxShapes.data(), pxRigidbody->getNbShapes() );
-		}
-
 		auto pos = transform->position;
 		auto quat = transform->rotation;
 
@@ -132,15 +121,10 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 		auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
 		RigidSwap( ( PxRigidActor* )pxRigid );
 
-		for ( size_t i = 0; i < pxShapes.size(); ++i )
+		auto colliders = GetComponentsInChildren<Collider>();
+		for ( auto i : colliders )
 		{
-			pxRigid->attachShape( *pxShapes[i] );
-		}
-
-		// 장면에 새 리지드바디를 추가합니다.
-		if ( pScene )
-		{
-			pScene->pxScene->addActor( *pxRigid );
+			i->AttachToActor( pxRigid );
 		}
 
 		isStaticRigid = true;
@@ -203,6 +187,46 @@ void GameObject::OnSceneDetached( Scene* pScene )
 	this->pScene = nullptr;
 }
 
+void GameObject::OnCollisionEnter( GameObject* pGameObject )
+{
+	for ( auto i : components )
+	{
+		i.second->OnCollisionEnter( pGameObject );
+	}
+}
+
+void GameObject::OnCollisionExit( GameObject* pGameObject )
+{
+	for ( auto i : components )
+	{
+		i.second->OnCollisionExit( pGameObject );
+	}
+}
+
+void GameObject::OnCollisionStay( GameObject* pGameObject )
+{
+	for ( auto i : components )
+	{
+		i.second->OnCollisionStay( pGameObject );
+	}
+}
+
+void GameObject::OnTriggerEnter( Collider* pCollider )
+{
+	for ( auto i : components )
+	{
+		i.second->OnTriggerEnter( pCollider );
+	}
+}
+
+void GameObject::OnTriggerExit( Collider* pCollider )
+{
+	for ( auto i : components )
+	{
+		i.second->OnTriggerExit( pCollider );
+	}
+}
+
 GameObject::GameObject( String name ) : Assets( name )
 {
 	transform = new Game::Transform();
@@ -212,17 +236,18 @@ GameObject::GameObject( String name ) : Assets( name )
 
 GameObject::~GameObject()
 {
-	for ( size_t i = 0; i < components.size(); ++i )
-	{
-		OnRemoveComponent( components[i].first, components[i].second.Get() );
-	}
-
 	if ( !AppShutdown && pxRigidbody )
 	{
 		GlobalVar.pxRigidActor.erase( pxRigidbody );
 
+		pxRigidbody->userData = nullptr;
 		pxRigidbody->release();
 		pxRigidbody = nullptr;
+	}
+
+	for ( size_t i = 0; i < components.size(); ++i )
+	{
+		OnRemoveComponent( components[i].first, components[i].second.Get() );
 	}
 }
 
@@ -257,19 +282,20 @@ object GameObject::Clone()
 
 void GameObject::Start()
 {
-	for ( auto i : gameObjects )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		i->Start();
+		auto cmp = components[i].second.Get();
+		cmp->Start();
 	}
 }
 
 void GameObject::Update( Time& time, Input& input )
 {
 	// 개체의 각 컴포넌트의 Start 함수를 호출합니다.
-	for ( auto i : components )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		auto cmp = i.second.Get();
-		if ( i.second->isEnabled )
+		auto cmp = components[i].second.Get();
+		if ( cmp->isEnabled )
 		{
 			if ( cmp->isFirst )
 			{
@@ -284,9 +310,9 @@ void GameObject::Update( Time& time, Input& input )
 	transform->Update( time, input );
 
 	// 개체의 각 컴포넌트를 업데이트합니다.
-	for ( auto i : components )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		auto cmp = i.second.Get();
+		auto cmp = components[i].second.Get();
 		if ( cmp->IsEnabled )
 		{
 			if ( cmp->isFirst )
@@ -302,9 +328,9 @@ void GameObject::Update( Time& time, Input& input )
 void GameObject::FixedUpdate( Time& time )
 {
 	// 개체의 각 컴포넌트의 고정 프레임 업데이트 함수를 호출합니다.
-	for ( auto i : components )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		auto cmp = i.second.Get();
+		auto cmp = components[i].second.Get();
 		if ( cmp->IsEnabled )
 		{
 			cmp->FixedUpdate( time );
@@ -315,9 +341,9 @@ void GameObject::FixedUpdate( Time& time )
 void GameObject::LateUpdate( Time& time, Input& input )
 {
 	// 개체의 각 컴포넌트의 늦은 업데이트 함수를 호출합니다.
-	for ( auto i : components )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		auto cmp = i.second.Get();
+		auto cmp = components[i].second.Get();
 		if ( cmp->IsEnabled )
 		{
 			cmp->LateUpdate( time, input );
@@ -329,9 +355,9 @@ void GameObject::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	transform->SetGraphicsRootConstantBufferView( deviceContext, frameIndex );
 
-	for ( auto i : components )
+	for ( int i = 0; i < ( int )components.size(); ++i )
 	{
-		auto cmp = i.second.Get();
+		auto cmp = components[i].second.Get();
 		if ( cmp->IsEnabled )
 			cmp->Render( deviceContext, frameIndex );
 	}
@@ -473,6 +499,7 @@ void GameObject::RigidSwap( void* pxRigid )
 	}
 
 	pxRigidbody = ( PxRigidActor* )pxRigid;
+	pxRigidbody->userData = this;
 
 	// 가비지 컬렉션 목록에 리지드바디를 추가합니다.
 	GlobalVar.pxRigidActor.insert( pxRigidbody );
@@ -481,5 +508,17 @@ void GameObject::RigidSwap( void* pxRigid )
 	if ( pScene )
 	{
 		pScene->pxScene->addActor( *pxRigidbody );
+	}
+}
+
+bool GameObject::CheckRigidbody()
+{
+	if ( pxRigidbody && !isStaticRigid )
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

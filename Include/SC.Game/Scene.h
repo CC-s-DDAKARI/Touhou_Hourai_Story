@@ -12,6 +12,7 @@ namespace SC::Game
 	{
 		friend class Details::GameLogic;
 		friend class GameObject;
+		friend class Transform;
 
 		static constexpr const int NumThreadsForLight = 4;
 
@@ -23,6 +24,7 @@ namespace SC::Game
 		Diagnostics::StepTimer fixedTimer;
 
 		sc_game_export_object( physx::PxScene* ) pxScene = nullptr;
+		sc_game_export_object( std::unique_ptr<Details::ContactCallback> ) mSimulationEventCallback;
 
 		bool firstUpdate = false;
 		bool updateSceneGraph = true;
@@ -31,6 +33,7 @@ namespace SC::Game
 		std::list<GameObject*> mSceneGraph;
 		std::list<Camera*> mSceneCameras;
 		std::list<Light*> mSceneLights;
+		std::list<Terrain*> mSceneTerrains;
 
 		std::vector<RefPtr<GameObject>> mSceneGraphBackup;
 
@@ -38,6 +41,8 @@ namespace SC::Game
 		std::map<int, std::list<GameObject*>> mThreadSceneGraph;
 		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueue;
 
+		RefPtr<Details::CDeviceContext> mDeviceContextForTerrain;
+		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mViewStorageForTerrain;
 		RefPtr<Details::CDeviceContext> mDeviceContextForSkinning;
 		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) mViewStoragesForLight[NumThreadsForLight];
 		RefPtr<Details::CDeviceContext> mDeviceContextsForLight[NumThreadsForLight];

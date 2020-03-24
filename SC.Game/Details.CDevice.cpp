@@ -25,7 +25,10 @@ CDevice::CDevice( IDXGIAdapter1* pAdapter ) : Object()
 	DirectQueue[2] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_DIRECT );
 	DirectQueue[3] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_DIRECT );
 	CopyQueue = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COPY );
-	ComputeQueue = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	ComputeQueue[0] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	ComputeQueue[1] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	ComputeQueue[2] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COMPUTE );
+	ComputeQueue[3] = new CCommandQueue( this, D3D12_COMMAND_LIST_TYPE_COMPUTE );
 
 	// 초기 서술자 스토리지를 생성합니다.
 	viewStorageChain.push( new ViewStorage( this ) );

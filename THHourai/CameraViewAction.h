@@ -6,6 +6,7 @@ namespace Touhou
 	{
 		double rotateSpeed = 5;
 		double range = 1;
+		double distance = 1;
 
 		double prange = 1;
 

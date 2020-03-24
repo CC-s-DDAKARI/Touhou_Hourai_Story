@@ -15,9 +15,8 @@ namespace SC::Game::Details
 		RefPtr<Diagnostics::StepTimer> timer;
 		RefPtr<Diagnostics::StepTimer> physicsTimer;
 
-		ComPtr<ID3D12CommandAllocator> pCommandAllocator[2];
-		RefPtr<CDeviceContext> deviceContext;
-		RefPtr<VisibleViewStorage> visibleViewStorage;
+		RefPtr<VisibleViewStorage> mVisibleViewStorage;
+		RefPtr<CDeviceContext> mDeviceContext;
 		RefPtr<Threading::Event> waitingHandle;
 
 		RefPtr<GeometryBuffer> geometryBuffer;
@@ -45,7 +44,9 @@ namespace SC::Game::Details
 		void Render( int frameIndex );
 		void ResizeBuffers( uint32 width, uint32 height );
 
+		void TerrainBaking( int frameIndex );
 		void MeshSkinning( int frameIndex );
+		void GeometryLighting( int frameIndex );
 		void GeometryWriting( int frameIndex );
 
 		void RenderSceneGraphForEachThreads( object, int threadIndex, std::list<Light*>& lights, int frameIndex );

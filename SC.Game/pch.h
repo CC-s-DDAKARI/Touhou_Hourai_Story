@@ -39,6 +39,8 @@ using namespace DirectX;
 
 namespace SC::Game::Details
 {
+	class ContactCallback;
+
 	class IntegratedFactory;
 	struct CDevice;
 	class CDeviceContext;

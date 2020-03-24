@@ -12,6 +12,7 @@ struct Material_Constants
 	int DiffuseMap;
 	int NormalMap;
 	int AlphaClip;
+	row_major matrix TexWorld;
 };
 
 ConstantBuffer<Camera> gCamera : register( b0 );

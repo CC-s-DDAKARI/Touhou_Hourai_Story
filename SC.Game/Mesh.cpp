@@ -129,9 +129,9 @@ RefPtr<Mesh> Mesh::CreatePlane( String name, float texScaleX, float texScaleY, i
 	vector<uint32> indexBuffer( gridCountX * gridCountY * 6 );
 
 	float xPosBeg = -1.0f;
-	float xPosEnd = 1.0f;
+	float yPosBeg = 1.0f;
 	float xPosStride = 2.0f / gridCountX;
-	float yPosStride = 2.0f / gridCountY;
+	float yPosStride = -2.0f / gridCountY;
 	float xTexStride = texScaleX / gridCountX;
 	float yTexStride = texScaleY / gridCountY;
 
@@ -141,7 +141,7 @@ RefPtr<Mesh> Mesh::CreatePlane( String name, float texScaleX, float texScaleY, i
 		{
 			Vertex v;
 
-			v.Pos = { xPosBeg + xPosStride * i, 0.0f, xPosEnd - xPosStride * j };
+			v.Pos = { xPosBeg + xPosStride * i, 0.0f, yPosBeg + yPosStride * j };
 			v.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			v.Tex = { xTexStride * i, yTexStride * j };
 			v.Normal = { 0.0f, 1.0f, 0.0f };
@@ -155,7 +155,7 @@ RefPtr<Mesh> Mesh::CreatePlane( String name, float texScaleX, float texScaleY, i
 	{
 		for ( int i = 0; i < gridCountX; ++i )
 		{
-			int base = j * gridCountX + i;
+			int base = j * vertexCountX + i;
 			auto arr = ( int( & )[6] )indexBuffer[( j * gridCountX + i ) * 6];
 			arr[0] = base;
 			arr[1] = base + 1;

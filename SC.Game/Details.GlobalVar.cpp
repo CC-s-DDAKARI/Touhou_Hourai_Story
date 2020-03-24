@@ -21,6 +21,10 @@ namespace SC::Game::Details
 		bool recordMemoryAllocations = false;
 #if defined( _DEBUG )
 		recordMemoryAllocations = true;
+
+		pxPvd = PxCreatePvd( *pxFoundation );
+		pxPvdTransport = PxDefaultPvdSocketTransportCreate( "127.0.0.1", 5425, 10 );
+		pxPvd->connect( *pxPvdTransport, PxPvdInstrumentationFlag::eALL );
 #endif
 
 		// PhysX 장치 개체를 생성합니다.
@@ -34,7 +38,7 @@ namespace SC::Game::Details
 		PxRegisterArticulations( *pxDevice );
 		PxRegisterHeightFields( *pxDevice );
 
-		// 컬라이더 개체를 베이킹하는 Cooking 개체를 생성합니다.
+		// 콜라이더 개체를 베이킹하는 Cooking 개체를 생성합니다.
 		pxCooking = PxCreateCooking( PX_PHYSICS_VERSION, *pxFoundation, PxCookingParams( PxTolerancesScale() ) );
 		if ( !pxCooking ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateCooking failed." );
 
@@ -85,6 +89,18 @@ namespace SC::Game::Details
 		{
 			pxDevice->release();
 			pxDevice = nullptr;
+		}
+
+		if ( pxPvd )
+		{
+			pxPvd->release();
+			pxPvd = nullptr;
+		}
+
+		if ( pxPvdTransport )
+		{
+			pxPvdTransport->release();
+			pxPvdTransport = nullptr;
 		}
 
 		if ( pxFoundation )

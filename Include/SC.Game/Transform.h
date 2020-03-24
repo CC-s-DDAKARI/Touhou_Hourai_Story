@@ -7,6 +7,7 @@ namespace SC::Game
 	{
 		friend class Camera;
 		friend class GameObject;
+		friend class Collider;
 
 		struct Constants
 		{
@@ -25,6 +26,9 @@ namespace SC::Game
 		sc_game_export_float( XMFLOAT4X4, 16 ) world;
 		bool hasUpdate = true;
 		bool updated = false;
+
+		float mGlobalPos[3]{ 0, 0, 0 };
+		float mGlobalQuat[4]{ 0, 0, 0, 1.0f };
 
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
@@ -67,6 +71,12 @@ namespace SC::Game
 		/// <summary> 개체의 위치 변환을 설정합니다. </summary>
 		void Position_set( Vector3 value );
 
+		/// <summary> (Visual Studio 전용) 개체의 렌더링 위치 변환을 가져옵니다. </summary>
+		vs_property_get( Vector3, ActualPosition );
+
+		/// <summary> 개체의 위치 변환을 가져옵니다. </summary>
+		Vector3 ActualPosition_get();
+
 		/// <summary> (Visual Studio 전용) 개체의 크기 변환을 설정하거나 가져옵니다. </summary>
 		vs_property( Vector3, Scale );
 
@@ -75,6 +85,12 @@ namespace SC::Game
 
 		/// <summary> 개체의 크기 변환을 설정합니다. </summary>
 		void Scale_set( Vector3 value );
+
+		/// <summary> (Visual Studio 전용) 개체의 렌더링 크기 변환을 가져옵니다. </summary>
+		vs_property_get( Vector3, ActualScale );
+
+		/// <summary> 개체의 렌더링 크기 변환을 가져옵니다. </summary>
+		Vector3 ActualScale_get();
 
 		/// <summary> (Visual Studio 전용) 개체의 회전 변환을 설정하거나 가져옵니다. </summary>
 		vs_property( Quaternion, Rotation );
@@ -85,10 +101,22 @@ namespace SC::Game
 		/// <summary> 개체의 회전 변환을 설정합니다. </summary>
 		void Rotation_set( Quaternion value );
 
+		/// <summary> (Visual Studio 전용) 개체의 렌더링 회전 변환을 가져옵니다. </summary>
+		vs_property_get( Quaternion, ActualRotation );
+
+		/// <summary> 개체의 렌더링 회전 변환을 가져옵니다. </summary>
+		Quaternion ActualRotation_get();
+
 		/// <summary> (Visual Studio 전용) 개체가 현재 바라보는 방향을 가져옵니다. </summary>
 		vs_property_get( Vector3, Forward );
 
 		/// <summary> 개체가 현재 바라보는 방향을 가져옵니다. </summary>
 		Vector3 Forward_get();
+
+		/// <summary> (Visual Studio 전용) 개체가 현재 바라보는 렌더링 방향을 가져옵니다. </summary>
+		vs_property_get( Vector3, ActualForward );
+
+		/// <summary> 개체가 현재 바라보는 렌더링 방향을 가져옵니다. </summary>
+		Vector3 ActualForward_get();
 	};
 }

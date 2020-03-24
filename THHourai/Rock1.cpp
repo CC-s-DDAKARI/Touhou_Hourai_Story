@@ -11,7 +11,7 @@ Rock1::Rock1( String name ) : GameObject( name )
 
 	var boxCol = AddComponent<BoxCollider>();
 	boxCol->Center = Vector3( 0, 1, 0 );
-	boxCol->Extent = Vector3( 2, 1, 2 );
+	boxCol->HalfExtents = Vector3( 2, 1, 2 );
 
 #if false && defined( _DEBUG )
 	var go = new ColliderBoxVisualizer( "debugVisualizer" );

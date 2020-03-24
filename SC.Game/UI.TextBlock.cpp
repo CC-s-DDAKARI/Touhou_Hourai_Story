@@ -8,9 +8,9 @@ using namespace std;
 
 Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 {
-	lock_guard<mutex> lock( locker );
 	if ( ( clientRect != prevClient || contentChanged ) && pLayout )
 	{
+		lock_guard<mutex> lock( locker );
 		prevClient = clientRect;
 		computed = clientRect;
 
@@ -45,10 +45,10 @@ Rect<double> TextBlock::OnUpdate( Rect<double> clientRect )
 			idx = ( int )Anchor;
 			computed.Top += offset[idx].Y * length;
 			computed.Bottom = computed.Top + actualHeight;
-		}
 
-		HR( pLayout->SetMaxWidth( ( float )computed.Width ) );
-		HR( pLayout->SetMaxHeight( ( float )computed.Height ) );
+			HR( pLayout->SetMaxWidth( ( float )computed.Width ) );
+			HR( pLayout->SetMaxHeight( ( float )computed.Height ) );
+		}
 
 		contentChanged = false;
 	}
@@ -61,7 +61,7 @@ void TextBlock::OnRender( RefPtr<CDeviceContext>& deviceContext )
 	lock_guard<mutex> lock( locker );
 	if ( pLayout )
 	{
-		auto rect = ( Drawing::Rect<float> )ActualContentRect;
+		auto rect = ( Drawing::Rect<float> )computed;
 		pLayout->Draw( deviceContext.Get(), glyphRenderer.Get(), rect.Left, rect.Top );
 	}
 }
@@ -212,6 +212,7 @@ void TextBlock::OnFormatChanged()
 	{
 		glyphRenderer = new GlyphRenderer( textFormat->glyphBuffer.Get() );
 	}
+	prevText = "";
 	OnContentChanged( nullptr, Content );
 }
 
@@ -221,11 +222,16 @@ void TextBlock::OnContentChanged( object sender, object content )
 	if ( content.IsValid )
 	{
 		auto str = content->ToString();
-		ParseText( str );
+		
+		if ( str != prevText )
+		{
+			ParseText( str );
 
-		Alignment_set( Alignment );
-		VerticalAlignment_set( VerticalAlignment );
-		contentChanged = true;
+			Alignment_set( Alignment );
+			VerticalAlignment_set( VerticalAlignment );
+			contentChanged = true;
+			prevText = str;
+		}
 	}
 }
 
@@ -350,6 +356,8 @@ void TextBlock::ParseText( String original )
 	auto str = wss.str();
 
 	HR( pDWriteFactory->CreateTextLayout( str.c_str(), ( UINT32 )str.length(), textFormat->pTextFormat, 0, 0, &pLayout ) );
+	pLayout->SetMaxWidth( ( float )computed.Width );
+	pLayout->SetMaxHeight( ( float )computed.Height );
 
 	richColors.resize( colorContexts.size() );
 	for ( size_t i = 0; i < colorContexts.size(); ++i )

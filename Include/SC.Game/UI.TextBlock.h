@@ -22,6 +22,7 @@ namespace SC::Game::UI
 		bool contentChanged = true;
 
 		std::mutex locker;
+		String prevText;
 
 	protected:
 		/// <summary> (<see cref="Element"/> 클래스에서 상속 됨.) 요소를 갱신합니다. </summary>

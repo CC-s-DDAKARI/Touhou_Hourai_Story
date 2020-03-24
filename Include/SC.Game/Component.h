@@ -40,14 +40,33 @@ namespace SC::Game
 		/// <param name="input"> 현재 프레임에서 입력 상태를 전달합니다. </param>
 		virtual void LateUpdate( Time& time, Input& input );
 
+		/// <summary> 컴포넌트에 연결된 게임 개체에서 물리 작용에 의한 충돌이 시작되었습니다. </summary>
+		/// <param name="pCollisionTarget"> 충돌 대상 게임 개체가 전달됩니다. </param>
+		virtual void OnCollisionEnter( GameObject* pCollisionTarget );
+
+		/// <summary> 컴포넌트에 연결된 게임 개체에서 물리 작용에 의한 충돌이 종료되었습니다. </summary>
+		/// <param name="pCollisionTarget"> 충돌 대상 게임 개체가 전달됩니다. </param>
+		virtual void OnCollisionExit( GameObject* pCollisionTarget );
+
+		/// <summary> 컴포넌트에 연결된 게임 개체에서 물리 작용에 의한 충돌이 유지되고 있습니다. </summary>
+		/// <param name="pCollisionTarget"> 충돌 대상 게임 개체가 전달됩니다. </param>
+		virtual void OnCollisionStay( GameObject* pCollisionTarget );
+
+		/// <summary> 컴포넌트에 연결된 게임 개체에서 트리거에 의한 충돌이 시작되었습니다. </summary>
+		/// <param name="pCollisionTarget"> 충돌 대상 콜라이더가 전달됩니다. </param>
+		virtual void OnTriggerEnter( Collider* pCollisionTarget );
+
+		/// <summary> 컴포넌트에 연결된 게임 개체에서 트리거에 의한 충돌이 종료되었습니다. </summary>
+		/// <param name="pCollisionTarget"> 충돌 대상 콜라이더가 전달됩니다. </param>
+		virtual void OnTriggerExit( Collider* pCollisionTarget );
+
 		/// <summary> 연결된 게임 개체에 확장 컴포넌트를 추가합니다. </summary>
 		template< class T, class... CtorArgs, std::enable_if_t<where<Component, T>> * = nullptr >
-		RefPtr<T> AddComponent( CtorArgs&&... ctorArgs )
+		T* AddComponent( CtorArgs&&... ctorArgs )
 		{
 			if ( gameObject )
 			{
-				auto go = gameObject.ResolveAs<GameObject>();
-				return go->AddComponent<T>( ctorArgs... );
+				return gameObject->AddComponent<T>( ctorArgs... );
 			}
 			else
 			{
@@ -57,7 +76,7 @@ namespace SC::Game
 
 		/// <summary> 연결된 게임 개체에 추가된 확장 컴포넌트를 가져옵니다. </summary>
 		template< class T >
-		RefPtr<T> GetComponent()
+		T* GetComponent()
 		{
 			if ( gameObject )
 			{

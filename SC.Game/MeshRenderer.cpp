@@ -9,7 +9,7 @@ void MeshRenderer::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex
 {
 	auto meshFilter = GetComponent<MeshFilter>();
 
-	if ( meshFilter.IsValid )
+	if ( meshFilter )
 	{
 		auto mesh = meshFilter->Mesh;
 		if ( mesh.IsValid )

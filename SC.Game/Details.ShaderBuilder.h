@@ -15,6 +15,11 @@ namespace SC::Game::Details
 		void SetAll( RefPtr<CDeviceContext>& commandList );
 	};
 
+	constexpr int Slot_Terrain_VertexBuffer = 0;
+	constexpr int Slot_Terrain_HeightMap = 1;
+	constexpr int Slot_Terrain_Constants = 2;
+	constexpr int Slot_Terrain_VertexBufferBase = 3;
+
 	constexpr int Slot_Skinning_SkinnedVertexBuffer = 0;
 	constexpr int Slot_Skinning_BoneTransform = 1;
 	constexpr int Slot_Skinning_VertexBuffer = 2;
@@ -29,6 +34,9 @@ namespace SC::Game::Details
 	class ShaderBuilder : virtual public Object
 	{
 	public:
+		static ComPtr<ID3D12RootSignature> pRootSignature_Terrain;
+		static ComPtr<ID3D12PipelineState> pPipelineState_Terrain;
+
 		static ComPtr<ID3D12RootSignature> pRootSignature_Skinning;
 		static ComPtr<ID3D12PipelineState> pPipelineState_Skinning;
 
@@ -60,6 +68,7 @@ namespace SC::Game::Details
 		static ShaderModule TextAndRectShader_get();
 
 	private:
+		static void LoadTerrainShader();
 		static void LoadSkinningShader();
 		static void LoadRenderingShader();
 

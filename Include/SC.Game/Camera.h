@@ -22,6 +22,8 @@ namespace SC::Game
 
 		double aspectRatio = 0;
 
+		sc_game_export_float( XMFLOAT4, 4 ) mPlanes[6];
+
 	private:
 		void SetGraphicsRootConstantBufferView( RefPtr<Details::CDeviceContext>& deviceContext, int frameIndex );
 
@@ -41,6 +43,14 @@ namespace SC::Game
 		/// <summary> 화면 공간 위치로부터 세계 공간으로 투영되는 광선 정보를 얻습니다. </summary>
 		/// <param name="screenSpace"> 화면 공간 위치를 전달합니다. [-1, 1]로 정규화된 위치입니다. </param>
 		Ray ScreenSpaceToRay( Drawing::Point<double> screenSpace );
+
+		/// <summary> 점 위치가 카메라 공간 안에 있는지 검사합니다. </summary>
+		/// <param name="value"> 위치 벡터를 전달합니다. </param>
+		bool IntersectPoint( Vector3 value );
+
+		/// <summary> 구 영역이 카메라 공간 안에 있는지 검사합니다. </summary>
+		/// <param name="sphere"> 구형 정보를 전달합니다. </param>
+		bool IntersectSphere( Sphere sphere );
 
 		/// <summary> (Visual Studio 전용) 카메라가 렌더링하는 장면의 배경 칠 모드를 설정하거나 가져옵니다. nullptr일 경우 배경을 칠하지 않습니다. </summary>
 		vs_property( RefPtr<CameraClearMode>, ClearMode );

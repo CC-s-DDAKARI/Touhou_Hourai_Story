@@ -47,7 +47,7 @@ namespace SC::Game::Details
 
 		RefPtr<CCommandQueue> DirectQueue[4];  // 0 is CORE queue, 3 is UI queue
 		RefPtr<CCommandQueue> CopyQueue;
-		RefPtr<CCommandQueue> ComputeQueue;
+		RefPtr<CCommandQueue> ComputeQueue[4];
 
 	private:
 		void InitializeInterop();

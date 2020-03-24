@@ -376,6 +376,24 @@
     <ClInclude Include="Details.CDeviceContextAndAllocator.h">
       <Filter>Details</Filter>
     </ClInclude>
+    <ClInclude Include="Details.ContactCallback.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Sphere.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\Terrain.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\TextureFormat.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\TerrainCollider.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\HeightMap.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -676,6 +694,24 @@
     <ClCompile Include="Details.CDeviceContextAndAllocator.cpp">
       <Filter>Details</Filter>
     </ClCompile>
+    <ClCompile Include="Details.ContactCallback.cpp">
+      <Filter>Details</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.ShaderBuilder.LoadTerrainShader.cpp">
+      <Filter>Shaders\TerrainShader</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainCollider.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMap.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -695,9 +731,6 @@
     </Filter>
     <Filter Include="Shaders\HDRColorShader">
       <UniqueIdentifier>{977b7b7e-90c0-46e4-ae44-26c5c6e8a295}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\ShadowCastShader">
-      <UniqueIdentifier>{88a0d64e-b225-4ae2-9729-cd530f5cff65}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\HDRComputeShader">
       <UniqueIdentifier>{a1be27dc-f6dc-4de9-bf81-f0f32c5fae36}</UniqueIdentifier>
@@ -743,6 +776,9 @@
     </Filter>
     <Filter Include="Shaders\RenderingShader">
       <UniqueIdentifier>{5464d930-81fe-43b1-b472-b6be75d04150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\TerrainShader">
+      <UniqueIdentifier>{8785ea73-ca1d-4e6c-8396-453765b028bc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -799,6 +835,9 @@
     </FxCompile>
     <FxCompile Include="ShadowCastVertexShader.hlsl">
       <Filter>Shaders\RenderingShader</Filter>
+    </FxCompile>
+    <FxCompile Include="TerrainComputeShader.hlsl">
+      <Filter>Shaders\TerrainShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -28,7 +28,7 @@ float3 ComputeDirectionalLight( Material material, Light light, float3 normal, f
 	if ( diffuseFactor > 0.0f )
 	{
 		float3 v = reflect( direction, normal );
-		float specFactor = pow( max( dot( v, rayDir ), 0.0f ), max( 1.0f, material.SpecExp ) );
+		float specFactor = pow( max( dot( v, rayDir ), 0.0f ), max( material.SpecExp, 1.0f ) );
 
 		diffuse = diffuseFactor * light.Diffuse * material.Diffuse;
 		specular = specFactor * light.Specular * material.Specular;

@@ -128,12 +128,13 @@ int Application::Start( RefPtr<Application> app )
 
 	// 앱이 종료될 때 모든 작업이 완료된 상태인지 검사합니다.
 	WaitAllQueues();
-	GlobalVar.Release();
-	AssetBundle::Dispose();
 
 	// 앱 종료 요청을 수행합니다.
 	auto ret = app->OnExit();
 	AppShutdown = true;
+
+	AssetBundle::Dispose();
+	GlobalVar.Release();
 
 	GC.CollectAll();
 
@@ -304,11 +305,11 @@ void Application::Update()
 
 	GlobalVar.gameLogic->Update();
 
-	RECT rc;
-	GetClientRect( GlobalVar.hWnd, &rc );
+	DXGI_SWAP_CHAIN_DESC1 desc;
+	HR( GlobalVar.swapChain->pSwapChain->GetDesc1( &desc ) );
 
-	frame->Width = ( double )( rc.right - rc.left );
-	frame->Height = ( double )( rc.bottom - rc.top );
+	frame->Width = ( double )( desc.Width );
+	frame->Height = ( double )( desc.Height );
 	Drawing::Rect<double> contentRect( 0, 0, frame->Width, frame->Height );
 	frame->Update( contentRect );
 }
@@ -325,70 +326,73 @@ void Application::Render()
 
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto directQueue = GlobalVar.device->DirectQueue[0].Get();
-			int frameIndex_ = frameIndex;
-
-			// 사전 글리프 렌더링을 시작합니다.
-			for ( auto i : GlobalVar.glyphBuffers )
+			if ( !discardApp )
 			{
-				i->LockGlyphs();
-				i->Restart();
+				auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+				int frameIndex_ = frameIndex;
+
+				// 사전 글리프 렌더링을 시작합니다.
+				for ( auto i : GlobalVar.glyphBuffers )
+				{
+					i->LockGlyphs();
+					i->Restart();
+				}
+
+				GlobalVar.gameLogic->Render( frameIndex_ );
+
+				// 렌더링을 실행하기 전 장치를 초기화합니다.
+				visibleViewStorage->Reset();
+
+				HR( pCommandAllocators[frameIndex_]->Reset() );
+				deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex_].Get(), nullptr );
+				deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
+				deviceContextUI->FrameIndex = frameIndex_;
+
+				// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
+				auto idx = GlobalVar.swapChain->Index;
+				auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
+				auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+				auto pCommandList = deviceContextUI->pCommandList.Get();
+				pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
+
+				pCommandList->RSSetViewports( 1, &viewport );
+				pCommandList->RSSetScissorRects( 1, &scissor );
+
+				// 통합 렌더링 셰이더를 불러옵니다.
+				ShaderBuilder::IntegratedUIShader_get().SetAll( deviceContextUI );
+				ShaderBuilder::TextAndRectShader_get().SetAll( deviceContextUI );
+
+				// 기본 매개변수를 입력합니다.
+				if ( auto slot = deviceContextUI->Slot["ScreenRes"]; slot != -1 )
+				{
+					float resolution[2] = { viewport.Width, viewport.Height };
+					pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
+				}
+
+				if ( auto slot = deviceContextUI->Slot["Cursor"]; slot != -1 )
+				{
+					POINT cursor;
+					GetCursorPos( &cursor );
+					ScreenToClient( GlobalVar.hWnd, &cursor );
+					float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
+					pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
+				}
+
+				// 프레임을 렌더링합니다.
+				frame->Render( deviceContextUI );
+
+				// 스왑 체인의 후면 버퍼를 원래 상태로 복구합니다.
+				deviceContextUI->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, 0 );
+
+				// 명령 목록을 닫고 푸쉬합니다.
+				deviceContextUI->Close();
+				directQueue->Execute( deviceContextUI );
+
+				GlobalVar.swapChain->Present( appConfig.verticalSync );
+
+				// 마지막 명령 번호를 저장합니다.
+				lastPending[frameIndex_] = directQueue->Signal();
 			}
-
-			GlobalVar.gameLogic->Render( frameIndex_ );
-
-			// 렌더링을 실행하기 전 장치를 초기화합니다.
-			visibleViewStorage->Reset();
-
-			HR( pCommandAllocators[frameIndex_]->Reset() );
-			deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex_].Get(), nullptr );
-			deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
-			deviceContextUI->FrameIndex = frameIndex_;
-
-			// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
-			auto idx = GlobalVar.swapChain->Index;
-			auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
-			auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
-			auto pCommandList = deviceContextUI->pCommandList.Get();
-			pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
-
-			pCommandList->RSSetViewports( 1, &viewport );
-			pCommandList->RSSetScissorRects( 1, &scissor );
-
-			// 통합 렌더링 셰이더를 불러옵니다.
-			ShaderBuilder::IntegratedUIShader_get().SetAll( deviceContextUI );
-			ShaderBuilder::TextAndRectShader_get().SetAll( deviceContextUI );
-
-			// 기본 매개변수를 입력합니다.
-			if ( auto slot = deviceContextUI->Slot["ScreenRes"]; slot != -1 )
-			{
-				float resolution[2] = { viewport.Width, viewport.Height };
-				pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-			}
-
-			if ( auto slot = deviceContextUI->Slot["Cursor"]; slot != -1 )
-			{
-				POINT cursor;
-				GetCursorPos( &cursor );
-				ScreenToClient( GlobalVar.hWnd, &cursor );
-				float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
-				pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-			}
-
-			// 프레임을 렌더링합니다.
-			frame->Render( deviceContextUI );
-
-			// 스왑 체인의 후면 버퍼를 원래 상태로 복구합니다.
-			deviceContextUI->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, 0 );
-
-			// 명령 목록을 닫고 푸쉬합니다.
-			deviceContextUI->Close();
-			directQueue->Execute( deviceContextUI );
-
-			GlobalVar.swapChain->Present( appConfig.verticalSync );
-
-			// 마지막 명령 번호를 저장합니다.
-			lastPending[frameIndex_] = directQueue->Signal();
 
 			mRenderThreadEvent.Set();
 		}
@@ -436,14 +440,17 @@ void Application::WaitAllQueues()
 {
 	RefPtr<Threading::Event> handle = new Threading::Event();
 
-	CCommandQueue* ppCommandQueues[6]
+	CCommandQueue* ppCommandQueues[9]
 	{
 		GlobalVar.device->DirectQueue[0].Get(),
 		GlobalVar.device->DirectQueue[1].Get(),
 		GlobalVar.device->DirectQueue[2].Get(),
 		GlobalVar.device->DirectQueue[3].Get(),
 		GlobalVar.device->CopyQueue.Get(),
-		GlobalVar.device->ComputeQueue.Get(),
+		GlobalVar.device->ComputeQueue[0].Get(),
+		GlobalVar.device->ComputeQueue[1].Get(),
+		GlobalVar.device->ComputeQueue[2].Get(),
+		GlobalVar.device->ComputeQueue[3].Get(),
 	};
 
 	for ( int i = 0; i < ARRAYSIZE( ppCommandQueues ); ++i )

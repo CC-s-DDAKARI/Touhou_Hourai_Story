@@ -1,5 +1,7 @@
 using namespace Touhou;
 
+using namespace std;
+
 CameraViewAction::CameraViewAction() : Component()
 {
 
@@ -50,12 +52,14 @@ void CameraViewAction::Update( Time& time, Input& input )
 		quat *= Quaternion::AngleAxis( -3.14 * 0.35, Vector3::Up );
 	}
 
+	distance = clamp( distance + -input.DeltaScroll.Y * 0.1, 0.5, 10.0 );
+
 	auto t = time.DeltaTimeInSeconds * rotateSpeed;
 
 	quat = pquat.Slerp( quat, t );
 	pquat = quat;
 
-	prange = prange * ( 1 - t ) + range * t;
+	prange = prange * ( 1 - t ) + range * distance * t;
 	Transform->Position = ( quat * Quaternion( pos, 0 ) * quat.Conjugate ).V * prange;
 	Transform->LookAt( ptarg );
 }

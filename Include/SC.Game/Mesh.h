@@ -8,6 +8,7 @@ namespace SC::Game
 		friend class MeshRenderer;
 		friend class SkinnedMeshRenderer;
 		friend class Details::GameLogic;
+		friend class Terrain;
 
 		sc_game_export_object( RefPtr<Details::CBuffer> ) vertexBuffer;
 		sc_game_export_object( RefPtr<Details::CBuffer> ) indexBuffer;

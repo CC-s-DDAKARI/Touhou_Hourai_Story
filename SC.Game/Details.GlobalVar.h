@@ -25,6 +25,7 @@ namespace SC::Game::Details
 
 		physx::PxFoundation* pxFoundation = nullptr;
 		physx::PxPvd* pxPvd = nullptr;
+		physx::PxPvdTransport* pxPvdTransport = nullptr;
 		physx::PxPhysics* pxDevice = nullptr;
 		physx::PxCooking* pxCooking = nullptr;
 		physx::PxDefaultCpuDispatcher* pxDefaultDispatcher = nullptr;

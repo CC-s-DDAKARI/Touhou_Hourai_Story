@@ -15,20 +15,20 @@ void Scene0_Terrain::InitializeComponents()
 {
 	// ¹Ù´Ú
 	declare_element( GameObject, terrain );
+	auto ter = terrain->AddComponent<Terrain>();
+	auto trc = terrain->AddComponent<TerrainCollider>();
+	trc->Center = Vector3( -50, 0, -50 );
+	ter->HeightMap = new HeightMap( "heightMap", "Assets/Texture/HeightMap.raw", 969, 969 );
 
-	declare_element( Material, terrain_material );
-	terrain_material->DiffuseMap = new Texture2D( "terrain_material_diffuse", "Assets/Texture/templeBase01_diffuse.jpg" );
-	terrain_material->NormalMap = new Texture2D( "terrain_material_diffuse", "Assets/Texture/templeBase01_normal.jpg" );
-
-	terrain->AddComponent<MeshRenderer>()->Material = terrain_material;
-	terrain->AddComponent<MeshFilter>()->Mesh = Mesh::CreatePlane( "Scene01_Terrain_Plane", 100.0f, 100.0f );
-
-	var boxCollider = terrain->AddComponent<BoxCollider>();
-	boxCollider->Center = Vector3( 0, -1, 0 );
+	var mat = new Material( "terrainMat" );
+	mat->DiffuseMap = new Texture2D( "diffuseMap", "Assets/Texture/templeBase01_diffuse.jpg" );
+	mat->NormalMap = new Texture2D( "diffuseMap", "Assets/Texture/templeBase01_normal.jpg" );
+	mat->TexScale = 100;
+	ter->Material = mat;
 
 	auto trp = terrain->Transform;
-	trp->Scale = Vector3( 100, 1, 100 );
-	trp->Position = Vector3( 90, 0, -90 );
+	trp->Scale = Vector3( 50, 3, 50 );
+	trp->Position = Vector3( 40, 0, -40 );
 	terrain->Parent = this;
 
 #if false && defined( _DEBUG )
@@ -85,4 +85,13 @@ void Scene0_Terrain::InitializeComponents()
 	test01 = test01->Clone().As<GameObject>();
 	test01->Transform->Position = Vector3( 5, 1, -3 );
 	test01->Parent = this;
+
+	// Å×½ºÆ®2
+	var trigger = new GameObject( "testTrigger" );
+	auto boxCol = trigger->AddComponent<BoxCollider>();
+	boxCol->Center = Vector3( 0, 1, 0 );
+	boxCol->HalfExtents = Vector3( 1, 1, 1 );
+	boxCol->IsTrigger = true;
+	trigger->Transform->Position = Vector3( 5, 1, -5 );
+	trigger->Parent = this;
 }

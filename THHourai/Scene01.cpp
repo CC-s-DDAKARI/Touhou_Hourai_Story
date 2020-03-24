@@ -35,7 +35,7 @@ void Scene01::Load( RefPtr<IAsyncLoad> asyncLoad )
 	declare_element( GameObject, directionalLight );
 	{
 		auto trp = directionalLight->Transform;
-		trp->Position = Vector3( -8, 16, 8 );
+		trp->Position = Vector3( -16, 16, 0 );
 		trp->LookAt( Vector3::Zero );
 	}
 	{

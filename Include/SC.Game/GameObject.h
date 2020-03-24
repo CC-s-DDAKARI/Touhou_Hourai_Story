@@ -5,9 +5,13 @@ namespace SC::Game
 	/// <summary> 게임 엔진에서 모든 게임 항목에 대한 기본 클래스를 나타냅니다. </summary>
 	class GameObject : public Assets, virtual public IEnumerable<RefPtr<GameObject>>, virtual public ICloneable
 	{
+#if defined( __SC_GAME_EXPORT_SYMBOL__ )
+		friend class Details::ContactCallback;
+#endif
+
 		friend class Scene;
 		friend class Transform;
-		friend class Collider;
+		friend class Details::GameLogic;
 
 		Scene* pScene = nullptr;
 
@@ -20,8 +24,6 @@ namespace SC::Game
 
 		sc_game_export_object( physx::PxRigidActor* ) pxRigidbody = nullptr;
 		bool isStaticRigid = false;
-
-		void AttachCollider( Collider* pCol );
 
 	protected:
 		/// <summary> 개체에서 컴포넌트가 추가되려고 합니다. </summary>
@@ -43,6 +45,21 @@ namespace SC::Game
 		/// <summary> 개체가 장면에서 제거될 때 호출됩니다. </summary>
 		/// <param name="pScene"> 대상 장면 개체가 전달됩니다. </param>
 		virtual void OnSceneDetached( Scene* pScene );
+
+		/// <summary> 개체가 소유한 Rigidbody에서 충돌이 발생했습니다. </summary>
+		virtual void OnCollisionEnter( GameObject* pGameObject );
+
+		/// <summary> 개체가 소유한 Rigidbody에서 충돌이 중단되었습니다. </summary>
+		virtual void OnCollisionExit( GameObject* pGameObject );
+
+		/// <summary> 개체가 소유한 Rigidbody에서 충돌이 계속 발생중입니다. </summary>
+		virtual void OnCollisionStay( GameObject* pGameObject );
+
+		/// <summary> 개체가 소유한 Rigidbody에서 트리거 충돌이 발생했습니다. </summary>
+		virtual void OnTriggerEnter( Collider* pCollider );
+
+		/// <summary> 개체가 소유한 Rigidbody에서 트리거 충돌이 중단되었습니다. </summary>
+		virtual void OnTriggerExit( Collider* pCollider );
 
 	public:
 		/// <summary> <see cref="GameObject"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
@@ -162,5 +179,6 @@ namespace SC::Game
 		void RemoveComponent( std::size_t type_hash, std::function<bool( Component* )> caster );
 
 		void RigidSwap( void* pxRigid );
+		bool CheckRigidbody();
 	};
 }

@@ -4,73 +4,102 @@ using namespace SC::Game::Details;
 
 using namespace physx;
 
-PxMaterial* Collider::pxDefaultMat = nullptr;
+PxMaterial* Collider::mDefaultMat = nullptr;
 
 Collider::Collider() : Component()
 {
-	if ( !pxDefaultMat )
+	if ( !mDefaultMat )
 	{
-		pxDefaultMat = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
+		mDefaultMat = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
 	}
 }
 
 void Collider::Clone( Collider* already_object )
 {
-	already_object->changeCenter = changeCenter;
-	already_object->changeRotation = changeRotation;
+	already_object->mCenter = mCenter;
+	already_object->mRotation = mRotation;
+	already_object->mHasUpdate = true;
+}
+
+void Collider::AttachToActor( PxRigidActor* actor )
+{
+	ReleaseShape();
+	mActor = actor;
+	mHasUpdate = true;
 }
 
 Collider::~Collider()
 {
-
+	if ( !AppShutdown )
+	{
+		ReleaseShape();
+	}
 }
 
-void Collider::Start()
+void Collider::Update( Time& time, Input& input )
 {
-	auto changeScale = Transform->Scale;
+	if ( mHasUpdate && mActor )
+	{
+		PxTransform localPose = PxTransform( ToPhysX( mCenter ), ToPhysX( mRotation ) );
+		if ( mShape )
+		{
+			mShape->setGeometry( *mGeometry );
+		}
+		else
+		{
+			PxShapeFlag::Enum shapeType = mIsTrigger ? PxShapeFlag::eTRIGGER_SHAPE : PxShapeFlag::eSIMULATION_SHAPE;
 
-	Vector3 center = changeCenter * changeScale;
-	PxTransform lp = PxTransform( ToPhysX( center ) );
-	lp.q = ToPhysX( changeRotation );
-	pxShape->setLocalPose( lp );
+			mShape = PxRigidActorExt::createExclusiveShape( *mActor, *mGeometry, *mDefaultMat, PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | shapeType );
+		}
+		mShape->setLocalPose( localPose );
 
-	Linked->AttachCollider( this );
+		mHasUpdate = false;
+	}
 }
 
 Vector3 Collider::Center_get()
 {
-	return changeCenter;
+	return mCenter;
 }
 
 void Collider::Center_set( Vector3 value )
 {
-	if ( started == false )
-	{
-		changeCenter = value;
-	}
-#if defined( _DEBUG )
-	else
-	{
-		throw new Exception( "SC.Game.Collider.Center_set(): Collider offset cannot change when collider attached." );
-	}
-#endif
+	mCenter = value;
+	mHasUpdate = true;
 }
 
 Quaternion Collider::Rotation_get()
 {
-	return changeRotation;
+	return mRotation;
 }
 
 void Collider::Rotation_set( Quaternion value )
 {
-	if ( started == false )
+	mRotation = value;
+	mHasUpdate = true;
+}
+
+bool Collider::IsTrigger_get()
+{
+	return mIsTrigger;
+}
+
+void Collider::IsTrigger_set( bool value )
+{
+	if ( mShape )
 	{
-		changeRotation = value;
+		mShape->setFlag( PxShapeFlag::eSIMULATION_SHAPE, !value );
+		mShape->setFlag( PxShapeFlag::eTRIGGER_SHAPE, value );
 	}
-#if defined( _DEBUG )
-	else
+	mIsTrigger = value;
+}
+
+void Collider::ReleaseShape()
+{
+	if ( !AppShutdown && mShape )
 	{
-		throw new Exception( "SC.Game.Collider.Center_set(): Collider offset cannot change when collider attached." );
+		mShape->userData = nullptr;
+		mShape->release();
+		mShape = nullptr;
 	}
-#endif
 }

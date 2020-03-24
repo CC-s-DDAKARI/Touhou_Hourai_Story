@@ -8,6 +8,7 @@ namespace SC::Game
 		friend class MeshRenderer;
 		friend class SkinnedMeshRenderer;
 		friend class Details::GameLogic;
+		friend class Terrain;
 
 #pragma pack( push, 4 )
 		struct Constants
@@ -16,6 +17,7 @@ namespace SC::Game
 			int DiffuseMap;
 			int NormalMap;
 			int AlphaClip;
+			sc_game_export_float( XMFLOAT4X4, 16 ) TexWorld;
 		};
 
 		struct Reflection
@@ -126,6 +128,24 @@ namespace SC::Game
 
 		/// <summary> 재질의 렌더 큐 계층을 설정합니다. </summary>
 		void Layer_set( RenderQueueLayer value );
+
+		/// <summary> (Visual Studio 전용) 텍스처 추출 위치를 설정하거나 가져옵니다. </summary>
+		vs_property( Vector2, TexLocation );
+
+		/// <summary> 텍스처 추출 위치를 가져옵니다. </summary>
+		Vector2 TexLocation_get();
+
+		/// <summary> 텍스처 추출 위치를 설정합니다. </summary>
+		void TexLocation_set( Vector2 value );
+
+		/// <summary> (Visual Studio 전용) 텍스처 추출 크기를 설정하거나 가져옵니다. </summary>
+		vs_property( Vector2, TexScale );
+
+		/// <summary> 텍스처 추출 크기를 가져옵니다. </summary>
+		Vector2 TexScale_get();
+
+		/// <summary> 텍스처 추출 크기를 설정합니다. </summary>
+		void TexScale_set( Vector2 value );
 
 	private:
 		static int Lock( Material* ptr );

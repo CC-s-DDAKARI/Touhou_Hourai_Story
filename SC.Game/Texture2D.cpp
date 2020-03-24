@@ -41,7 +41,7 @@ Texture2D::~Texture2D()
 	GC.Add( pUploadHeap );
 }
 
-Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, int queueIndex ) : Assets( name )
+Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, TextureFormat format, int queueIndex ) : Assets( name )
 {
 	auto pImagingFactory = GlobalVar.factory->pWICFactory.Get();
 
@@ -56,10 +56,10 @@ Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, int qu
 	HR( pImagingFactory->CreateDecoderFromStream( pStream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder ) );
 
 	// 디코더 개체를 이용하여 이미지 개체를 초기화합니다.
-	InitializeFrom( pDecoder.Get(), queueIndex );
+	InitializeFrom( pDecoder.Get(), format, queueIndex );
 }
 
-Texture2D::Texture2D( String name, const path& filepath, int queueIndex ) : Assets( name )
+Texture2D::Texture2D( String name, const path& filepath, TextureFormat format, int queueIndex ) : Assets( name )
 {
 	auto pImagingFactory = GlobalVar.factory->pWICFactory.Get();
 	ComPtr<IWICBitmapDecoder> pDecoder;
@@ -68,7 +68,7 @@ Texture2D::Texture2D( String name, const path& filepath, int queueIndex ) : Asse
 	HR( pImagingFactory->CreateDecoderFromFilename( filepath.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder ) );
 
 	// 디코더 개체를 이용하여 이미지 개체를 초기화합니다.
-	InitializeFrom( pDecoder.Get(), queueIndex );
+	InitializeFrom( pDecoder.Get(), format, queueIndex );
 }
 
 uint32 Texture2D::Width_get()
@@ -81,19 +81,36 @@ uint32 Texture2D::Height_get()
 	return height;
 }
 
-void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, int queueIndex )
+void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat format, int queueIndex )
 {
 	auto pWICImagingFactory = GlobalVar.factory->pWICFactory.Get();
 	auto pDevice = GlobalVar.device->pDevice.Get();
 	ComPtr<IWICBitmapFrameDecode> pFrame;
 	ComPtr<IWICFormatConverter> pConverter;
 
+	GUID wicPixelFormat;
+	DXGI_FORMAT dxgiPixelFormat;
+
+	switch ( format )
+	{
+	case TextureFormat::PRGBA_32bpp:
+		wicPixelFormat = GUID_WICPixelFormat32bppPRGBA;
+		dxgiPixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		break;
+	case TextureFormat::Gray_8bpp:
+		wicPixelFormat = GUID_WICPixelFormat8bppGray;
+		dxgiPixelFormat = DXGI_FORMAT_R8_UNORM;
+		break;
+	default:
+		throw new ArgumentException();
+	}
+
 	// 이미지의 0번 프레임을 얻어옵니다.
 	HR( pDecoder->GetFrame( 0, &pFrame ) );
 
 	// 컨버터 개체를 생성해 이미지의 형식을 변환합니다.
 	HR( pWICImagingFactory->CreateFormatConverter( &pConverter ) );
-	HR( pConverter->Initialize( pFrame.Get(), GUID_WICPixelFormat32bppPRGBA, WICBitmapDitherTypeNone, nullptr, 0, WICBitmapPaletteTypeCustom ) );
+	HR( pConverter->Initialize( pFrame.Get(), wicPixelFormat, WICBitmapDitherTypeNone, nullptr, 0, WICBitmapPaletteTypeCustom ) );
 
 	// 이미지의 크기를 조회합니다.
 	UINT width, height;
@@ -106,7 +123,7 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, int queueIndex )
 	textureDesc.Height = height;
 	textureDesc.DepthOrArraySize = 1;
 	textureDesc.MipLevels = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.Format = dxgiPixelFormat;
 	textureDesc.SampleDesc = { 1, 0 };
 
 	// 텍스처 정보를 기반으로 버퍼의 크기를 조회합니다.
