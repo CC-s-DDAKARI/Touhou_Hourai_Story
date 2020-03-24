@@ -1,4 +1,16 @@
 # 패치 노트
+## 2020-03-24. ver 0.3.0.778
+* Transform 컴포넌트에 ActualPosition, ActualScale, ActualRotation, ActualForward 속성이 추가되었습니다.
+  * 이 속성은 렌더링 시 정확한 월드 변환 데이터를 제공합니다.
+  * 마지막 Update 이후 적용되는 속성입니다.
+* PhysX 물리 엔진에서 충돌 리포트 및 트리거 기능을 추가하였습니다.
+  * 게임 오브젝트 및 컴포넌트에서 OnCollisionEnter/Exit/Stay 함수를 재정의하여 기능을 만들 수 있습니다.
+  * Collider 컴포넌트에서 IsTrigger 속성에 true를 넣음으로 트리거 기능을 활성화할 수 있습니다.
+  * 트리거는 OnTriggerEnter/Exit/Stay 함수를 재정의하여 기능을 만들 수 있습니다.
+* Transform 업데이트 성능을 크게 개선했습니다.
+  * 이제 게임 오브젝트가 Static 리지드바디를 사용하는 경우 더 이상 매 프레임 갱신하지 않습니다.
+* Terrain 컴포넌트 및 HeightMap 텍스처 Asset이 추가되었습니다.
+* TerrainCollider 컴포넌트가 추가되었습니다.
 ## 2020-03-21. ver 0.2.1.427
 * 멀티 스레드 렌더링 성능 개선
   * 모든 명령 목록 작성에 새로운 스레드를 효과적으로 배치하도록 개선했습니다.
