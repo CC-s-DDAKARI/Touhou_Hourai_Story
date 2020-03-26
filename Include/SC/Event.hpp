@@ -24,7 +24,7 @@ namespace SC
 	template< class TEventArgs >
 	inline int64 Event<TEventArgs>::AddHandler( EventHandler<TEventArgs> handler )
 	{
-		handlers.push_back( handler );
+		handlers.push_front( handler );
 		return handler.Id_get();
 	}
 
@@ -37,11 +37,11 @@ namespace SC
 	template< class TEventArgs >
 	inline void Event<TEventArgs>::RemoveHandler( int64 handlerId )
 	{
-		for ( int i = 0; i < Count_get(); ++i )
+		for ( auto i = handlers.begin(); i != handlers.end(); ++i )
 		{
-			if ( handlers[i].Id_get() == handlerId )
+			if ( i->Id_get() == handlerId )
 			{
-				handlers.erase( handlers.begin() + i );
+				handlers.erase( i );
 				return;
 			}
 		}
@@ -50,9 +50,9 @@ namespace SC
 	template< class TEventArgs >
 	inline void Event<TEventArgs>::Invoke( object sender, TEventArgs args )
 	{
-		for ( int i = 0; i < Count_get(); ++i )
+		for ( auto& i : handlers )
 		{
-			handlers[i]( sender, args );
+			i( sender, args );
 		}
 	}
 

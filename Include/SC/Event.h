@@ -6,7 +6,7 @@ namespace SC
 	template< class TEventArgs = void >
 	struct Event : public ValueType
 	{
-		std::vector<EventHandler<TEventArgs>> handlers;
+		std::list<EventHandler<TEventArgs>> handlers;
 
 	public:
 		/// <summary> <see cref="Event"/> 구조체의 새 인스턴스를 초기화합니다. </summary>
@@ -53,7 +53,7 @@ namespace SC
 	template<>
 	struct Event<void> : public ValueType
 	{
-		std::vector<EventHandler<void>> handlers;
+		std::list<EventHandler<void>> handlers;
 
 	public:
 		/// <summary> <see cref="Event"/> 구조체의 새 인스턴스를 초기화합니다. </summary>
@@ -80,7 +80,7 @@ namespace SC
 		/// <returns> 등록된 핸들러 ID를 반환합니다. </returns>
 		inline int64 AddHandler( EventHandler<void> handler )
 		{
-			handlers.push_back( handler );
+			handlers.push_front( handler );
 			return handler.Id_get();
 		}
 
@@ -96,11 +96,11 @@ namespace SC
 		/// <param name="handlerId"> 핸들러 ID를 전달합니다. </param>
 		inline void RemoveHandler( int64 handlerId )
 		{
-			for ( int i = 0; i < Count_get(); ++i )
+			for ( auto i = handlers.begin(); i != handlers.end(); ++i )
 			{
-				if ( handlers[i].Id_get() == handlerId )
+				if ( i->Id_get() == handlerId )
 				{
-					handlers.erase( handlers.begin() + i );
+					handlers.erase( i );
 					return;
 				}
 			}
@@ -111,9 +111,9 @@ namespace SC
 		/// <param name="args"> 이벤트 매개변수를 전달합니다. </param>
 		inline void Invoke( object sender )
 		{
-			for ( int i = 0; i < Count_get(); ++i )
+			for ( auto& i : handlers )
 			{
-				handlers[i]( sender );
+				i( sender );
 			}
 		}
 

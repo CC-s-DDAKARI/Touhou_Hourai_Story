@@ -26,6 +26,9 @@ Application::Application( AppConfiguration appConfig )
 	//_CrtSetBreakAlloc( 589591 );
 #endif
 
+	App::mApp = this;
+	App::mConfiguration = appConfig;
+
 	GlobalVar.pApp = this;
 
 	WNDCLASSEXW wcex{ };
@@ -51,8 +54,6 @@ Application::Application( AppConfiguration appConfig )
 	this->appConfig.deviceName = String::Format( "{0} ({1})", ( const wchar_t* )desc.Description, desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ? L"Software" : L"Hardware" );
 
 	mRenderThreadEvent.Set();
-
-	App::mApp = this;
 }
 
 Application::~Application()
