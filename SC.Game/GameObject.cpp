@@ -27,7 +27,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		gp.p = ToPhysX( pos );
 		gp.q = ToPhysX( quat );
 
-		auto pxRigid = GlobalVar.pxDevice->createRigidDynamic( gp );
+		auto pxRigid = Physics::mPhysics->createRigidDynamic( gp );
 		RigidSwap( ( PxRigidActor* )pxRigid );
 
 		// 기존 충돌체 컴포넌트가 있을 경우 추가합니다.
@@ -97,7 +97,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 			gp.p = ToPhysX( pos );
 			gp.q = ToPhysX( quat );
 
-			auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
+			auto pxRigid = Physics::mPhysics->createRigidStatic( gp );
 			RigidSwap( ( PxRigidActor* )pxRigid );
 		}
 
@@ -118,7 +118,7 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 		gp.p = ToPhysX( pos );
 		gp.q = ToPhysX( quat );
 
-		auto pxRigid = GlobalVar.pxDevice->createRigidStatic( gp );
+		auto pxRigid = Physics::mPhysics->createRigidStatic( gp );
 		RigidSwap( ( PxRigidActor* )pxRigid );
 
 		auto colliders = GetComponentsInChildren<Collider>();

@@ -400,6 +400,9 @@
     <ClInclude Include="Details.Graphics.h">
       <Filter>Packages</Filter>
     </ClInclude>
+    <ClInclude Include="Details.Physics.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -722,6 +725,9 @@
       <Filter>Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.Graphics.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.Physics.cpp">
       <Filter>Packages</Filter>
     </ClCompile>
   </ItemGroup>

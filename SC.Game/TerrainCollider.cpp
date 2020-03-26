@@ -60,9 +60,9 @@ void TerrainCollider::Bake( Terrain* terrain )
 		heightFieldDesc.samples.stride = sizeof( HeightMap::Sample );
 
 		PxDefaultMemoryOutputStream cookedData;
-		GlobalVar.pxCooking->cookHeightField( heightFieldDesc, cookedData );
+		Physics::mCooking->cookHeightField( heightFieldDesc, cookedData );
 		PxDefaultMemoryInputData cookedInput( cookedData.getData(), cookedData.getSize() );
-		mCookedHeightField = GlobalVar.pxDevice->createHeightField( cookedInput );
+		mCookedHeightField = Physics::mPhysics->createHeightField( cookedInput );
 		mBakedTerrain = terrain;
 	}
 }

@@ -8,41 +8,6 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::InitializeComponents()
 	{
-		// PhysX 파운데이션 개체를 초기화합니다.
-		pxFoundation = PxCreateFoundation( PX_PHYSICS_VERSION, pxDefaultAllocator, pxDefaultErrorCallback );
-		if ( !pxFoundation ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateFoundation failed." );
-
-		bool recordMemoryAllocations = false;
-#if defined( _DEBUG )
-		recordMemoryAllocations = true;
-
-		pxPvd = PxCreatePvd( *pxFoundation );
-		pxPvdTransport = PxDefaultPvdSocketTransportCreate( "127.0.0.1", 5425, 10 );
-		pxPvd->connect( *pxPvdTransport, PxPvdInstrumentationFlag::eALL );
-#endif
-
-		// PhysX 장치 개체를 생성합니다.
-		pxDevice = PxCreatePhysics( PX_PHYSICS_VERSION, *pxFoundation, PxTolerancesScale(), recordMemoryAllocations, pxPvd );
-		if ( !pxDevice ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreatePhysics failed." );
-
-		// 추가 라이브러리를 불러옵니다.
-		//if ( !PxInitExtensions( *pxDevice, pxPvd ) )
-			//throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxInitExtensions failed." );
-
-		PxRegisterArticulations( *pxDevice );
-		PxRegisterHeightFields( *pxDevice );
-
-		// 콜라이더 개체를 베이킹하는 Cooking 개체를 생성합니다.
-		pxCooking = PxCreateCooking( PX_PHYSICS_VERSION, *pxFoundation, PxCookingParams( PxTolerancesScale() ) );
-		if ( !pxCooking ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateCooking failed." );
-
-		// 멀티 스레드를 사용하는 기본 PhysX 태스크 매니저 개체를 생성합니다.
-		pxDefaultDispatcher = PxDefaultCpuDispatcherCreate( 4 );
-
-		// CUDA GPU를 사용하여 PhysX GPU 디스패처를 구현합니다.
-		PxCudaContextManagerDesc desc;
-		pxCudaManager = PxCreateCudaContextManager( *pxFoundation, desc);
-
 		// 게임 논리를 수행하는 게임 논리 개체를 생성합니다.
 		gameLogic = new GameLogic();
 	}
@@ -59,48 +24,6 @@ namespace SC::Game::Details
 		for ( auto i : pxSceneList )
 		{
 			i->release();
-		}
-
-		if ( pxCudaManager )
-		{
-			pxCudaManager->release();
-			pxCudaManager = nullptr;
-		}
-
-		if ( pxDefaultDispatcher )
-		{
-			pxDefaultDispatcher->release();
-			pxDefaultDispatcher = nullptr;
-		}
-
-		if ( pxCooking )
-		{
-			pxCooking->release();
-			pxCooking = nullptr;
-		}
-
-		if ( pxDevice )
-		{
-			pxDevice->release();
-			pxDevice = nullptr;
-		}
-
-		if ( pxPvd )
-		{
-			pxPvd->release();
-			pxPvd = nullptr;
-		}
-
-		if ( pxPvdTransport )
-		{
-			pxPvdTransport->release();
-			pxPvdTransport = nullptr;
-		}
-
-		if ( pxFoundation )
-		{
-			pxFoundation->release();
-			pxFoundation = nullptr;
 		}
 	}
 }

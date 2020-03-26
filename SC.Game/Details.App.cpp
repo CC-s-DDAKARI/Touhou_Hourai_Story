@@ -117,8 +117,8 @@ void App::CreateWindow()
 void App::InitializePackages()
 {
 	Graphics::Initialize();
-	/*
 	Physics::Initialize();
+	/*
 	ShaderBuilder::Initialize();
 
 	mGameLogic = new GameLogic();

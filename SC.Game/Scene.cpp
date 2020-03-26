@@ -45,11 +45,11 @@ Scene::Scene()
 	mSimulationEventCallback = make_unique<ContactCallback>();
 	auto pxSceneDesc = PxSceneDesc( PxTolerancesScale() );
 	pxSceneDesc.gravity = PxVec3( 0.0f, -9.8f, 0.0f );
-	pxSceneDesc.cpuDispatcher = GlobalVar.pxDefaultDispatcher;
+	pxSceneDesc.cpuDispatcher = Physics::mDispatcher;
 	pxSceneDesc.filterShader = ContactReportFilterShader;
-	pxSceneDesc.cudaContextManager = GlobalVar.pxCudaManager;
+	pxSceneDesc.cudaContextManager = Physics::mCudaManager;
 	pxSceneDesc.simulationEventCallback = mSimulationEventCallback.get();
-	pxScene = GlobalVar.pxDevice->createScene( pxSceneDesc );
+	pxScene = Physics::mPhysics->createScene( pxSceneDesc );
 	pxScene->setSimulationEventCallback( mSimulationEventCallback.get() );
 
 	GlobalVar.globalMutex.lock();

@@ -231,6 +231,7 @@
     <ClCompile Include="Details.HDRBuffer.cpp" />
     <ClCompile Include="Details.HDRComputedBuffer.cpp" />
     <ClCompile Include="Details.MDLParser.cpp" />
+    <ClCompile Include="Details.Physics.cpp" />
     <ClCompile Include="Details.ShaderBuilder.HDRColorShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.HDRComputeShader.cpp" />
     <ClCompile Include="Details.ShaderBuilder.HDRShader.cpp" />
@@ -387,6 +388,7 @@
     <ClInclude Include="Details.HeapAllocator.h" />
     <ClInclude Include="Details.M3DParser.h" />
     <ClInclude Include="Details.MDLParser.h" />
+    <ClInclude Include="Details.Physics.h" />
     <ClInclude Include="Details.RichTextColorUnknown.h" />
     <ClInclude Include="Details.ShaderBuilder.h" />
     <ClInclude Include="Details.IntegratedFactory.h" />

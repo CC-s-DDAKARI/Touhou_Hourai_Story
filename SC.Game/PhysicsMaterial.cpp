@@ -6,7 +6,7 @@ using namespace physx;
 
 PhysicsMaterial::PhysicsMaterial( String name ) : Assets( name )
 {
-	pxMaterial = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
+	pxMaterial = Physics::mPhysics->createMaterial( 0.5f, 0.5f, 0.6f );
 }
 
 PhysicsMaterial::~PhysicsMaterial()

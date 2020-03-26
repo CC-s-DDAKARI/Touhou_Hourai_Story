@@ -10,7 +10,7 @@ Collider::Collider() : Component()
 {
 	if ( !mDefaultMat )
 	{
-		mDefaultMat = GlobalVar.pxDevice->createMaterial( 0.5f, 0.5f, 0.6f );
+		mDefaultMat = Physics::mPhysics->createMaterial( 0.5f, 0.5f, 0.6f );
 	}
 }
 

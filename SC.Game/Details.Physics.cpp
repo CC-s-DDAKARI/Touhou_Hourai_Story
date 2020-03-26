@@ -5,6 +5,18 @@ using namespace SC::Game::Details;
 using namespace std;
 using namespace physx;
 
+PxDefaultAllocator Physics::mDefaultAllocator;
+PxDefaultErrorCallback Physics::mDefaultErrorCallback;
+
+PxFoundation* Physics::mFoundation;
+PxPvd* Physics::mPVD;
+PxPvdTransport* Physics::mPVDTransport;
+
+PxPhysics* Physics::mPhysics;
+PxCooking* Physics::mCooking;
+PxDefaultCpuDispatcher* Physics::mDispatcher;
+PxCudaContextManager* Physics::mCudaManager;
+
 void Physics::Initialize()
 {
 	bool recordMemoryAllocations = false;
