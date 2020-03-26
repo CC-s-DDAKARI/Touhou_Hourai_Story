@@ -206,6 +206,7 @@
     <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="CapsuleCollider.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="Details.App.cpp" />
     <ClCompile Include="Details.CBuffer.cpp" />
     <ClCompile Include="Details.CCommandQueue.cpp" />
     <ClCompile Include="Details.CDevice.cpp" />
@@ -360,6 +361,7 @@
     <ClInclude Include="..\Include\SC.Game\Vector.h" />
     <ClInclude Include="..\Include\SC.Game\Vertex.h" />
     <ClInclude Include="..\Include\SC.Game\Sphere.h" />
+    <ClInclude Include="Details.App.h" />
     <ClInclude Include="Details.CDeviceContextAndAllocator.h" />
     <ClInclude Include="Details.ContactCallback.h" />
     <ClInclude Include="Details.CView.h" />

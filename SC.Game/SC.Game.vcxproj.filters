@@ -394,6 +394,9 @@
     <ClInclude Include="..\Include\SC.Game\HeightMap.h">
       <Filter>Assets</Filter>
     </ClInclude>
+    <ClInclude Include="Details.App.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -712,6 +715,9 @@
     <ClCompile Include="HeightMap.cpp">
       <Filter>Assets</Filter>
     </ClCompile>
+    <ClCompile Include="Details.App.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -779,6 +785,9 @@
     </Filter>
     <Filter Include="Shaders\TerrainShader">
       <UniqueIdentifier>{8785ea73-ca1d-4e6c-8396-453765b028bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packages">
+      <UniqueIdentifier>{36f4dd97-35aa-4b3e-b557-1ecf55721492}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

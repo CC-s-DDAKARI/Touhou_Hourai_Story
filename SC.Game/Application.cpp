@@ -51,6 +51,8 @@ Application::Application( AppConfiguration appConfig )
 	this->appConfig.deviceName = String::Format( "{0} ({1})", ( const wchar_t* )desc.Description, desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ? L"Software" : L"Hardware" );
 
 	mRenderThreadEvent.Set();
+
+	App::mApp = this;
 }
 
 Application::~Application()
@@ -74,49 +76,7 @@ int Application::Start( RefPtr<Application> app )
 		app->OnStart();
 		ShowWindow( GlobalVar.hWnd, SW_SHOW );
 
-		MSG msg{ };
-		while ( true )
-		{
-#if !defined( _DEBUG )
-			try
-#endif
-			{
-				if ( PeekMessageW( &msg, nullptr, 0, 0, PM_REMOVE ) )
-				{
-					if ( msg.message == WM_QUIT )
-					{
-						break;
-					}
-
-					TranslateMessage( &msg );
-					DispatchMessageW( &msg );
-				}
-				else
-				{
-					app->IdleProcess();
-				}
-			}
-#if !defined( _DEBUG )
-			catch ( Exception * e )
-			{
-				if ( UnhandledErrorDetected.Count == 0 )
-				{
-					rethrow_exception( current_exception() );
-				}
-				else
-				{
-					RefPtr eventArgs = new UnhandledErrorDetectedEventArgs( e );
-					UnhandledErrorDetected( nullptr, eventArgs );
-					if ( eventArgs->IsCritical )
-					{
-						break;
-					}
-				}
-
-				delete e;
-			}
-#endif
-		}
+		App::Start();
 	}
 #if !defined( _DEBUG )
 	catch ( Exception * e )

@@ -73,7 +73,7 @@ namespace SC::Game
 		/// <summary> 앱에서 처리하지 않은 비동기 완료 처리기 또는 이벤트 처리기에 오류가 있는 경우 발생합니다. </summary>
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
 
-	private:
+	public:
 		void InitializeDevice();
 		static void* __stdcall WndProc( void* hWnd, uint32 uMsg, void* wParam, void* lParam );
 		void ResizeBuffers( uint32 width, uint32 height );

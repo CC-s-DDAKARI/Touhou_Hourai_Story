@@ -18,6 +18,9 @@
 #include "Details.CCommandQueue.h"
 #include "Details.CSwapChain.h"
 
+/* Packages */
+#include "Details.App.h"
+
 /* Helper */
 #include "Details.ViewStorage.h"
 #include "Details.VisibleViewStorage.h"

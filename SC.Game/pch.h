@@ -22,6 +22,7 @@
 
 #undef min
 #undef max
+#undef CreateWindow
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
