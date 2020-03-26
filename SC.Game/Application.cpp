@@ -29,25 +29,14 @@ Application::Application( AppConfiguration appConfig )
 	App::mApp = this;
 	App::mConfiguration = appConfig;
 
-	GlobalVar.pApp = this;
-
-	WNDCLASSEXW wcex{ };
-	wcex.cbSize = sizeof( wcex );
-	wcex.lpfnWndProc = ( WNDPROC )WndProc;
-	wcex.lpszClassName = L"SC.Game.Core.Application.CoreWindow";
-	wcex.hInstance = GetModuleHandleW( nullptr );
-
-	if ( RegisterClassExW( &wcex ) == 0 )
-	{
-		throw new Exception( "Cannot initialize window class in Windows Platform." );
-	}
-
-	GlobalVar.hWnd = CreateWindowExW( NULL, wcex.lpszClassName, appConfig.AppName.Chars, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT_ALL, nullptr, nullptr, wcex.hInstance, nullptr );
-	App::mWndHandle = GlobalVar.hWnd;
-
 	// 내부 API 초기화
 	App::Initialize();
 	InitializeDevice();
+
+	App::AppResizing += [&]( auto sender, auto size )
+	{
+		ResizeBuffers( ( uint )size.X, ( uint )size.Y );
+	};
 
 	// 사용한 그래픽 어댑터의 이름을 가져옵니다.
 	auto pAdapter = Graphics::mDevice->pAdapter.Get();
@@ -77,14 +66,14 @@ int Application::Start( RefPtr<Application> app )
 		app->frame = new Canvas( "Canvas_root" );
 
 		app->OnStart();
-		ShowWindow( GlobalVar.hWnd, SW_SHOW );
+		ShowWindow( App::mWndHandle, SW_SHOW );
 
 		App::Start();
 	}
 #if !defined( _DEBUG )
 	catch ( Exception * e )
 	{
-		MessageBoxW( GlobalVar.hWnd, e->Message.Chars, e->Name.Chars, MB_OK | MB_ICONERROR );
+		MessageBoxW( App::mWndHandle, e->Message.Chars, e->Name.Chars, MB_OK | MB_ICONERROR );
 		delete e;
 	}
 #endif
@@ -107,7 +96,7 @@ int Application::Start( RefPtr<Application> app )
 Point<int> Application::ClientSize_get()
 {
 	RECT rc;
-	GetClientRect( GlobalVar.hWnd, &rc );
+	GetClientRect( App::mWndHandle, &rc );
 	return { rc.right - rc.left, rc.bottom - rc.top };
 }
 
@@ -129,7 +118,7 @@ String Application::AppName_get()
 void Application::AppName_set( String value )
 {
 	appConfig.AppName = value;
-	SetWindowTextW( GlobalVar.hWnd, value.Chars );
+	SetWindowTextW( App::mWndHandle, value.Chars );
 }
 
 void Application::InitializeDevice()
@@ -161,48 +150,48 @@ void* __stdcall Application::WndProc( void* arg0, uint32 arg1, void* arg2, void*
 	switch ( uMsg )
 	{
 		case WM_SIZE:
-			GlobalVar.pApp->ResizeBuffers( ( UINT )LOWORD( lParam ), ( UINT )HIWORD( lParam ) );
+			App::mApp->ResizeBuffers( ( UINT )LOWORD( lParam ), ( UINT )HIWORD( lParam ) );
 			break;
 		case WM_MOUSEMOVE:
 		{
 			auto cur = LPARAMToPoint( lParam );
 			auto del = cur - previous;
 			previous = cur;
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseMove, UI::MouseMoveEventArgs( cur, del ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseMove, UI::MouseMoveEventArgs( cur, del ) ) );
 			break;
 		}
 		case WM_LBUTTONDOWN:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, true, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, true, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_LBUTTONUP:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, false, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, false, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_RBUTTONDOWN:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, true, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, true, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_RBUTTONUP:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, false, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, false, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_MBUTTONDOWN:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, true, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, true, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_MBUTTONUP:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, false, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, false, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_XBUTTONDOWN:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, true, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, true, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_XBUTTONUP:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
 			break;
 		case WM_MOUSEWHEEL:
 			GlobalVar.scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
 			break;
 		case WM_KEYDOWN:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );
 			break;
 		case WM_KEYUP:
-			GlobalVar.pApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, false ) ) );
+			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, false ) ) );
 			break;
 		case WM_DESTROY:
 			PostQuitMessage( 0 );
@@ -336,7 +325,7 @@ void Application::Render()
 				{
 					POINT cursor;
 					GetCursorPos( &cursor );
-					ScreenToClient( GlobalVar.hWnd, &cursor );
+					ScreenToClient( App::mWndHandle, &cursor );
 					float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
 					pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
 				}

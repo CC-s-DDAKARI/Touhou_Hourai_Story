@@ -46,7 +46,7 @@ void Input::LockCursor()
 
 	POINT point;
 	GetCursorPos( &point );
-	ScreenToClient( Details::GlobalVar.hWnd, &point );
+	ScreenToClient( Details::App::mWndHandle, &point );
 
 	lockedCursor.X = point.x;
 	lockedCursor.Y = point.y;
@@ -60,7 +60,7 @@ void Input::UnlockCursor( bool restore )
 	if ( restore )
 	{
 		POINT point = { lockedCursor.X, lockedCursor.Y };
-		ClientToScreen( Details::GlobalVar.hWnd, &point );
+		ClientToScreen( Details::App::mWndHandle, &point );
 		SetCursorPos( point.x, point.y );
 	}
 
@@ -113,13 +113,13 @@ void Input::SetCursorToCenter()
 
 	RECT rect;
 
-	GetClientRect( Details::GlobalVar.hWnd, &rect );
+	GetClientRect( Details::App::mWndHandle, &rect );
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
 
 	point.x = width / 2;
 	point.y = height / 2;
-	ClientToScreen( Details::GlobalVar.hWnd, &point );
+	ClientToScreen( Details::App::mWndHandle, &point );
 
 	SetCursorPos( point.x, point.y );
 }

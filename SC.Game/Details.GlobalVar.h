@@ -4,8 +4,6 @@ namespace SC::Game::Details
 {
 	struct tag_GlobalVar
 	{
-		Application* pApp;
-		HWND hWnd;
 		String systemMessageFontName;
 		std::mutex globalMutex;
 

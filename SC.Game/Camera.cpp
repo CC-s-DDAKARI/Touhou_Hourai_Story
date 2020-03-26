@@ -42,7 +42,7 @@ void Camera::LateUpdate( Time& time, Input& input )
 	if ( asp == 0.0 )
 	{
 		RECT rc;
-		GetClientRect( GlobalVar.hWnd, &rc );
+		GetClientRect( App::mWndHandle, &rc );
 		auto wid = rc.right - rc.left;
 		auto hei = rc.bottom - rc.top;
 		asp = ( double )wid / hei;
@@ -120,7 +120,7 @@ Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
 	if ( asp == 0.0 )
 	{
 		RECT rc;
-		GetClientRect( GlobalVar.hWnd, &rc );
+		GetClientRect( App::mWndHandle, &rc );
 		auto wid = rc.right - rc.left;
 		auto hei = rc.bottom - rc.top;
 		asp = ( double )wid / hei;

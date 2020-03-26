@@ -37,7 +37,7 @@ Scene::Scene()
 
 	POINT cursor;
 	GetCursorPos( &cursor );
-	ScreenToClient( Details::GlobalVar.hWnd, &cursor );
+	ScreenToClient( Details::App::mWndHandle, &cursor );
 
 	input.prevCursorPos = input.cursorPos;
 	input.cursorPos = { cursor.x, cursor.y };
@@ -229,7 +229,7 @@ void Scene::Update()
 	time.time = timer.TotalSeconds;
 	time.deltaTime = timer.ElapsedSeconds;
 
-	if ( GetActiveWindow() == Details::GlobalVar.hWnd )
+	if ( GetActiveWindow() == Details::App::mWndHandle )
 	{
 		BYTE vks[256];
 		GetKeyboardState( vks );
@@ -243,7 +243,7 @@ void Scene::Update()
 		{
 			POINT center, cursor;
 			RECT rect;
-			GetClientRect( Details::GlobalVar.hWnd, &rect );
+			GetClientRect( Details::App::mWndHandle, &rect );
 
 			int width = rect.right - rect.left;
 			int height = rect.bottom - rect.top;
@@ -253,7 +253,7 @@ void Scene::Update()
 
 
 			GetCursorPos( &cursor );
-			ScreenToClient( Details::GlobalVar.hWnd, &cursor );
+			ScreenToClient( Details::App::mWndHandle, &cursor );
 			input.prevCursorPos = { center.x, center.y };
 			input.cursorPos = { cursor.x, cursor.y };
 
@@ -263,7 +263,7 @@ void Scene::Update()
 		{
 			POINT cursor;
 			GetCursorPos( &cursor );
-			ScreenToClient( Details::GlobalVar.hWnd, &cursor );
+			ScreenToClient( Details::App::mWndHandle, &cursor );
 
 			input.prevCursorPos = input.cursorPos;
 			input.cursorPos = { cursor.x, cursor.y };
@@ -335,7 +335,7 @@ void Scene::FixedUpdate()
 		}
 	}
 
-	pxScene->simulate( 1.0f / GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds );
+	pxScene->simulate( 1.0f / App::mApp->AppConfig.PhysicsUpdatePerSeconds );
 	mFetchResults = pxScene->fetchResults( false );
 }
 
@@ -360,8 +360,8 @@ void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 void Scene::PopulateSceneGraph()
 {
 	// 장면 그래프를 변경하기 전 마지막 렌더링과 동기화합니다.
-	GlobalVar.pApp->mRenderThreadEvent.WaitForSingleObject();
-	GlobalVar.pApp->mRenderThreadEvent.Set();
+	App::mApp->mRenderThreadEvent.WaitForSingleObject();
+	App::mApp->mRenderThreadEvent.Set();
 
 	ClearSceneGraph();
 

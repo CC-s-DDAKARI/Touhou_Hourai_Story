@@ -18,7 +18,7 @@ CSwapChain::CSwapChain() : Object()
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	HR( pDXGIFactory->CreateSwapChainForHwnd(
 		pCommandQueue,
-		GlobalVar.hWnd,
+		App::mWndHandle,
 		&swapChainDesc,
 		nullptr,
 		nullptr,

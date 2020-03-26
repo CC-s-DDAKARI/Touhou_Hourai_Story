@@ -13,6 +13,7 @@ namespace SC::Game::Details
 		static void Initialize();
 		
 	private:
+		static void Resize( object sender, Drawing::Point<int> size );
 		static void Dispose( object sender );
 	};
 }

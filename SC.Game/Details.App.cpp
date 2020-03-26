@@ -22,9 +22,7 @@ void App::Initialize()
 {
 	AppDisposing += Dispose;
 
-	/*
 	CreateWindow();
-	*/
 	InitializePackages();
 }
 

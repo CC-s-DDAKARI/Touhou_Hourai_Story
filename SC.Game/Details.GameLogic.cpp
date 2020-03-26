@@ -13,7 +13,7 @@ GameLogic::GameLogic() : Object()
 	// 게임 시간을 정밀하게 측정할 타이머 도구를 생성합니다.
 	timer = new StepTimer();
 	physicsTimer = new StepTimer();
-	physicsTimer->TargetElapsedTicksPerSecond = GlobalVar.pApp->AppConfig.PhysicsUpdatePerSeconds;
+	physicsTimer->TargetElapsedTicksPerSecond = App::mApp->AppConfig.PhysicsUpdatePerSeconds;
 	physicsTimer->IsFixedTimeStep = true;
 
 	// 주 렌더링 디바이스 컨텍스트 개체를 생성합니다.
