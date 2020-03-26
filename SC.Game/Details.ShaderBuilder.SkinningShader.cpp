@@ -6,7 +6,7 @@ using namespace SC::Game::Details;
 
 void ShaderBuilder::LoadSkinningShader()
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE skinnedBuffer[]
 	{
@@ -28,7 +28,7 @@ void ShaderBuilder::LoadSkinningShader()
 	rootSignatureDesc.AddShaderResourceView( 1 );
 	rootSignatureDesc.AddUnorderedAccessView( 0 );
 	rootSignatureDesc.AddRoot32BitConstants( 0, 1 );
-	pRootSignature_Skinning = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	pRootSignature_Skinning = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC pipelineStateDesc{ };
 	pipelineStateDesc.pRootSignature = pRootSignature_Skinning.Get();

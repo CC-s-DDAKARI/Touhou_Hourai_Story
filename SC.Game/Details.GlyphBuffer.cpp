@@ -6,10 +6,10 @@ using namespace std;
 
 GlyphBuffer::GlyphBuffer( String fontFamilyName, float fontSize ) : Object()
 {
-	auto pDWriteFactory = GlobalVar.factory->pDWriteFactory.Get();
-	auto pDevice = GlobalVar.device->pDevice.Get();
-	auto pDevice11On12 = GlobalVar.device->pDevice11On12.Get();
-	auto pDeviceContext2D = GlobalVar.device->pDeviceContext2D.Get();
+	auto pDWriteFactory = Graphics::mFactory->pDWriteFactory.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
+	auto pDevice11On12 = Graphics::mDevice->pDevice11On12.Get();
+	auto pDeviceContext2D = Graphics::mDevice->pDeviceContext2D.Get();
 
 	// 텍스트 렌더링을 위한 텍스트 포맷을 만들고, 텍스트 정보를 조회합니다.
 	ComPtr<IDWriteFontCollection> pFontCollection;
@@ -61,7 +61,7 @@ GlyphBuffer::GlyphBuffer( String fontFamilyName, float fontSize ) : Object()
 	textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 	D3D12_CLEAR_VALUE clearValue{ Format };
 	HR( pDevice->CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, IID_PPV_ARGS( &pGlyphTexture ) ) );
-	pShaderResourceView = GlobalVar.device->CreateShaderResourceView( pGlyphTexture.Get(), nullptr );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pGlyphTexture.Get(), nullptr );
 
 	D3D11_RESOURCE_FLAGS resourceFlags{ D3D11_BIND_RENDER_TARGET };
 	D2D1_BITMAP_PROPERTIES1 bitmapProp{ };
@@ -77,7 +77,7 @@ GlyphBuffer::GlyphBuffer( String fontFamilyName, float fontSize ) : Object()
 
 	// 글리프 렌더링 명령을 수행할 장치 컨텍스트 목록을 생성합니다.
 	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocator ) ) );
-	deviceContext = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT, pCommandAllocator.Get() );
+	deviceContext = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT, pCommandAllocator.Get() );
 	deviceContext->TransitionBarrier(
 		pGlyphTexture.Get(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -152,8 +152,8 @@ void GlyphBuffer::LockGlyphs()
 	// 추가해야 할 글리프가 있으면 렌더링 준비를 합니다.
 	if ( added.size() )
 	{
-		auto directQueue0 = GlobalVar.device->DirectQueue[0].Get();
-		auto directQueue3 = GlobalVar.device->DirectQueue[3].Get();
+		auto directQueue0 = Graphics::mDevice->DirectQueue[0].Get();
+		auto directQueue3 = Graphics::mDevice->DirectQueue[3].Get();
 
 		// 마지막 프레임 렌더링을 대기합니다.
 		directQueue3->pCommandQueue->Wait( directQueue0->pFence.Get(), directQueue0->LastPending );
@@ -162,7 +162,7 @@ void GlyphBuffer::LockGlyphs()
 		directQueue3->Execute( deviceContext );
 
 		// 자원을 D2D 상태로 승인합니다.
-		pDevice11On12 = GlobalVar.device->pDevice11On12.Get();
+		pDevice11On12 = Graphics::mDevice->pDevice11On12.Get();
 		pDevice11On12->AcquireWrappedResources( pGlyphTextureInterop.GetAddressOf(), 1 );
 
 		glyphQueue.insert( glyphQueue.end(), added.begin(), added.end() );
@@ -179,7 +179,7 @@ void GlyphBuffer::LockGlyphs()
 
 	if ( pDevice11On12 )
 	{
-		auto pDeviceContext = GlobalVar.device->pDeviceContext2D.Get();
+		auto pDeviceContext = Graphics::mDevice->pDeviceContext2D.Get();
 
 		pDeviceContext->SetTarget( pGlyphBitmap.Get() );
 		pDeviceContext->BeginDraw();
@@ -241,16 +241,16 @@ void GlyphBuffer::LockGlyphs()
 
 		// 렌더링 상태를 종료하고 명시적으로 출력합니다.
 		pDevice11On12->ReleaseWrappedResources( pGlyphTextureInterop.GetAddressOf(), 1 );
-		GlobalVar.device->pDeviceContext11->Flush();
+		Graphics::mDevice->pDeviceContext11->Flush();
 
 		// 3D 큐와 분리된, UI큐를 통해 작업을 진행한다.
-		lastPending = GlobalVar.device->DirectQueue[3]->Signal();
+		lastPending = Graphics::mDevice->DirectQueue[3]->Signal();
 	}
 }
 
 void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float baselineX, float baselineY, const DWRITE_GLYPH_RUN* glyphRun )
 {
-	auto directQueue = GlobalVar.device->DirectQueue[3].Get();
+	auto directQueue = Graphics::mDevice->DirectQueue[3].Get();
 	auto pCommandList = clientDrawingContext->pCommandList.Get();
 
 	// 글리프 렌더링이 아직 완료되지 않았다면 대기합니다.
@@ -354,10 +354,10 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 
 void GlyphBuffer::Expand()
 {
-	auto pDWriteFactory = GlobalVar.factory->pDWriteFactory.Get();
-	auto pDevice = GlobalVar.device->pDevice.Get();
-	auto pDevice11On12 = GlobalVar.device->pDevice11On12.Get();
-	auto pDeviceContext2D = GlobalVar.device->pDeviceContext2D.Get();
+	auto pDWriteFactory = Graphics::mFactory->pDWriteFactory.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
+	auto pDevice11On12 = Graphics::mDevice->pDevice11On12.Get();
+	auto pDeviceContext2D = Graphics::mDevice->pDeviceContext2D.Get();
 
 	// 크기를 2배로 확장합니다.
 	maxWidth *= 2;
@@ -380,7 +380,7 @@ void GlyphBuffer::Expand()
 	GC.Add( pCommandAllocator );
 
 	HR( pDevice->CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, IID_PPV_ARGS( &pGlyphTexture ) ) );
-	pShaderResourceView = GlobalVar.device->CreateShaderResourceView( pGlyphTexture.Get(), nullptr );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pGlyphTexture.Get(), nullptr );
 
 	D3D11_RESOURCE_FLAGS resourceFlags{ D3D11_BIND_RENDER_TARGET };
 	D2D1_BITMAP_PROPERTIES1 bitmapProp{ };
@@ -396,7 +396,7 @@ void GlyphBuffer::Expand()
 
 	// 글리프 렌더링 명령을 수행할 장치 컨텍스트 목록을 생성합니다.
 	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocator ) ) );
-	deviceContext = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT, pCommandAllocator.Get() );
+	deviceContext = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT, pCommandAllocator.Get() );
 	deviceContext->TransitionBarrier(
 		pGlyphTexture.Get(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,

@@ -10,7 +10,7 @@ bool Texture2D::Lock( RefPtr<CDeviceContext>& deviceContext )
 	if ( !copySuccessFlag )
 	{
 		// 복사가 아직 완료되지 않았을 경우,
-		if ( auto pFence = GlobalVar.device->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
+		if ( auto pFence = Graphics::mDevice->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
 		{
 			copySuccessFlag = true;
 			GC.Add( pUploadCommands );
@@ -25,7 +25,7 @@ bool Texture2D::IsValid_get()
 {
 	if ( !copySuccessFlag )
 	{
-		if ( auto pFence = GlobalVar.device->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
+		if ( auto pFence = Graphics::mDevice->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
 		{
 			return false;
 		}
@@ -43,7 +43,7 @@ Texture2D::~Texture2D()
 
 Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, TextureFormat format, int queueIndex ) : Assets( name )
 {
-	auto pImagingFactory = GlobalVar.factory->pWICFactory.Get();
+	auto pImagingFactory = Graphics::mFactory->pWICFactory.Get();
 
 	ComPtr<IWICStream> pStream;
 	ComPtr<IWICBitmapDecoder> pDecoder;
@@ -61,7 +61,7 @@ Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, Textur
 
 Texture2D::Texture2D( String name, const path& filepath, TextureFormat format, int queueIndex ) : Assets( name )
 {
-	auto pImagingFactory = GlobalVar.factory->pWICFactory.Get();
+	auto pImagingFactory = Graphics::mFactory->pWICFactory.Get();
 	ComPtr<IWICBitmapDecoder> pDecoder;
 
 	// 파일 데이터를 기반으로 이미지 디코더를 생성합니다.
@@ -83,8 +83,8 @@ uint32 Texture2D::Height_get()
 
 void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat format, int queueIndex )
 {
-	auto pWICImagingFactory = GlobalVar.factory->pWICFactory.Get();
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pWICImagingFactory = Graphics::mFactory->pWICFactory.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 	ComPtr<IWICBitmapFrameDecode> pFrame;
 	ComPtr<IWICFormatConverter> pConverter;
 
@@ -157,7 +157,7 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat forma
 
 	// 텍스처 복사 명령 할당을 위해 명령 할당기를 준비합니다.
 	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pUploadCommands ) ) );
-	var deviceContext = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT, pUploadCommands.Get() );
+	var deviceContext = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT, pUploadCommands.Get() );
 
 	D3D12_TEXTURE_COPY_LOCATION dst{ };
 	auto src = dst;
@@ -178,11 +178,11 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat forma
 
 	// 명령 목록을 닫고 명령을 카피 큐에 제출합니다.
 	deviceContext->Close();
-	GlobalVar.device->DirectQueue[queueIndex]->Execute( deviceContext );
-	uploadFenceValue = GlobalVar.device->CopyQueue->Signal();
+	Graphics::mDevice->DirectQueue[queueIndex]->Execute( deviceContext );
+	uploadFenceValue = Graphics::mDevice->CopyQueue->Signal();
 
 	// 셰이더 자원 서술자를 생성합니다.
-	pShaderResourceView = GlobalVar.device->CreateShaderResourceView( pTexture2D.Get(), nullptr );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pTexture2D.Get(), nullptr );
 
 	this->width = width;
 	this->height = height;

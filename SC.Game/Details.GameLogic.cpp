@@ -8,7 +8,7 @@ using namespace std;
 
 GameLogic::GameLogic() : Object()
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	// 게임 시간을 정밀하게 측정할 타이머 도구를 생성합니다.
 	timer = new StepTimer();
@@ -17,16 +17,16 @@ GameLogic::GameLogic() : Object()
 	physicsTimer->IsFixedTimeStep = true;
 
 	// 주 렌더링 디바이스 컨텍스트 개체를 생성합니다.
-	mVisibleViewStorage = new VisibleViewStorage( GlobalVar.device.Get() );
-	mDeviceContext = new CDeviceContextAndAllocator( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
+	mVisibleViewStorage = new VisibleViewStorage( Graphics::mDevice.Get() );
+	mDeviceContext = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 
 	// 스레드 대기를 위한 핸들을 생성합니다.
 	waitingHandle = new Threading::Event();
 
 	// 필요한 버퍼를 할당합니다.
-	geometryBuffer = new GeometryBuffer( GlobalVar.device );
-	hdrBuffer = new HDRBuffer( GlobalVar.device );
-	hdrComputedBuffer = new HDRComputedBuffer( GlobalVar.device );
+	geometryBuffer = new GeometryBuffer( Graphics::mDevice );
+	hdrBuffer = new HDRBuffer( Graphics::mDevice );
+	hdrComputedBuffer = new HDRComputedBuffer( Graphics::mDevice );
 
 	// 기초 데이터 자산을 생성합니다.
 	skyboxMesh = Mesh::CreateCube( "skybox_mesh" );
@@ -62,8 +62,8 @@ void GameLogic::FixedUpdate()
 
 void GameLogic::Render( int frameIndex )
 {
-	auto directQueue = GlobalVar.device->DirectQueue[0].Get();
-	auto directQueue1 = GlobalVar.device->DirectQueue[1].Get();
+	auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
+	auto directQueue1 = Graphics::mDevice->DirectQueue[1].Get();
 	auto& pCommandQueue = *directQueue->pCommandQueue.Get();
 	auto pScene = currentScene.Get();
 
@@ -156,9 +156,9 @@ void GameLogic::Render( int frameIndex )
 	}
 
 	// 현재 후면 버퍼의 인덱스를 가져옵니다.
-	auto idx = GlobalVar.swapChain->Index;
-	auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
-	auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+	auto idx = Graphics::mSwapChain->Index;
+	auto pBackBuffer = Graphics::mSwapChain->ppBackBuffers[idx].Get();
+	auto rtvHandle = Graphics::mSwapChain->RTVHandle[idx];
 
 	// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
 	mDeviceContext->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, 0 );
@@ -199,7 +199,7 @@ void GameLogic::TerrainBaking( int frameIndex )
 		{
 			auto pScene = currentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForTerrain;
-			auto& computeQueue = GlobalVar.device->ComputeQueue[0];
+			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
 			pScene->mViewStorageForTerrain->Reset();
 			mDeviceContext->Reset( computeQueue.Get(), ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_Terrain.Get() );
@@ -217,8 +217,8 @@ void GameLogic::TerrainBaking( int frameIndex )
 
 			computeQueue->Execute( mDeviceContext );
 			auto fenceValue = computeQueue->Signal();
-			HR( GlobalVar.device->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
-			HR( GlobalVar.device->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
+			HR( Graphics::mDevice->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
+			HR( Graphics::mDevice->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
 
 			FetchAndSetThread();
 		}
@@ -231,7 +231,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 		{
 			auto pScene = currentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForSkinning;
-			auto& computeQueue = GlobalVar.device->ComputeQueue[0];
+			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
 			auto& skinningCollection = pScene->mpSkinnedMeshRendererQueue->GetCollections();
 
@@ -253,8 +253,8 @@ void GameLogic::MeshSkinning( int frameIndex )
 
 			computeQueue->Execute( mDeviceContext );
 			auto fenceValue = computeQueue->Signal();
-			HR( GlobalVar.device->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
-			HR( GlobalVar.device->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
+			HR( Graphics::mDevice->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
+			HR( Graphics::mDevice->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
 
 			FetchAndSetThread();
 		}

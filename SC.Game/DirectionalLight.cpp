@@ -6,7 +6,7 @@ void DirectionalLight::ReadyBuffer()
 {
 	if ( !pShadowDepthMap )
 	{
-		auto pDevice = GlobalVar.device->pDevice.Get();
+		auto pDevice = Graphics::mDevice->pDevice.Get();
 
 		D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
 

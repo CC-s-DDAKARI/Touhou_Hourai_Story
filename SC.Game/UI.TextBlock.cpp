@@ -352,7 +352,7 @@ void TextBlock::ParseText( String original )
 		}
 	}
 
-	auto pDWriteFactory = GlobalVar.factory->pDWriteFactory.Get();
+	auto pDWriteFactory = Graphics::mFactory->pDWriteFactory.Get();
 	auto str = wss.str();
 
 	HR( pDWriteFactory->CreateTextLayout( str.c_str(), ( UINT32 )str.length(), textFormat->pTextFormat, 0, 0, &pLayout ) );

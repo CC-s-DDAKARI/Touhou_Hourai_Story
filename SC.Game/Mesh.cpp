@@ -72,7 +72,7 @@ void Mesh::DrawSkinnedIndexed( uint64 virtualAddress, RefPtr<CDeviceContext>& de
 Mesh::Mesh( String name, const vector<Vertex>& vertexBuffer, const vector<uint32>& indexBuffer ) : Assets( name )
 {
 	this->vertexBuffer = new CBuffer(
-		GlobalVar.device,
+		Graphics::mDevice,
 		sizeof( Vertex ) * vertexBuffer.size(),
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -80,7 +80,7 @@ Mesh::Mesh( String name, const vector<Vertex>& vertexBuffer, const vector<uint32
 	);
 
 	this->indexBuffer = new CBuffer(
-		GlobalVar.device,
+		Graphics::mDevice,
 		sizeof( uint32 ) * indexBuffer.size(),
 		D3D12_RESOURCE_STATE_INDEX_BUFFER,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -94,7 +94,7 @@ Mesh::Mesh( String name, const vector<Vertex>& vertexBuffer, const vector<uint32
 Mesh::Mesh( String name, const vector<SkinnedVertex>& vertexBuffer, const vector<uint32>& indexBuffer ) : Assets( name )
 {
 	this->vertexBuffer = new CBuffer(
-		GlobalVar.device,
+		Graphics::mDevice,
 		sizeof( SkinnedVertex ) * vertexBuffer.size(),
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -102,7 +102,7 @@ Mesh::Mesh( String name, const vector<SkinnedVertex>& vertexBuffer, const vector
 	);
 
 	this->indexBuffer = new CBuffer(
-		GlobalVar.device,
+		Graphics::mDevice,
 		sizeof( uint32 ) * indexBuffer.size(),
 		D3D12_RESOURCE_STATE_INDEX_BUFFER,
 		D3D12_RESOURCE_FLAG_NONE,

@@ -107,7 +107,7 @@ inline void HR( HRESULT hr )
 	{
 		if ( hr == DXGI_ERROR_DEVICE_REMOVED )
 		{
-			HRESULT hr = SC::Game::Details::GlobalVar.device->pDevice->GetDeviceRemovedReason();
+			HRESULT hr = SC::Game::Details::Graphics::mDevice->pDevice->GetDeviceRemovedReason();
 			throw new Exception( FormatMessage( hr ), new Exception( FormatMessage( hr ) ) );
 		}
 		else

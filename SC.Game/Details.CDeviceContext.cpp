@@ -22,8 +22,8 @@ RefPtr<IDevice> CDeviceContext::GetDevice()
 
 void CDeviceContext::CreateShaderInfoBuffers( int capacity )
 {
-	uiShaderInfos[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_ShaderInfo ) * capacity );  // 32KB
-	uiShaderInfos[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_ShaderInfo ) * capacity );  // 32KB
+	uiShaderInfos[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_ShaderInfo ) * capacity );  // 32KB
+	uiShaderInfos[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_ShaderInfo ) * capacity );  // 32KB
 }
 
 void CDeviceContext::Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pAllocator, ID3D12PipelineState* pInitialPipelineState )

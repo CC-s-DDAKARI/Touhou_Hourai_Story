@@ -7,7 +7,7 @@ using namespace SC::Game::Details;
 void ShaderBuilder::LoadTextAndRectShader()
 {
 	ShaderModule shader = IntegratedUIShader_get();
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	CGraphicsPipelineStateDesc pipelineDesc( shader.RootSignature );
 	pipelineDesc.RTVCount = 1;

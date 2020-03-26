@@ -7,7 +7,7 @@ using namespace SC::Game::Details;
 void ShaderBuilder::LoadHDRShader()
 {
 	ShaderModule shader;
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE hdrSource0[]
 	{
@@ -35,7 +35,7 @@ void ShaderBuilder::LoadHDRShader()
 
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_BORDER );
 	rootSignatureDesc.AddStaticComparisonSampler( D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_BORDER, 1 );
-	shader.RootSignature = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	shader.RootSignature = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	CGraphicsPipelineStateDesc pipelineDesc( shader.RootSignature );
 	pipelineDesc.RTVCount = 1;

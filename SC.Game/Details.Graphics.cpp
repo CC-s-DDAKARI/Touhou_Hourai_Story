@@ -10,7 +10,7 @@ RefPtr<CSwapChain> Graphics::mSwapChain;
 
 void Graphics::Initialize()
 {
-	Application::AppDisposing += Dispose;
+	App::AppDisposing += Dispose;
 
 	// 기본 그래픽 디바이스를 생성합니다.
 	mFactory = new IntegratedFactory();

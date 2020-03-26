@@ -91,7 +91,7 @@ dcl_temps 5
 //   v1.x <- fg.Tex.x; v1.y <- fg.Tex.y; 
 //   o0.x <- <main return value>.Color.x; o0.y <- <main return value>.Color.y; o0.z <- <main return value>.Color.z; o0.w <- <main return value>.Color.w
 //
-#line 35 "C:\Users\wkdgh\Source\Repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
+#line 35 "C:\Users\wkdgh\source\repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
 if_z CB2[3][0].x
 
 #line 37
@@ -102,7 +102,7 @@ if_z CB2[3][0].x
   mov r2.xy, CB0[1][0].xyxx
   mov r2.zw, v0.xxxy
 
-#line 20 "C:\Users\wkdgh\Source\Repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\Brush.hlsli"
+#line 20 "C:\Users\wkdgh\source\repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\Brush.hlsli"
   if_z r1.x
 
 #line 22
@@ -146,7 +146,7 @@ if_z CB2[3][0].x
     endif 
   endif 
 
-#line 37 "C:\Users\wkdgh\Source\Repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
+#line 37 "C:\Users\wkdgh\source\repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
   mov r3.xyzw, r3.xyzw  // r3.x <- px.Color.x; r3.y <- px.Color.y; r3.z <- px.Color.z; r3.w <- px.Color.w
 
 #line 38
@@ -176,7 +176,7 @@ else
     mov r2.yz, CB0[1][0].xxyx
     mov r4.xy, v0.xyxx
 
-#line 20 "C:\Users\wkdgh\Source\Repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\Brush.hlsli"
+#line 20 "C:\Users\wkdgh\source\repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\Brush.hlsli"
     if_z r2.x
 
 #line 22
@@ -220,7 +220,7 @@ else
       endif 
     endif 
 
-#line 42 "C:\Users\wkdgh\Source\Repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
+#line 42 "C:\Users\wkdgh\source\repos\CC-s-DDAKARI\Touhou_Hourai_Story\SC.Game\TextAndRectPixelShader.hlsl"
     mov r3.xyzw, r3.xyzw  // r3.x <- px.Color.x; r3.y <- px.Color.y; r3.z <- px.Color.z; r3.w <- px.Color.w
 
 #line 43
@@ -257,10 +257,10 @@ ret
 
 const BYTE pTextAndRectPixelShader[] =
 {
-     68,  88,  66,  67, 146, 110, 
-    221,  25,  17, 135, 242,  41, 
-    236, 177,  88, 245, 196, 133, 
-     49, 201,   1,   0,   0,   0, 
+     68,  88,  66,  67, 221, 182, 
+    243,  79, 105,  98,  60,  11, 
+    127,  77, 163, 217,  26, 245, 
+    211, 227,   1,   0,   0,   0, 
     180, 107,   0,   0,   6,   0, 
       0,   0,  56,   0,   0,   0, 
     108,   4,   0,   0, 196,   4, 
@@ -1269,10 +1269,10 @@ const BYTE pTextAndRectPixelShader[] =
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0, 148,  46,  49,   1, 
-    214,  18, 122,  94,   1,   0, 
-      0,   0, 200,  84,  55, 204, 
-    135, 184,  86,  68, 168, 133, 
-     12,  32,  20, 249, 201,  33, 
+    160,  81, 124,  94,   1,   0, 
+      0,   0, 112, 251,  73, 164, 
+    121, 143, 134,  66, 148,  63, 
+     38, 235,  11,  89, 172, 185, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   1,   0,   0,   0, 
       1,   0,   0,   0,   0,   0, 
@@ -1358,8 +1358,8 @@ const BYTE pTextAndRectPixelShader[] =
      30,  10,   0,   0,   0,  67, 
      58,  92,  85, 115, 101, 114, 
     115,  92, 119, 107, 100, 103, 
-    104,  92,  83, 111, 117, 114, 
-     99, 101,  92,  82, 101, 112, 
+    104,  92, 115, 111, 117, 114, 
+     99, 101,  92, 114, 101, 112, 
     111, 115,  92,  67,  67,  45, 
     115,  45,  68,  68,  65,  75, 
      65,  82,  73,  92,  84, 111, 
@@ -1390,9 +1390,9 @@ const BYTE pTextAndRectPixelShader[] =
     101, 114,  46, 104, 108, 115, 
     108,   0,  67,  58,  92,  85, 
     115, 101, 114, 115,  92, 119, 
-    107, 100, 103, 104,  92,  83, 
+    107, 100, 103, 104,  92, 115, 
     111, 117, 114,  99, 101,  92, 
-     82, 101, 112, 111, 115,  92, 
+    114, 101, 112, 111, 115,  92, 
      67,  67,  45, 115,  45,  68, 
      68,  65,  75,  65,  82,  73, 
      92,  84, 111, 117, 104, 111, 
@@ -1418,8 +1418,8 @@ const BYTE pTextAndRectPixelShader[] =
     115, 108, 105,   0,  67,  58, 
      92,  85, 115, 101, 114, 115, 
      92, 119, 107, 100, 103, 104, 
-     92,  83, 111, 117, 114,  99, 
-    101,  92,  82, 101, 112, 111, 
+     92, 115, 111, 117, 114,  99, 
+    101,  92, 114, 101, 112, 111, 
     115,  92,  67,  67,  45, 115, 
      45,  68,  68,  65,  75,  65, 
      82,  73,  92,  84, 111, 117, 
@@ -1452,7 +1452,7 @@ const BYTE pTextAndRectPixelShader[] =
     212, 150,   1,   0,  69, 166, 
       3,   0,  86, 168,   2,   0, 
      65,  36,   1,   0,  90,  76, 
-      1,   0, 142, 195,   1,   0, 
+      1,   0, 158,  31,   0,   0, 
      28, 221,   1,   0, 214, 154, 
       2,   0,  56, 246,   3,   0, 
     210, 159,   0,   0, 228, 199, 
@@ -2208,8 +2208,8 @@ const BYTE pTextAndRectPixelShader[] =
      10,   9,   9, 112, 120,  46, 
      67, 111, 108, 111, 114,  32, 
      27, 226,  48,   1, 216,   0, 
-      0,   0,  90, 142, 124, 200, 
-    228,   1, 214,   1,   1,   0, 
+      0,   0,  57, 209, 208,  98, 
+     59,   3, 214,   1,   1,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
@@ -3166,7 +3166,7 @@ const BYTE pTextAndRectPixelShader[] =
      18,  16,   0,   0,  23,   0, 
       4,   0,  17,  16,   0,   0, 
      14,   0,  23,  21,   0,  16, 
-      0,   0,   3,   2,  16,   3, 
+      0,   0,   3,   2,  96,   0, 
       0,   0, 242, 241,  10,   0, 
      24,  21,  20,  16,   0,   0, 
       1,   0,   1,   0,  10,   0, 
@@ -4189,7 +4189,7 @@ const BYTE pTextAndRectPixelShader[] =
      11,   0,  72,  10,   0,   0, 
       0,   0,   0,   0, 244,   8, 
       0,   0,   4,   0,   0,   0, 
-     64, 169,  57,   3,   0,   0, 
+      0, 194, 134,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
     109,  97, 105, 110,   0, 110, 
     111, 110, 101,   0,   0,   0, 
@@ -4212,8 +4212,8 @@ const BYTE pTextAndRectPixelShader[] =
      97,   0,   0,   0,  67,  58, 
      92,  85, 115, 101, 114, 115, 
      92, 119, 107, 100, 103, 104, 
-     92,  83, 111, 117, 114,  99, 
-    101,  92,  82, 101, 112, 111, 
+     92, 115, 111, 117, 114,  99, 
+    101,  92, 114, 101, 112, 111, 
     115,  92,  67,  67,  45, 115, 
      45,  68,  68,  65,  75,  65, 
      82,  73,  92,  84, 111, 117, 
@@ -4228,8 +4228,8 @@ const BYTE pTextAndRectPixelShader[] =
     104, 108, 115, 108,   0,  67, 
      58,  92,  85, 115, 101, 114, 
     115,  92, 119, 107, 100, 103, 
-    104,  92,  83, 111, 117, 114, 
-     99, 101,  92,  82, 101, 112, 
+    104,  92, 115, 111, 117, 114, 
+     99, 101,  92, 114, 101, 112, 
     111, 115,  92,  67,  67,  45, 
     115,  45,  68,  68,  65,  75, 
      65,  82,  73,  92,  84, 111, 
@@ -4242,8 +4242,8 @@ const BYTE pTextAndRectPixelShader[] =
     108, 105,   0,  67,  58,  92, 
      85, 115, 101, 114, 115,  92, 
     119, 107, 100, 103, 104,  92, 
-     83, 111, 117, 114,  99, 101, 
-     92,  82, 101, 112, 111, 115, 
+    115, 111, 117, 114,  99, 101, 
+     92, 114, 101, 112, 111, 115, 
      92,  67,  67,  45, 115,  45, 
      68,  68,  65,  75,  65,  82, 
      73,  92,  84, 111, 117, 104, 
@@ -4341,10 +4341,10 @@ const BYTE pTextAndRectPixelShader[] =
       0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0,   0, 
       0,   0, 148,  46,  49,   1, 
-    214,  18, 122,  94,   1,   0, 
-      0,   0, 200,  84,  55, 204, 
-    135, 184,  86,  68, 168, 133, 
-     12,  32,  20, 249, 201,  33, 
+    160,  81, 124,  94,   1,   0, 
+      0,   0, 112, 251,  73, 164, 
+    121, 143, 134,  66, 148,  63, 
+     38, 235,  11,  89, 172, 185, 
      71,   1,   0,   0,  47,  76, 
     105, 110, 107,  73, 110, 102, 
     111,   0,  47, 110,  97, 109, 

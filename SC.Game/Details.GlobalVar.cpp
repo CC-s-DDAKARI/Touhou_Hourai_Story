@@ -8,12 +8,6 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::InitializeComponents()
 	{
-		// 기본 그래픽 디바이스를 생성합니다.
-		factory = new IntegratedFactory();
-		device = new CDevice( GlobalVar.factory->SearchHardwareAdapter().Get() );
-		swapChain = new CSwapChain();
-
-
 		// PhysX 파운데이션 개체를 초기화합니다.
 		pxFoundation = PxCreateFoundation( PX_PHYSICS_VERSION, pxDefaultAllocator, pxDefaultErrorCallback );
 		if ( !pxFoundation ) throw new Exception( "SC.Game.Details.tag_GlobalVar.InitializeComponents(): PxCreateFoundation failed." );

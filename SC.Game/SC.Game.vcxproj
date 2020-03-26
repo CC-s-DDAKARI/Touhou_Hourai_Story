@@ -220,6 +220,7 @@
     <ClCompile Include="Details.CView.cpp" />
     <ClCompile Include="Details.GarbageCollector.cpp" />
     <ClCompile Include="Details.GlyphBuffer.cpp" />
+    <ClCompile Include="Details.Graphics.cpp" />
     <ClCompile Include="Details.HeapAllocator.cpp" />
     <ClCompile Include="Details.IntegratedFactory.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -380,6 +381,7 @@
     <ClInclude Include="Details.GarbageCollector.h" />
     <ClInclude Include="Details.GeometryBuffer.h" />
     <ClInclude Include="Details.GlyphRenderer.h" />
+    <ClInclude Include="Details.Graphics.h" />
     <ClInclude Include="Details.h" />
     <ClInclude Include="Details.HDRComputedBuffer.h" />
     <ClInclude Include="Details.HeapAllocator.h" />

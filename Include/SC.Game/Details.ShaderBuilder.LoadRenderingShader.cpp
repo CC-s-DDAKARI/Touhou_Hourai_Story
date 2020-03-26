@@ -13,7 +13,7 @@ using namespace SC::Game::Details;
 
 void ShaderBuilder::LoadRenderingShader()
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE textures[]
 	{
@@ -44,7 +44,7 @@ void ShaderBuilder::LoadRenderingShader()
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_WRAP, 16, 0 );
 	
 	// 루트 서명 개체를 생성합니다.
-	pRootSignature_Rendering = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	pRootSignature_Rendering = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	// 컬러 렌더링 파이프라인 개체를 생성합니다.
 	CGraphicsPipelineStateDesc pipelineDesc( pRootSignature_Rendering.Get() );

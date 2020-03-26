@@ -47,8 +47,8 @@ void Animator::Start()
 
 	if ( numBones )
 	{
-		finalTransformBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
-		finalTransformBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
+		finalTransformBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
+		finalTransformBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
 		InitializeOffset( Linked );
 	}
 	else

@@ -4,9 +4,9 @@ using namespace SC::Game::Details;
 
 CSwapChain::CSwapChain() : Object()
 {
-	auto pDXGIFactory = GlobalVar.factory->pDXGIFactory.Get();
-	auto pDevice = GlobalVar.device->pDevice.Get();
-	auto pCommandQueue = GlobalVar.device->DirectQueue[0]->pCommandQueue.Get();
+	auto pDXGIFactory = Graphics::mFactory->pDXGIFactory.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
+	auto pCommandQueue = Graphics::mDevice->DirectQueue[0]->pCommandQueue.Get();
 
 	// 전역 정보를 기반으로 스왑 체인 개체를 생성합니다.
 	ComPtr<IDXGISwapChain1> pSwapChain;
@@ -37,7 +37,7 @@ CSwapChain::CSwapChain() : Object()
 
 void CSwapChain::ResizeBuffers( uint32 width, uint32 height )
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	// 버퍼의 크기를 변경하기 전 모든 참조를 제거합니다.
 	for ( int i = 0; i < BufferCount; ++i )

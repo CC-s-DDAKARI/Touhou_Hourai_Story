@@ -7,7 +7,7 @@ using namespace SC::Game::Details;
 void ShaderBuilder::LoadSkyboxShader()
 {
 	ShaderModule shader;
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE ranges[]
 	{
@@ -21,7 +21,7 @@ void ShaderBuilder::LoadSkyboxShader()
 	rootSignatureDesc.AddConstantBufferView( 0 );
 	rootSignatureDesc.AddDescriptorTable( ranges );
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, 8 );
-	shader.RootSignature = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	shader.RootSignature = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	CGraphicsPipelineStateDesc pipelineDesc( shader.RootSignature );
 	pipelineDesc.RTVCount = 1;

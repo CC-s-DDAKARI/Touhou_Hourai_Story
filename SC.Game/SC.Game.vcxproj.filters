@@ -397,6 +397,9 @@
     <ClInclude Include="Details.App.h">
       <Filter>Packages</Filter>
     </ClInclude>
+    <ClInclude Include="Details.Graphics.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -716,6 +719,9 @@
       <Filter>Assets</Filter>
     </ClCompile>
     <ClCompile Include="Details.App.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.Graphics.cpp">
       <Filter>Packages</Filter>
     </ClCompile>
   </ItemGroup>

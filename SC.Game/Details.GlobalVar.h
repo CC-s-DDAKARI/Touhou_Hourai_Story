@@ -9,9 +9,6 @@ namespace SC::Game::Details
 		String systemMessageFontName;
 		std::mutex globalMutex;
 
-		RefPtr<IntegratedFactory> factory;
-		RefPtr<CDevice> device;
-		RefPtr<CSwapChain> swapChain;
 		RefPtr<GameLogic> gameLogic;
 		Drawing::Point<double> scrollDelta;
 

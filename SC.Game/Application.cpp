@@ -43,12 +43,14 @@ Application::Application( AppConfiguration appConfig )
 	}
 
 	GlobalVar.hWnd = CreateWindowExW( NULL, wcex.lpszClassName, appConfig.AppName.Chars, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT_ALL, nullptr, nullptr, wcex.hInstance, nullptr );
+	App::mWndHandle = GlobalVar.hWnd;
 
 	// 내부 API 초기화
+	App::Initialize();
 	InitializeDevice();
 
 	// 사용한 그래픽 어댑터의 이름을 가져옵니다.
-	auto pAdapter = GlobalVar.device->pAdapter.Get();
+	auto pAdapter = Graphics::mDevice->pAdapter.Get();
 	DXGI_ADAPTER_DESC1 desc;
 	pAdapter->GetDesc1( &desc );
 	this->appConfig.deviceName = String::Format( "{0} ({1})", ( const wchar_t* )desc.Description, desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ? L"Software" : L"Hardware" );
@@ -137,12 +139,12 @@ void Application::InitializeDevice()
 
 	LoadSystemFont();
 
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
-	deviceContextUI = new CDeviceContext( GlobalVar.device, D3D12_COMMAND_LIST_TYPE_DIRECT );
+	deviceContextUI = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocators[0] ) ) );
 	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocators[1] ) ) );
-	visibleViewStorage = new VisibleViewStorage( GlobalVar.device.Get() );
+	visibleViewStorage = new VisibleViewStorage( Graphics::mDevice.Get() );
 
 	deviceContextUI->CreateShaderInfoBuffers();
 }
@@ -218,7 +220,7 @@ void Application::ResizeBuffers( uint32 width, uint32 height )
 		mRenderThreadEvent.WaitForSingleObject();
 		mRenderThreadEvent.Set();
 
-		GlobalVar.swapChain->ResizeBuffers( width, height );
+		Graphics::mSwapChain->ResizeBuffers( width, height );
 		GlobalVar.gameLogic->ResizeBuffers( width, height );
 
 		viewport.TopLeftX = 0;
@@ -267,7 +269,7 @@ void Application::Update()
 	GlobalVar.gameLogic->Update();
 
 	DXGI_SWAP_CHAIN_DESC1 desc;
-	HR( GlobalVar.swapChain->pSwapChain->GetDesc1( &desc ) );
+	HR( Graphics::mSwapChain->pSwapChain->GetDesc1( &desc ) );
 
 	frame->Width = ( double )( desc.Width );
 	frame->Height = ( double )( desc.Height );
@@ -282,14 +284,14 @@ void Application::Render()
 	mRenderThreadEvent.WaitForSingleObject();
 
 	// 이전 명령이 실행 완료되었는지 검사합니다. 완료되지 않았을 경우 대기합니다.
-	auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+	auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 	directQueue->WaitFor( lastPending[frameIndex], waitingHandle );
 
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
 			if ( !discardApp )
 			{
-				auto directQueue = GlobalVar.device->DirectQueue[0].Get();
+				auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 				int frameIndex_ = frameIndex;
 
 				// 사전 글리프 렌더링을 시작합니다.
@@ -310,9 +312,9 @@ void Application::Render()
 				deviceContextUI->FrameIndex = frameIndex_;
 
 				// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
-				auto idx = GlobalVar.swapChain->Index;
-				auto pBackBuffer = GlobalVar.swapChain->ppBackBuffers[idx].Get();
-				auto rtvHandle = GlobalVar.swapChain->RTVHandle[idx];
+				auto idx = Graphics::mSwapChain->Index;
+				auto pBackBuffer = Graphics::mSwapChain->ppBackBuffers[idx].Get();
+				auto rtvHandle = Graphics::mSwapChain->RTVHandle[idx];
 				auto pCommandList = deviceContextUI->pCommandList.Get();
 				pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
 
@@ -349,7 +351,7 @@ void Application::Render()
 				deviceContextUI->Close();
 				directQueue->Execute( deviceContextUI );
 
-				GlobalVar.swapChain->Present( appConfig.verticalSync );
+				Graphics::mSwapChain->Present( appConfig.verticalSync );
 
 				// 마지막 명령 번호를 저장합니다.
 				lastPending[frameIndex_] = directQueue->Signal();
@@ -362,7 +364,7 @@ void Application::Render()
 
 void Application::LoadSystemFont()
 {
-	auto pDWriteFactory = GlobalVar.factory->pDWriteFactory.Get();
+	auto pDWriteFactory = Graphics::mFactory->pDWriteFactory.Get();
 	NONCLIENTMETRICS ncm;
 
 	// 시스템 정보를 조회합니다.
@@ -399,19 +401,20 @@ void Application::LoadSystemFont()
 
 void Application::WaitAllQueues()
 {
+	/*
 	RefPtr<Threading::Event> handle = new Threading::Event();
 
 	CCommandQueue* ppCommandQueues[9]
 	{
-		GlobalVar.device->DirectQueue[0].Get(),
-		GlobalVar.device->DirectQueue[1].Get(),
-		GlobalVar.device->DirectQueue[2].Get(),
-		GlobalVar.device->DirectQueue[3].Get(),
-		GlobalVar.device->CopyQueue.Get(),
-		GlobalVar.device->ComputeQueue[0].Get(),
-		GlobalVar.device->ComputeQueue[1].Get(),
-		GlobalVar.device->ComputeQueue[2].Get(),
-		GlobalVar.device->ComputeQueue[3].Get(),
+		Graphics::mDevice->DirectQueue[0].Get(),
+		Graphics::mDevice->DirectQueue[1].Get(),
+		Graphics::mDevice->DirectQueue[2].Get(),
+		Graphics::mDevice->DirectQueue[3].Get(),
+		Graphics::mDevice->CopyQueue.Get(),
+		Graphics::mDevice->ComputeQueue[0].Get(),
+		Graphics::mDevice->ComputeQueue[1].Get(),
+		Graphics::mDevice->ComputeQueue[2].Get(),
+		Graphics::mDevice->ComputeQueue[3].Get(),
 	};
 
 	for ( int i = 0; i < ARRAYSIZE( ppCommandQueues ); ++i )
@@ -426,10 +429,11 @@ void Application::WaitAllQueues()
 			handle->WaitForSingleObject( 1000 );
 		}
 	}
+	*/
 }
 
 void Application::WaitPrimaryQueue()
 {
-	auto primaryQueue = GlobalVar.device->DirectQueue[0].Get();
+	auto primaryQueue = Graphics::mDevice->DirectQueue[0].Get();
 	primaryQueue->WaitFor( primaryQueue->LastPending, waitingHandle );
 }

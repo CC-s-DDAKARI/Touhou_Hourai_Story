@@ -6,7 +6,7 @@ using namespace SC::Game::Details;
 
 void ShaderBuilder::LoadTerrainShader()
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE heightMap[]
 	{
@@ -19,7 +19,7 @@ void ShaderBuilder::LoadTerrainShader()
 	rootSignatureDesc.AddRoot32BitConstants( 0, 2 );
 	rootSignatureDesc.AddShaderResourceView( 1 );
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP );
-	pRootSignature_Terrain = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	pRootSignature_Terrain = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC pipelineStateDesc{ };
 	pipelineStateDesc.pRootSignature = pRootSignature_Terrain.Get();

@@ -24,14 +24,14 @@ void App::Initialize()
 
 	/*
 	CreateWindow();
-	InitializePackages();
 	*/
+	InitializePackages();
 }
 
 void App::Start()
 {
 	// 앱을 초기화합니다.
-	Initialize();
+	//Initialize();
 
 	// 앱에 스타트 요청을 보내고, 창을 화면에 표시합니다.
 	//mApp->OnStart();
@@ -116,8 +116,8 @@ void App::CreateWindow()
 
 void App::InitializePackages()
 {
-	/*
 	Graphics::Initialize();
+	/*
 	Physics::Initialize();
 	ShaderBuilder::Initialize();
 

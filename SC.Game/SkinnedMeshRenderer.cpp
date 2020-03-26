@@ -61,7 +61,7 @@ object SkinnedMeshRenderer::Clone()
 	RefPtr renderer = new SkinnedMeshRenderer();
 	renderer->material = material;
 	renderer->skinnedMesh = skinnedMesh;
-	renderer->mVertexBuffer = new CBuffer( GlobalVar.device, sizeof( Vertex ) * skinnedMesh->numVertex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
+	renderer->mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * skinnedMesh->numVertex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
 	return renderer;
 }
 
@@ -74,7 +74,7 @@ void SkinnedMeshRenderer::Mesh_set( RefPtr<Game::Mesh> value )
 {
 	skinnedMesh = value;
 	
-	mVertexBuffer = new CBuffer( GlobalVar.device, sizeof( Vertex ) * skinnedMesh->numVertex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
+	mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * skinnedMesh->numVertex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
 }
 
 RefPtr<Material> SkinnedMeshRenderer::Material_get()

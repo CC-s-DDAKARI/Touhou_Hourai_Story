@@ -20,6 +20,7 @@
 
 /* Packages */
 #include "Details.App.h"
+#include "Details.Graphics.h"
 
 /* Helper */
 #include "Details.ViewStorage.h"

@@ -66,7 +66,7 @@ Material::Material( String name ) : Assets( name )
 	TexLocation = 0;
 	TexScale = 1.0;
 
-	constantBuffer = GlobalVar.device->CreateDynamicBuffer( sizeof( Reflection ), 256 );
+	constantBuffer = Graphics::mDevice->CreateDynamicBuffer( sizeof( Reflection ), 256 );
 
 	// 참조 횟수를 증가시킵니다.
 	++reference_count;
@@ -207,7 +207,7 @@ int Material::Lock( Material* ptr )
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvDesc.Texture2D.MipLevels = 1;
 
-		pNullSRV = GlobalVar.device->CreateShaderResourceView( nullptr, &srvDesc );
+		pNullSRV = Graphics::mDevice->CreateShaderResourceView( nullptr, &srvDesc );
 
 		// 버퍼가 없을 경우 초기 버퍼를 생성합니다.
 		return Realloc( 256 );
@@ -230,7 +230,7 @@ int Material::Lock( Material* ptr )
 
 int Material::Realloc( int capacity )
 {
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };
 
@@ -254,7 +254,7 @@ int Material::Realloc( int capacity )
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Buffer.NumElements = capacity;
 	srvDesc.Buffer.StructureByteStride = sizeof( Reflection );
-	pShaderResourceView = GlobalVar.device->CreateShaderResourceView( pReflectionBuffer.Get(), &srvDesc );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pReflectionBuffer.Get(), &srvDesc );
 
 	// 캐퍼시티를 다시 설정합니다.
 	auto ret = Material::capacity;

@@ -4,7 +4,7 @@ using namespace SC::Game::Details;
 void ShaderBuilder::LoadIntegratedUIShader()
 {
 	ShaderModule shader;
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE textBuffer[]
 	{
@@ -26,7 +26,7 @@ void ShaderBuilder::LoadIntegratedUIShader()
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_BORDER );
 	rootSignatureDesc.AddStaticSampler( D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_BORDER, 0, 1 );
 
-	shader.RootSignature = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	shader.RootSignature = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	shader.RootParameterIndex =
 	{

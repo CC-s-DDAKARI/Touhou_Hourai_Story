@@ -4,7 +4,7 @@ using namespace SC::Game::Details;
 
 Brush::Brush( int type ) : Object()
 {
-	brushConstants = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ) );
+	brushConstants = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ) );
 
 	frameResource = ( Constants* )brushConstants->pBlock;
 	frameResource->Type = type;

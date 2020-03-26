@@ -4,8 +4,8 @@ using namespace SC::Game::Details;
 
 Light::Light()
 {
-	lightBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( LightConstants ) );
-	lightBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( LightConstants ) );
+	lightBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( LightConstants ) );
+	lightBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( LightConstants ) );
 
 	LightColor = Drawing::Color::White;
 	Diffuse = 1.0;
@@ -38,7 +38,7 @@ void Light::SetDepthBuffer( void* pResource )
 	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srv.Texture2D.MipLevels = 1;
 
-	pShaderResourceView = GlobalVar.device->CreateShaderResourceView( ( ID3D12Resource* )pResource, &srv );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( ( ID3D12Resource* )pResource, &srv );
 }
 
 Light::~Light()

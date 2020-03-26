@@ -16,8 +16,8 @@ void Transform::CreateBuffer()
 {
 	if ( !hasBuffer )
 	{
-		dynamicBuffer[0] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
-		dynamicBuffer[1] = GlobalVar.device->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		dynamicBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		dynamicBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
 
 		hasBuffer = true;
 	}

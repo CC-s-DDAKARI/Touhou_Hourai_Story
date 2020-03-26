@@ -8,7 +8,7 @@ using namespace SC::Game::Details;
 void ShaderBuilder::LoadHDRComputeShader()
 {
 	ShaderModule shader;
-	auto pDevice = GlobalVar.device->pDevice.Get();
+	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	D3D12_DESCRIPTOR_RANGE hdrBuffer[]
 	{
@@ -24,7 +24,7 @@ void ShaderBuilder::LoadHDRComputeShader()
 	rootSignatureDesc.AddDescriptorTable( hdrBuffer );
 	rootSignatureDesc.AddDescriptorTable( halfHDRAndConstants );
 	rootSignatureDesc.AddRoot32BitConstants( 0, 1 );
-	shader.RootSignature = GlobalVar.device->CreateRootSignature( *rootSignatureDesc.Get() );
+	shader.RootSignature = Graphics::mDevice->CreateRootSignature( *rootSignatureDesc.Get() );
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{ };
 	computePipelineStateDesc.pRootSignature = shader.RootSignature.Get();
