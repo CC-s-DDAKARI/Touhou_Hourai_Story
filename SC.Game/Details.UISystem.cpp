@@ -17,8 +17,8 @@ void UISystem::Initialize()
 {
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 
-	App::AppDisposing += Dispose;
-	App::AppResizing += ResizeApp;
+	App::Disposing += Dispose;
+	App::Resizing += ResizeApp;
 
 	mRootCanvas = new Canvas( "UISystem.mRootCanvas" );
 	mViewStorage = new VisibleViewStorage();

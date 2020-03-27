@@ -8,14 +8,10 @@ namespace SC::Game::Details
 
 	void tag_GlobalVar::InitializeComponents()
 	{
-		// 게임 논리를 수행하는 게임 논리 개체를 생성합니다.
-		gameLogic = new GameLogic();
 	}
 
 	void tag_GlobalVar::Release()
 	{
-		gameLogic = nullptr;
-
 		for ( auto i : pxRigidActor )
 		{
 			i->release();

@@ -11,11 +11,9 @@ namespace SC::Game::Details
 		static AppConfiguration mConfiguration;
 		static bool mDiscardPresent;
 
-		static RefPtr<GameLogic> mGameLogic;
-
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
-		static Event<> AppDisposing;
-		static Event<Drawing::Point<int>> AppResizing;
+		static Event<> Disposing;
+		static Event<Drawing::Point<int>> Resizing;
 
 	public:
 		static void Initialize();

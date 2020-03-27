@@ -7,7 +7,6 @@ namespace SC::Game::Details
 		String systemMessageFontName;
 		std::mutex globalMutex;
 
-		RefPtr<GameLogic> gameLogic;
 		Drawing::Point<double> scrollDelta;
 
 		RefPtr<UI::TextFormat> defaultTextFormat;

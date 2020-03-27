@@ -13,7 +13,7 @@ set<GlyphBuffer*> Graphics::mGlyphBuffers;
 
 void Graphics::Initialize()
 {
-	App::AppDisposing += Dispose;
+	App::Disposing += Dispose;
 
 	// 기본 그래픽 디바이스를 생성합니다.
 	mFactory = new IntegratedFactory();

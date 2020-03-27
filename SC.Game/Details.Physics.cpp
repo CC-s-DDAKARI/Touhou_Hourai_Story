@@ -21,7 +21,7 @@ void Physics::Initialize()
 {
 	bool recordMemoryAllocations = false;
 
-	App::AppDisposing += Dispose;
+	App::Disposing += Dispose;
 
 	// PhysX 파운데이션 개체를 초기화합니다.
 	mFoundation = PxCreateFoundation( PX_PHYSICS_VERSION, mDefaultAllocator, mDefaultErrorCallback );

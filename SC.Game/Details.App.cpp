@@ -12,15 +12,13 @@ HWND App::mWndHandle;
 AppConfiguration App::mConfiguration;
 bool App::mDiscardPresent = false;
 
-RefPtr<GameLogic> App::mGameLogic;
-
 SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
-SC::Event<> App::AppDisposing;
-SC::Event<Point<int>> App::AppResizing;
+SC::Event<> App::Disposing;
+SC::Event<Point<int>> App::Resizing;
 
 void App::Initialize()
 {
-	AppDisposing += Dispose;
+	Disposing += Dispose;
 
 	CreateWindow();
 	InitializePackages();
@@ -71,7 +69,7 @@ void App::Start()
 	}
 
 	// 앱이 종료될 때 패키지의 Dispose 함수를 호출합니다.
-	AppDisposing( nullptr );
+	Disposing( nullptr );
 }
 
 void App::Dispose( object sender )
@@ -117,6 +115,7 @@ void App::InitializePackages()
 	Graphics::Initialize();
 	Physics::Initialize();
 	UISystem::Initialize();
+	GameLogic::Initialize();
 	/*
 	ShaderBuilder::Initialize();
 
@@ -126,7 +125,7 @@ void App::InitializePackages()
 
 void App::ResizeApp( Point<int> appResizing )
 {
-	AppResizing( IntPtr( mWndHandle ), appResizing );
+	Resizing( IntPtr( mWndHandle ), appResizing );
 }
 
 void App::OnIdle()

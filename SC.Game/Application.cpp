@@ -33,7 +33,7 @@ Application::Application( AppConfiguration appConfig )
 	App::Initialize();
 	InitializeDevice();
 
-	App::AppResizing += [&]( auto sender, auto size )
+	App::Resizing += [&]( auto sender, auto size )
 	{
 		ResizeBuffers( ( uint )size.X, ( uint )size.Y );
 	};
@@ -198,7 +198,6 @@ void Application::ResizeBuffers( uint32 width, uint32 height )
 		mRenderThreadEvent.Set();
 
 		Graphics::mSwapChain->ResizeBuffers( width, height );
-		GlobalVar.gameLogic->ResizeBuffers( width, height );
 
 		discardApp = false;
 	}
@@ -227,11 +226,11 @@ void Application::Update()
 	if ( SceneManager::currentScene.Get() )
 	{
 		mRenderThreadEvent.WaitForSingleObject();
-		GlobalVar.gameLogic->currentScene = move( SceneManager::currentScene );
+		GameLogic::mCurrentScene = move( SceneManager::currentScene );
 		mRenderThreadEvent.Set();
 	}
 
-	GlobalVar.gameLogic->Update();
+	GameLogic::Update();
 	UISystem::Update();
 }
 
@@ -259,7 +258,7 @@ void Application::Render()
 					i->Restart();
 				}
 
-				GlobalVar.gameLogic->Render( frameIndex_ );
+				GameLogic::Render( frameIndex_ );
 				UISystem::Render( frameIndex_ );
 
 				// 마지막 명령 번호를 저장합니다.

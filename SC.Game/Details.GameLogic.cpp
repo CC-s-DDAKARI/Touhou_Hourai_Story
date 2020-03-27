@@ -3,61 +3,76 @@ using namespace SC::Game;
 using namespace SC::Game::Details;
 using namespace SC::Diagnostics;
 using namespace SC::Threading;
+using namespace SC::Drawing;
 
 using namespace std;
 
-GameLogic::GameLogic() : Object()
+StepTimer GameLogic::mTimer;
+StepTimer GameLogic::mPhysicsTimer;
+StepTimer GameLogic::mRenderTimer;
+
+RefPtr<VisibleViewStorage> GameLogic::mViewStorage;
+RefPtr<CDeviceContext> GameLogic::mDeviceContext;
+
+RefPtr<GeometryBuffer> GameLogic::mGeometryBuffer;
+RefPtr<HDRBuffer> GameLogic::mHDRBuffer;
+RefPtr<HDRComputedBuffer> GameLogic::mHDRComputedBuffer;
+
+RefPtr<Mesh> GameLogic::mSkyboxMesh;
+RefPtr<Scene> GameLogic::mCurrentScene;
+
+atomic<int> GameLogic::mCompletedValue;
+int GameLogic::mCompletedGoal;
+Threading::Event GameLogic::mCompletedEvent;
+int GameLogic::mLightThreads;
+
+void GameLogic::Initialize()
 {
-	auto pDevice = Graphics::mDevice->pDevice.Get();
+	App::Disposing += Dispose;
+	App::Resizing += ResizeApp;
 
-	// 게임 시간을 정밀하게 측정할 타이머 도구를 생성합니다.
-	timer = new StepTimer();
-	physicsTimer = new StepTimer();
-	physicsTimer->TargetElapsedTicksPerSecond = App::mApp->AppConfig.PhysicsUpdatePerSeconds;
-	physicsTimer->IsFixedTimeStep = true;
+	// 물리 타이머의 갱신 주기를 설정합니다.
+	mPhysicsTimer.TargetElapsedTicksPerSecond = App::mConfiguration.PhysicsUpdatePerSeconds;
+	mPhysicsTimer.IsFixedTimeStep = true;
 
-	// 주 렌더링 디바이스 컨텍스트 개체를 생성합니다.
-	mVisibleViewStorage = new VisibleViewStorage();
+	// 렌더링 디바이스 컨텍스트 개체를 생성합니다.
+	mViewStorage = new VisibleViewStorage();
 	mDeviceContext = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 
-	// 스레드 대기를 위한 핸들을 생성합니다.
-	waitingHandle = new Threading::Event();
+	// 필요한 버퍼 개체를 생성합니다.
+	mGeometryBuffer = new GeometryBuffer( Graphics::mDevice );
+	mHDRBuffer = new HDRBuffer( Graphics::mDevice );
+	mHDRComputedBuffer = new HDRComputedBuffer( Graphics::mDevice );
 
-	// 필요한 버퍼를 할당합니다.
-	geometryBuffer = new GeometryBuffer( Graphics::mDevice );
-	hdrBuffer = new HDRBuffer( Graphics::mDevice );
-	hdrComputedBuffer = new HDRComputedBuffer( Graphics::mDevice );
-
-	// 기초 데이터 자산을 생성합니다.
-	skyboxMesh = Mesh::CreateCube( "skybox_mesh" );
-}
-
-GameLogic::~GameLogic()
-{
-
+	// 스카이박스 메쉬 개체를 생성합니다.
+	mSkyboxMesh = Mesh::CreateCube( "skybox_mesh" );
 }
 
 void GameLogic::Update()
 {
-	// 장면 갱신 함수를 호출합니다.
-	if ( currentScene->firstUpdate == false )
+	if ( mCurrentScene )
 	{
-		currentScene->Start();
-		currentScene->firstUpdate = true;
+		// 장면 갱신 함수를 호출합니다.
+		if ( mCurrentScene->firstUpdate == false )
+		{
+			mCurrentScene->Start();
+			mCurrentScene->firstUpdate = true;
+		}
+		mCurrentScene->Update();
+
+		// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
+		mPhysicsTimer.Tick( FixedUpdate );
 	}
-	currentScene->Update();
 
 	// 매 프레임 업데이트가 끝난 후 스크롤 이동량을 초기화합니다.
 	GlobalVar.scrollDelta = { 0, 0 };
-
-	// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
-	physicsTimer->Tick( [this]() { FixedUpdate(); } );
 }
 
 void GameLogic::FixedUpdate()
 {
 	// 장면의 물리 갱신 함수를 호출합니다.
-	currentScene->FixedUpdate();
+	// Update 함수에서 개체의 존재 여부를 검사하기 때문에, 추가로 검사하지 않습니다.
+	mCurrentScene->FixedUpdate();
 }
 
 void GameLogic::Render( int frameIndex )
@@ -65,18 +80,19 @@ void GameLogic::Render( int frameIndex )
 	auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 	auto directQueue1 = Graphics::mDevice->DirectQueue[1].Get();
 	auto& pCommandQueue = *directQueue->pCommandQueue.Get();
-	auto pScene = currentScene.Get();
+	auto pScene = mCurrentScene.Get();
 
 	// 렌더링을 실행하기 전 장치를 초기화합니다.
-	mVisibleViewStorage->Reset();
 	mDeviceContext->FrameIndex = frameIndex;
 	mDeviceContext->Reset( directQueue, nullptr, nullptr );
-	mDeviceContext->SetVisibleViewStorage( mVisibleViewStorage );
+
+	mViewStorage->Reset();
+	mDeviceContext->SetVisibleViewStorage( mViewStorage );
 
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
 
 	// 카메라 컬렉션이 존재할 경우에만 렌더링을 수행합니다.
-	auto& cameraCollection = currentScene->mSceneCameras;
+	auto& cameraCollection = pScene->mSceneCameras;
 	if ( !cameraCollection.empty() )
 	{
 		mCompletedValue = 0;
@@ -88,20 +104,20 @@ void GameLogic::Render( int frameIndex )
 		GeometryWriting( frameIndex );
 
 		// HDR 버퍼를 렌더 타겟으로 설정합니다.
-		hdrBuffer->OMSetRenderTargets( mDeviceContext );
+		mHDRBuffer->OMSetRenderTargets( mDeviceContext );
 
 		// HDR 렌더링을 수행합니다.
 		ShaderBuilder::HDRShader_get().SetAll( mDeviceContext );
 
 		// 매개변수를 입력합니다.
 		pScene->mSceneCameras.front()->SetGraphicsRootConstantBufferView( mDeviceContext, frameIndex );
-		geometryBuffer->SetGraphicsRootShaderResourcesForLayer( mDeviceContext );
+		mGeometryBuffer->SetGraphicsRootShaderResourcesForLayer( mDeviceContext );
 
 		// 각 조명에 대해 조명 렌더 패스를 진행합니다.
 		pCommandList.IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
 		Material::SetGraphicsRootShaderResources( mDeviceContext );
 
-		for ( auto i : currentScene->mSceneLights )
+		for ( auto i : pScene->mSceneLights )
 		{
 			i->SetGraphicsRootConstantBufferView( mDeviceContext, frameIndex );
 			i->SetGraphicsRootShaderResources( mDeviceContext );
@@ -112,30 +128,30 @@ void GameLogic::Render( int frameIndex )
 		ShaderBuilder::HDRColorShader_get().SetAll( mDeviceContext );
 
 		// 매개변수를 입력합니다.
-		geometryBuffer->SetGraphicsRootShaderResourcesForColor( mDeviceContext );
+		mGeometryBuffer->SetGraphicsRootShaderResourcesForColor( mDeviceContext );
 
 		// HDR 버퍼에 색상 렌더링을 수행합니다.
 		pCommandList.IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
 		pCommandList.DrawInstanced( 4, 1, 0, 0 );
 
 		// HDR 버퍼 사용을 종료합니다.
-		hdrBuffer->EndDraw( mDeviceContext );
+		mHDRBuffer->EndDraw( mDeviceContext );
 
 		// 시간 경과를 조회합니다.
-		timer->Tick();
-		double t = timer->ElapsedSeconds;
+		mRenderTimer.Tick();
+		double t = mRenderTimer.ElapsedSeconds;
 
 		// 매개변수를 입력합니다.
 		ShaderBuilder::HDRComputeShader_get( 0 ).SetAll( mDeviceContext );
-		hdrComputedBuffer->SetComputeRootTimestamp( mDeviceContext, t );
-		hdrBuffer->SetComputeRootShaderResources( mDeviceContext );
+		mHDRComputedBuffer->SetComputeRootTimestamp( mDeviceContext, t );
+		mHDRBuffer->SetComputeRootShaderResources( mDeviceContext );
 
 		// 렌더 패스를 수행합니다.
 		for ( int i = 0; i < 3; ++i )
 		{
 			// 셰이더를 선택합니다.
 			if ( i != 0 ) ShaderBuilder::HDRComputeShader_get( i ).SetAll( mDeviceContext );
-			hdrComputedBuffer->Compute( mDeviceContext, i );
+			mHDRComputedBuffer->Compute( mDeviceContext, i );
 		}
 
 		// 모든 명령 목록 기록이 완료될 때까지 대기합니다.
@@ -175,8 +191,8 @@ void GameLogic::Render( int frameIndex )
 		ShaderBuilder::ToneMappingShader_get().SetAll( mDeviceContext );
 
 		// HDR 원본 텍스처 및 계산된 HDR 상수를 설정하고 렌더링을 수행합니다.
-		hdrBuffer->SetGraphicsRootShaderResources( mDeviceContext );
-		hdrComputedBuffer->SetGraphicsRootConstantBuffers( mDeviceContext );
+		mHDRBuffer->SetGraphicsRootShaderResources( mDeviceContext );
+		mHDRComputedBuffer->SetGraphicsRootConstantBuffers( mDeviceContext );
 		pCommandList.IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
 		pCommandList.DrawInstanced( 4, 1, 0, 0 );
 	}
@@ -186,19 +202,32 @@ void GameLogic::Render( int frameIndex )
 	directQueue->Execute( mDeviceContext );
 }
 
-void GameLogic::ResizeBuffers( uint32 width, uint32 height )
+void GameLogic::Dispose( object sender )
+{
+	mCurrentScene = nullptr;
+	mSkyboxMesh = nullptr;
+
+	mHDRComputedBuffer = nullptr;
+	mHDRBuffer = nullptr;
+	mGeometryBuffer = nullptr;
+
+	mDeviceContext = nullptr;
+	mViewStorage = nullptr;
+}
+
+void GameLogic::ResizeApp( object sender, Point<int> size )
 {
 	// 필요한 각종 버퍼에게 크기 변경 요청을 수행합니다.
-	geometryBuffer->ResizeBuffers( width, height );
-	hdrBuffer->ResizeBuffers( width, height );
-	hdrComputedBuffer->ResizeBuffers( width, height );
+	mGeometryBuffer->ResizeBuffers( size.X, size.Y );
+	mHDRBuffer->ResizeBuffers( size.X, size.Y );
+	mHDRComputedBuffer->ResizeBuffers( size.X, size.Y );
 }
 
 void GameLogic::TerrainBaking( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = currentScene.Get();
+			auto pScene = mCurrentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForTerrain;
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
@@ -231,7 +260,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = currentScene.Get();
+			auto pScene = mCurrentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForSkinning;
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
@@ -266,12 +295,12 @@ void GameLogic::MeshSkinning( int frameIndex )
 
 void GameLogic::GeometryLighting( int frameIndex )
 {
-	auto* pScene = currentScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	int threadIndex = 0;
 
 	// 디바이스 컨텍스트 사용 전 모두 초기화합니다.
 	int minThreadCount = min( ( int )pScene->mSceneLights.size(), Scene::NumThreadsForLight );
-	this->mLightThreads = minThreadCount;
+	mLightThreads = minThreadCount;
 	for ( int i = 0; i < Scene::NumThreadsForLight; ++i )
 	{
 		if ( i < minThreadCount )
@@ -306,13 +335,13 @@ void GameLogic::GeometryLighting( int frameIndex )
 	// 조명 스레드를 실행합니다.
 	for ( int i = 0; i < minThreadCount; ++i )
 	{
-		ThreadPool::QueueUserWorkItem( bind( &GameLogic::RenderSceneGraphForEachThreads, this, placeholders::_1, i, lightsPerThread[i], frameIndex ), nullptr );
+		ThreadPool::QueueUserWorkItem( bind( &GameLogic::RenderSceneGraphForEachThreads, placeholders::_1, i, lightsPerThread[i], frameIndex ), nullptr );
 	}
 }
 
 void GameLogic::GeometryWriting( int frameIndex )
 {
-	auto* pScene = currentScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextForRender;
 
 	mDeviceContext->FrameIndex = frameIndex;
@@ -327,7 +356,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 	for ( auto i : pScene->mSceneCameras )
 	{
 		// 기하 버퍼를 렌더 타겟으로 설정합니다.
-		geometryBuffer->OMSetRenderTargets( mDeviceContext );
+		mGeometryBuffer->OMSetRenderTargets( mDeviceContext );
 
 		if ( auto skybox = i->ClearMode.TryAs<CameraClearModeSkybox>(); skybox )
 		{
@@ -336,7 +365,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 
 			i->SetGraphicsRootConstantBufferView( mDeviceContext, frameIndex );
 			mDeviceContext->SetGraphicsRootShaderResources( Slot_Rendering_Textures, skybox->SkyboxTexture->pShaderResourceView );
-			skyboxMesh->DrawIndexed( mDeviceContext );
+			mSkyboxMesh->DrawIndexed( mDeviceContext );
 		}
 
 		// 기하 버퍼 셰이더를 선택합니다.
@@ -347,7 +376,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 		pScene->Render( mDeviceContext, frameIndex );
 
 		// 기하 버퍼 사용을 종료합니다.
-		geometryBuffer->EndDraw( mDeviceContext );
+		mGeometryBuffer->EndDraw( mDeviceContext );
 	}
 
 	mDeviceContext->Close();
@@ -355,7 +384,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 
 void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Light*>& lights, int frameIndex )
 {
-	auto* pScene = currentScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextsForLight[threadIndex];
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
 

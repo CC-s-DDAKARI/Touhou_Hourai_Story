@@ -168,9 +168,6 @@
     <ClInclude Include="Details.CSwapChain.h">
       <Filter>Details</Filter>
     </ClInclude>
-    <ClInclude Include="Details.GameLogic.h">
-      <Filter>Details</Filter>
-    </ClInclude>
     <ClInclude Include="Details.GeometryBuffer.h">
       <Filter>Details</Filter>
     </ClInclude>
@@ -406,6 +403,9 @@
     <ClInclude Include="Details.UISystem.h">
       <Filter>Packages</Filter>
     </ClInclude>
+    <ClInclude Include="Details.GameLogic.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -536,9 +536,6 @@
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.CSwapChain.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.GameLogic.cpp">
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.GeometryBuffer.cpp">
@@ -738,6 +735,9 @@
     </ClCompile>
     <ClCompile Include="Details.AsyncLoad.cpp">
       <Filter>Details</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.GameLogic.cpp">
+      <Filter>Packages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

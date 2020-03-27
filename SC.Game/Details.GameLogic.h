@@ -2,54 +2,45 @@
 
 namespace SC::Game::Details
 {
-	class GameLogic : virtual public Object
+	class GameLogic abstract
 	{
-		friend class Application;
+	public:
+		static Diagnostics::StepTimer mTimer;
+		static Diagnostics::StepTimer mPhysicsTimer;
+		static Diagnostics::StepTimer mRenderTimer;
 
-		struct tag_GraphPair
-		{
-			int ThreadIndex;
-			std::list<GameObject*> Graph;
-		};
+		static RefPtr<VisibleViewStorage> mViewStorage;
+		static RefPtr<CDeviceContext> mDeviceContext;
 
-		RefPtr<Diagnostics::StepTimer> timer;
-		RefPtr<Diagnostics::StepTimer> physicsTimer;
+		static RefPtr<GeometryBuffer> mGeometryBuffer;
+		static RefPtr<HDRBuffer> mHDRBuffer;
+		static RefPtr<HDRComputedBuffer> mHDRComputedBuffer;
 
-		RefPtr<VisibleViewStorage> mVisibleViewStorage;
-		RefPtr<CDeviceContext> mDeviceContext;
-		RefPtr<Threading::Event> waitingHandle;
-
-		RefPtr<GeometryBuffer> geometryBuffer;
-		RefPtr<HDRBuffer> hdrBuffer;
-		RefPtr<HDRComputedBuffer> hdrComputedBuffer;
-
-		/* Default assets */
-		RefPtr<Mesh> skyboxMesh;
-
-		RefPtr<Scene> currentScene;
+		static RefPtr<Mesh> mSkyboxMesh;
+		static RefPtr<Scene> mCurrentScene;
 
 		// 멀티 스레드를 위한 추가 개체입니다.
-		std::atomic<int> mCompletedValue;
-		int mCompletedGoal;
-		Threading::Event mCompletedEvent;
-
-		int mLightThreads;
+		static std::atomic<int> mCompletedValue;
+		static int mCompletedGoal;
+		static Threading::Event mCompletedEvent;
+		static int mLightThreads;
 
 	public:
-		GameLogic();
-		~GameLogic();
+		static void Initialize();
+		static void Update();
+		static void FixedUpdate();
+		static void Render( int frameIndex );
 
-		void Update();
-		void FixedUpdate();
-		void Render( int frameIndex );
-		void ResizeBuffers( uint32 width, uint32 height );
+	private:
+		static void Dispose( object sender );
+		static void ResizeApp( object sender, Drawing::Point<int> size );
 
-		void TerrainBaking( int frameIndex );
-		void MeshSkinning( int frameIndex );
-		void GeometryLighting( int frameIndex );
-		void GeometryWriting( int frameIndex );
+		static void TerrainBaking( int frameIndex );
+		static void MeshSkinning( int frameIndex );
+		static void GeometryLighting( int frameIndex );
+		static void GeometryWriting( int frameIndex );
 
-		void RenderSceneGraphForEachThreads( object, int threadIndex, std::list<Light*>& lights, int frameIndex );
-		void FetchAndSetThread();
+		static void RenderSceneGraphForEachThreads( object, int threadIndex, std::list<Light*>& lights, int frameIndex );
+		static void FetchAndSetThread();
 	};
 }
