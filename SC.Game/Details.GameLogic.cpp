@@ -17,7 +17,7 @@ GameLogic::GameLogic() : Object()
 	physicsTimer->IsFixedTimeStep = true;
 
 	// 주 렌더링 디바이스 컨텍스트 개체를 생성합니다.
-	mVisibleViewStorage = new VisibleViewStorage( Graphics::mDevice.Get() );
+	mVisibleViewStorage = new VisibleViewStorage();
 	mDeviceContext = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 
 	// 스레드 대기를 위한 핸들을 생성합니다.
@@ -69,7 +69,8 @@ void GameLogic::Render( int frameIndex )
 
 	// 렌더링을 실행하기 전 장치를 초기화합니다.
 	mVisibleViewStorage->Reset();
-	mDeviceContext->Reset( directQueue, ( ID3D12CommandAllocator* )&frameIndex, nullptr );
+	mDeviceContext->FrameIndex = frameIndex;
+	mDeviceContext->Reset( directQueue, nullptr, nullptr );
 	mDeviceContext->SetVisibleViewStorage( mVisibleViewStorage );
 
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
@@ -202,7 +203,8 @@ void GameLogic::TerrainBaking( int frameIndex )
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
 			pScene->mViewStorageForTerrain->Reset();
-			mDeviceContext->Reset( computeQueue.Get(), ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_Terrain.Get() );
+			mDeviceContext->FrameIndex = frameIndex;
+			mDeviceContext->Reset( computeQueue.Get(), nullptr, ShaderBuilder::pPipelineState_Terrain.Get() );
 			mDeviceContext->SetVisibleViewStorage( pScene->mViewStorageForTerrain );
 
 			auto& pCommandList = *mDeviceContext->pCommandList.Get();
@@ -235,7 +237,8 @@ void GameLogic::MeshSkinning( int frameIndex )
 
 			auto& skinningCollection = pScene->mpSkinnedMeshRendererQueue->GetCollections();
 
-			mDeviceContext->Reset( computeQueue.Get(), ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_Skinning.Get() );
+			mDeviceContext->FrameIndex = frameIndex;
+			mDeviceContext->Reset( computeQueue.Get(), nullptr, ShaderBuilder::pPipelineState_Skinning.Get() );
 
 			auto& pCommandList = *mDeviceContext->pCommandList.Get();
 			pCommandList.SetComputeRootSignature( ShaderBuilder::pRootSignature_Skinning.Get() );
@@ -274,7 +277,8 @@ void GameLogic::GeometryLighting( int frameIndex )
 		if ( i < minThreadCount )
 		{
 			auto& mDeviceContext = pScene->mDeviceContextsForLight[i];
-			mDeviceContext->Reset( nullptr, ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
+			mDeviceContext->FrameIndex = frameIndex;
+			mDeviceContext->Reset( nullptr, nullptr, ShaderBuilder::pPipelineState_ShadowCastShader.Get() );
 			mDeviceContext->pCommandList->SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
 
 			auto& mStorage = pScene->mViewStoragesForLight[i];
@@ -311,7 +315,8 @@ void GameLogic::GeometryWriting( int frameIndex )
 	auto* pScene = currentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextForRender;
 
-	mDeviceContext->Reset( nullptr, ( ID3D12CommandAllocator* )&frameIndex, ShaderBuilder::pPipelineState_ColorShader.Get() );
+	mDeviceContext->FrameIndex = frameIndex;
+	mDeviceContext->Reset( nullptr, nullptr, ShaderBuilder::pPipelineState_ColorShader.Get() );
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
 	pCommandList.SetGraphicsRootSignature( ShaderBuilder::pRootSignature_Rendering.Get() );
 

@@ -9,32 +9,22 @@ namespace SC::Game
 
 		AppConfiguration appConfig;
 		bool discardApp = false;
-		
-		RefPtr<UI::Canvas> frame;
 
-		sc_game_export_object( ComPtr<ID3D12CommandAllocator> ) pCommandAllocators[2];
 		uint64 lastPending[2]{ };
-		RefPtr<Details::CDeviceContext> deviceContextUI;
-		sc_game_export_object( RefPtr<Details::VisibleViewStorage> ) visibleViewStorage;
 		RefPtr<Threading::Event> waitingHandle = new Threading::Event();
-
-		sc_game_export_float( D3D12_VIEWPORT, 6 ) viewport;
-		sc_game_export_float( D3D12_RECT, 4 ) scissor;
 		Threading::Event mRenderThreadEvent;
 
-	protected:
+	public:
 		/// <summary> <see cref="Application"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="appConfig"> 앱 설정을 전달합니다. </param>
 		Application( AppConfiguration appConfig );
+		~Application() override;
 
 		/// <summary> 앱이 시작될 때 호출됩니다. </summary>
 		virtual void OnStart() = 0;
 
 		/// <summary> 앱이 종료될 때 호출됩니다. 앱은 종료 코드를 반환해야 합니다. </summary>
 		virtual int OnExit() = 0;
-
-	public:
-		~Application() override;
 
 		/// <summary> (<see cref="Object"/> 클래스에서 상속 됨.) 현재 개체의 텍스트 표현을 생성하여 반환합니다. </summary>
 		String ToString() override;

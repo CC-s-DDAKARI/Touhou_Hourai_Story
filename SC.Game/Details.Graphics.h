@@ -9,11 +9,12 @@ namespace SC::Game::Details
 		static RefPtr<CDevice> mDevice;
 		static RefPtr<CSwapChain> mSwapChain;
 
+		static std::set<GlyphBuffer*> mGlyphBuffers;
+
 	public:
 		static void Initialize();
 		
 	private:
-		static void Resize( object sender, Drawing::Point<int> size );
 		static void Dispose( object sender );
 	};
 }

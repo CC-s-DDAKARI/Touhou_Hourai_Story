@@ -254,7 +254,7 @@ void GlyphBuffer::DrawGlyphRun( CDeviceContext* clientDrawingContext, float base
 	auto pCommandList = clientDrawingContext->pCommandList.Get();
 
 	// 글리프 렌더링이 아직 완료되지 않았다면 대기합니다.
-	if ( directQueue->pFence->GetCompletedValue() >= lastPending )
+	if ( directQueue->pFence->GetCompletedValue() < lastPending )
 	{
 		clientDrawingContext->pCommandQueue->pCommandQueue->Wait( directQueue->pFence.Get(), lastPending );
 	}

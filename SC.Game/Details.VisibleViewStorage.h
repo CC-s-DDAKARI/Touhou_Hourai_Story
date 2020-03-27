@@ -4,9 +4,6 @@ namespace SC::Game::Details
 {
 	class VisibleViewStorage : virtual public Object
 	{
-		CDevice* deviceRef;
-		ComPtr<ID3D12Device> pDevice;
-
 		D3D12_CPU_DESCRIPTOR_HANDLE handleBase{ };
 		D3D12_GPU_DESCRIPTOR_HANDLE handleBaseGpu{ };
 		UINT stride = 0;
@@ -16,7 +13,7 @@ namespace SC::Game::Details
 		bool failure = false;
 
 	public:
-		VisibleViewStorage( CDevice* device, int capacity = 1024 );
+		VisibleViewStorage( int capacity = 256 );
 
 		int Lock();
 		void Reset();

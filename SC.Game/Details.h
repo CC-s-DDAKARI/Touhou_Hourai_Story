@@ -22,6 +22,7 @@
 #include "Details.App.h"
 #include "Details.Graphics.h"
 #include "Details.Physics.h"
+#include "Details.UISystem.h"
 
 /* Helper */
 #include "Details.ViewStorage.h"

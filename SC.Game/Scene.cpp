@@ -59,14 +59,14 @@ Scene::Scene()
 	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 
 	mDeviceContextForTerrain = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_COMPUTE );
-	mViewStorageForTerrain = new VisibleViewStorage( Graphics::mDevice.Get() );
+	mViewStorageForTerrain = new VisibleViewStorage();
 	mDeviceContextForSkinning = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_COMPUTE );
 	for ( int i = 0; i < NumThreadsForLight; ++i )
 	{
-		mViewStoragesForLight[i] = new VisibleViewStorage( Graphics::mDevice.Get() );
+		mViewStoragesForLight[i] = new VisibleViewStorage();
 		mDeviceContextsForLight[i] = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 	}
-	mViewStorageForRender = new VisibleViewStorage( Graphics::mDevice.Get() );
+	mViewStorageForRender = new VisibleViewStorage();
 	mDeviceContextForRender = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 }
 

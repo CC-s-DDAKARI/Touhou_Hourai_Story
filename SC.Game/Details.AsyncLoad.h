@@ -8,66 +8,20 @@ namespace SC::Game::Details
 		double progress = 0;
 
 	public:
-		AsyncLoad()
-		{
+		AsyncLoad();
 
-		}
-
-		void Bind( RefPtr<IAsyncOperation<object>> asyncLoad )
-		{
-			this->asyncLoad = asyncLoad;
-			this->asyncLoad->Canceled += EventHandler<>( this, &AsyncLoad::OnCanceled );
-		}
-
-		void Cancel() override
-		{
-			asyncLoad->Cancel();
-		}
-
-		void Close() override
-		{
-			asyncLoad->Close();
-		}
-
-		int64 Id_get() override
-		{
-			return asyncLoad->Id;
-		}
-
-		RefPtr<Exception> Error_get() override
-		{
-			return asyncLoad->Error;
-		}
-
-		Threading::AsyncStatus Status_get() override
-		{
-			return asyncLoad->Status;
-		}
-
-		object GetResults() override
-		{
-			return asyncLoad->GetResults();
-		}
-
-		RefPtr<IAsyncOperation<object>> Then( Threading::AsyncTaskChainDelegate<object> asyncTask, object args ) override
-		{
-			return asyncLoad->Then( asyncTask, args );
-		}
-
-		double Progress_get() override
-		{
-			return progress;
-		}
-
-		void Progress_set( double value )
-		{
-			progress = std::clamp<double>( value, 0, 1 );
-		}
+		void Bind( RefPtr<IAsyncOperation<object>> asyncLoad );
+		void Cancel() override;
+		void Close() override;
+		int64 Id_get() override;
+		RefPtr<Exception> Error_get() override;
+		Threading::AsyncStatus Status_get() override;
+		object GetResults() override;
+		RefPtr<IAsyncOperation<object>> Then( Threading::AsyncTaskChainDelegate<object> asyncTask, object args ) override;
+		double Progress_get() override;
+		void Progress_set( double value ) override;
 
 	private:
-		void OnCanceled( object sender )
-		{
-			Canceled( sender );
-		}
+		void OnCanceled( object sender );
 	};
 }

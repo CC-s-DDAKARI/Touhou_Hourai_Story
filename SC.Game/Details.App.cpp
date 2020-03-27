@@ -32,8 +32,8 @@ void App::Start()
 	//Initialize();
 
 	// 앱에 스타트 요청을 보내고, 창을 화면에 표시합니다.
-	//mApp->OnStart();
-	//ShowWindow( mWndHandle, SW_SHOW );
+	mApp->OnStart();
+	ShowWindow( mWndHandle, SW_SHOW );
 
 	// 앱의 주 메시지 루프를 시작합니다.
 	MSG msg{ };
@@ -116,6 +116,7 @@ void App::InitializePackages()
 {
 	Graphics::Initialize();
 	Physics::Initialize();
+	UISystem::Initialize();
 	/*
 	ShaderBuilder::Initialize();
 

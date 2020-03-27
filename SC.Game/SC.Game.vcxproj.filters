@@ -403,6 +403,9 @@
     <ClInclude Include="Details.Physics.h">
       <Filter>Packages</Filter>
     </ClInclude>
+    <ClInclude Include="Details.UISystem.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -729,6 +732,12 @@
     </ClCompile>
     <ClCompile Include="Details.Physics.cpp">
       <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.UISystem.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.AsyncLoad.cpp">
+      <Filter>Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

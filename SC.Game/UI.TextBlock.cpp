@@ -62,7 +62,7 @@ void TextBlock::OnRender( RefPtr<CDeviceContext>& deviceContext )
 	if ( pLayout )
 	{
 		auto rect = ( Drawing::Rect<float> )computed;
-		pLayout->Draw( deviceContext.Get(), glyphRenderer.Get(), rect.Left, rect.Top );
+		HR( pLayout->Draw( deviceContext.Get(), glyphRenderer.Get(), rect.Left, rect.Top ) );
 	}
 }
 

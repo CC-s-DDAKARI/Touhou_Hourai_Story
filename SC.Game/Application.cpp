@@ -63,11 +63,6 @@ int Application::Start( RefPtr<Application> app )
 	try
 #endif
 	{
-		app->frame = new Canvas( "Canvas_root" );
-
-		app->OnStart();
-		ShowWindow( App::mWndHandle, SW_SHOW );
-
 		App::Start();
 	}
 #if !defined( _DEBUG )
@@ -107,7 +102,7 @@ AppConfiguration Application::AppConfig_get()
 
 RefPtr<Canvas> Application::Frame_get()
 {
-	return frame;
+	return UISystem::mRootCanvas;
 }
 
 String Application::AppName_get()
@@ -129,13 +124,6 @@ void Application::InitializeDevice()
 	LoadSystemFont();
 
 	auto pDevice = Graphics::mDevice->pDevice.Get();
-
-	deviceContextUI = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
-	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocators[0] ) ) );
-	HR( pDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pCommandAllocators[1] ) ) );
-	visibleViewStorage = new VisibleViewStorage( Graphics::mDevice.Get() );
-
-	deviceContextUI->CreateShaderInfoBuffers();
 }
 
 void* __stdcall Application::WndProc( void* arg0, uint32 arg1, void* arg2, void* arg3 )
@@ -212,18 +200,6 @@ void Application::ResizeBuffers( uint32 width, uint32 height )
 		Graphics::mSwapChain->ResizeBuffers( width, height );
 		GlobalVar.gameLogic->ResizeBuffers( width, height );
 
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Width = ( float )width;
-		viewport.Height = ( float )height;
-		viewport.MinDepth = 0;
-		viewport.MaxDepth = 1.0f;
-
-		scissor.left = 0;
-		scissor.top = 0;
-		scissor.right = width;
-		scissor.bottom = height;
-
 		discardApp = false;
 	}
 	else
@@ -256,14 +232,7 @@ void Application::Update()
 	}
 
 	GlobalVar.gameLogic->Update();
-
-	DXGI_SWAP_CHAIN_DESC1 desc;
-	HR( Graphics::mSwapChain->pSwapChain->GetDesc1( &desc ) );
-
-	frame->Width = ( double )( desc.Width );
-	frame->Height = ( double )( desc.Height );
-	Drawing::Rect<double> contentRect( 0, 0, frame->Width, frame->Height );
-	frame->Update( contentRect );
+	UISystem::Update();
 }
 
 void Application::Render()
@@ -291,56 +260,7 @@ void Application::Render()
 				}
 
 				GlobalVar.gameLogic->Render( frameIndex_ );
-
-				// 렌더링을 실행하기 전 장치를 초기화합니다.
-				visibleViewStorage->Reset();
-
-				HR( pCommandAllocators[frameIndex_]->Reset() );
-				deviceContextUI->Reset( directQueue, pCommandAllocators[frameIndex_].Get(), nullptr );
-				deviceContextUI->SetVisibleViewStorage( visibleViewStorage );
-				deviceContextUI->FrameIndex = frameIndex_;
-
-				// 스왑 체인의 후면 버퍼를 렌더 타겟으로 설정합니다.
-				auto idx = Graphics::mSwapChain->Index;
-				auto pBackBuffer = Graphics::mSwapChain->ppBackBuffers[idx].Get();
-				auto rtvHandle = Graphics::mSwapChain->RTVHandle[idx];
-				auto pCommandList = deviceContextUI->pCommandList.Get();
-				pCommandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, nullptr );
-
-				pCommandList->RSSetViewports( 1, &viewport );
-				pCommandList->RSSetScissorRects( 1, &scissor );
-
-				// 통합 렌더링 셰이더를 불러옵니다.
-				ShaderBuilder::IntegratedUIShader_get().SetAll( deviceContextUI );
-				ShaderBuilder::TextAndRectShader_get().SetAll( deviceContextUI );
-
-				// 기본 매개변수를 입력합니다.
-				if ( auto slot = deviceContextUI->Slot["ScreenRes"]; slot != -1 )
-				{
-					float resolution[2] = { viewport.Width, viewport.Height };
-					pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-				}
-
-				if ( auto slot = deviceContextUI->Slot["Cursor"]; slot != -1 )
-				{
-					POINT cursor;
-					GetCursorPos( &cursor );
-					ScreenToClient( App::mWndHandle, &cursor );
-					float resolution[2] = { ( float )cursor.x, ( float )cursor.y };
-					pCommandList->SetGraphicsRoot32BitConstants( ( UINT )slot, 2, resolution, 0 );
-				}
-
-				// 프레임을 렌더링합니다.
-				frame->Render( deviceContextUI );
-
-				// 스왑 체인의 후면 버퍼를 원래 상태로 복구합니다.
-				deviceContextUI->TransitionBarrier( pBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, 0 );
-
-				// 명령 목록을 닫고 푸쉬합니다.
-				deviceContextUI->Close();
-				directQueue->Execute( deviceContextUI );
-
-				Graphics::mSwapChain->Present( appConfig.verticalSync );
+				UISystem::Render( frameIndex_ );
 
 				// 마지막 명령 번호를 저장합니다.
 				lastPending[frameIndex_] = directQueue->Signal();

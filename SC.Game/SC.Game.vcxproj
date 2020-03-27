@@ -207,6 +207,7 @@
     <ClCompile Include="CapsuleCollider.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Details.App.cpp" />
+    <ClCompile Include="Details.AsyncLoad.cpp" />
     <ClCompile Include="Details.CBuffer.cpp" />
     <ClCompile Include="Details.CCommandQueue.cpp" />
     <ClCompile Include="Details.CDevice.cpp" />
@@ -243,6 +244,7 @@
     <ClCompile Include="Details.ShaderBuilder.ToneMappingShader.cpp" />
     <ClCompile Include="Details.SkinnedMeshRendererQueue.cpp" />
     <ClCompile Include="Details.TextParser.cpp" />
+    <ClCompile Include="Details.UISystem.cpp" />
     <ClCompile Include="Details.ViewStorage.cpp" />
     <ClCompile Include="Details.ViewStorageException.cpp" />
     <ClCompile Include="Details.VisibleViewStorage.cpp" />
@@ -399,6 +401,7 @@
     <ClInclude Include="Details.ShaderInfo.h" />
     <ClInclude Include="Details.SkinnedMeshRendererQueue.h" />
     <ClInclude Include="Details.TextParser.h" />
+    <ClInclude Include="Details.UISystem.h" />
     <ClInclude Include="Details.ViewStorage.h" />
     <ClInclude Include="Details.ViewStorageException.h" />
     <ClInclude Include="Details.VisibleViewStorage.h" />

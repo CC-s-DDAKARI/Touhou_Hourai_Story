@@ -4,11 +4,11 @@ using namespace SC::Game::Details;
 
 using namespace std;
 
-VisibleViewStorage::VisibleViewStorage( CDevice* device, int capacity ) : Object()
-	, deviceRef( device )
-	, pDevice( device->pDevice )
+VisibleViewStorage::VisibleViewStorage( int capacity ) : Object()
 	, capacity( capacity )
 {
+	auto pDevice = Graphics::mDevice->pDevice.Get();
+
 	// 서술자 힙 개체를 생성합니다.
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{ };
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -33,6 +33,8 @@ int VisibleViewStorage::Lock()
 	{
 		if ( lockId >= capacity )
 		{
+			auto pDevice = Graphics::mDevice->pDevice.Get();
+
 			GC.Add( pDescriptorHeap );
 
 			// 서술자 힙 개체를 다시 생성합니다.

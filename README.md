@@ -1,4 +1,6 @@
 # 패치 노트
+## 2020-03-26. ver 0.4.0.791
+* 엔진 내부 클래스의 관계를 개선했습니다.
 ## 2020-03-24. ver 0.3.0.778
 * Transform 컴포넌트에 ActualPosition, ActualScale, ActualRotation, ActualForward 속성이 추가되었습니다.
   * 이 속성은 렌더링 시 정확한 월드 변환 데이터를 제공합니다.
