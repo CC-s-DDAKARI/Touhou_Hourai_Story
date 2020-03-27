@@ -13,6 +13,9 @@ RefPtr<CDeviceContext> UISystem::mDeviceContext;
 D3D12_VIEWPORT UISystem::mViewport;
 D3D12_RECT UISystem::mScissorRect;
 
+RefPtr<TextFormat> UISystem::mDefaultTextFormat;
+set<GlyphBuffer*> UISystem::mGlyphBuffers;
+
 void UISystem::Initialize()
 {
 	auto pDevice = Graphics::mDevice->pDevice.Get();
@@ -32,6 +35,8 @@ void UISystem::Initialize()
 
 	mScissorRect.left = 0;
 	mScissorRect.top = 0;
+
+	mDefaultTextFormat = new TextFormat( "" );
 }
 
 void UISystem::Update()
@@ -45,7 +50,7 @@ void UISystem::Render( int frameIndex )
 	auto pCommandQueue = directQueue->pCommandQueue.Get();
 
 	// 글리프 렌더링을 시작합니다.
-	for ( auto i : GlobalVar.glyphBuffers )
+	for ( auto i : mGlyphBuffers )
 	{
 		i->LockGlyphs();
 		i->Restart();

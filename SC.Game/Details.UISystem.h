@@ -12,6 +12,9 @@ namespace SC::Game::Details
 		static D3D12_VIEWPORT mViewport;
 		static D3D12_RECT mScissorRect;
 
+		static RefPtr<UI::TextFormat> mDefaultTextFormat;
+		static std::set<GlyphBuffer*> mGlyphBuffers;
+
 	public:
 		static void Initialize();
 		static void Update();

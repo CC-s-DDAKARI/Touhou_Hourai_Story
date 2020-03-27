@@ -121,8 +121,6 @@ void Application::InitializeDevice()
 	GlobalVar.InitializeComponents();
 	ShaderBuilder::Initialize();
 
-	LoadSystemFont();
-
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 }
 
@@ -251,13 +249,6 @@ void Application::Render()
 				auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 				int frameIndex_ = frameIndex;
 
-				// 사전 글리프 렌더링을 시작합니다.
-				for ( auto i : GlobalVar.glyphBuffers )
-				{
-					i->LockGlyphs();
-					i->Restart();
-				}
-
 				GameLogic::Render( frameIndex_ );
 				UISystem::Render( frameIndex_ );
 
@@ -268,43 +259,6 @@ void Application::Render()
 			mRenderThreadEvent.Set();
 		}
 	, nullptr );
-}
-
-void Application::LoadSystemFont()
-{
-	auto pDWriteFactory = Graphics::mFactory->pDWriteFactory.Get();
-	NONCLIENTMETRICS ncm;
-
-	// 시스템 정보를 조회합니다.
-	ncm.cbSize = sizeof( ncm );
-	SystemParametersInfoW( SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0 );
-
-	ComPtr<IDWriteGdiInterop> gdiInterop;
-	HR( pDWriteFactory->GetGdiInterop( &gdiInterop ) );
-
-	// 시스템 폰트를 DirectWrite 형식으로 조회합니다.
-	ComPtr<IDWriteFont> sys_font;
-	HR( gdiInterop->CreateFontFromLOGFONT( &ncm.lfMessageFont, &sys_font ) );
-
-	// 폰트 패밀리를 가져와 폰트 패밀리 이름을 조회합니다.
-	ComPtr<IDWriteFontFamily> family;
-	HR( sys_font->GetFontFamily( &family ) );
-	ComPtr<IDWriteLocalizedStrings> font_family_name;
-	HR( family->GetFamilyNames( &font_family_name ) );
-
-	// ko-KR 지역 문자열 개체를 조회합니다.
-	UINT32 index = 0;
-	UINT32 length = 0;
-	BOOL exists = false;
-	HR( font_family_name->FindLocaleName( L"ko-KR", &index, &exists ) );
-	HR( font_family_name->GetStringLength( index, &length ) );
-
-	std::vector<wchar_t> name( length + 1 );
-	HR( font_family_name->GetString( index, name.data(), length + 1 ) );
-	GlobalVar.systemMessageFontName = name.data();
-
-	// 텍스트 포맷 개체를 생성합니다.
-	GlobalVar.defaultTextFormat = new UI::TextFormat( GlobalVar.systemMessageFontName );
 }
 
 void Application::WaitAllQueues()

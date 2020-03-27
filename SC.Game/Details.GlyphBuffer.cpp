@@ -86,12 +86,12 @@ GlyphBuffer::GlyphBuffer( String fontFamilyName, float fontSize ) : Object()
 	);
 	deviceContext->Close();
 
-	GlobalVar.glyphBuffers.insert( this );
+	UISystem::mGlyphBuffers.insert( this );
 }
 
 GlyphBuffer::~GlyphBuffer()
 {
-	if ( !AppShutdown ) GlobalVar.glyphBuffers.erase( this );
+	if ( !AppShutdown ) UISystem::mGlyphBuffers.erase( this );
 }
 
 void GlyphBuffer::Restart()

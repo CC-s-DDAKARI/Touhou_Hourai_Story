@@ -70,7 +70,7 @@ TextBlock::TextBlock( String name ) : Element( name )
 {
 	ContentChanged += { this, & TextBlock::OnContentChanged };
 
-	textFormat = GlobalVar.defaultTextFormat;
+	textFormat = UISystem::mDefaultTextFormat;
 
 	OnFormatChanged();
 }

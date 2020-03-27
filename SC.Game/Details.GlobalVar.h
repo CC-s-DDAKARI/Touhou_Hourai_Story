@@ -4,13 +4,9 @@ namespace SC::Game::Details
 {
 	struct tag_GlobalVar
 	{
-		String systemMessageFontName;
 		std::mutex globalMutex;
 
 		Drawing::Point<double> scrollDelta;
-
-		RefPtr<UI::TextFormat> defaultTextFormat;
-		std::set<GlyphBuffer*> glyphBuffers;
 
 		int frameIndex = 0;
 

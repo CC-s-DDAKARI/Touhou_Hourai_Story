@@ -72,8 +72,6 @@ namespace SC::Game
 		void Update();
 		void Render();
 
-		void LoadSystemFont();
-
 		static void WaitAllQueues();
 		void WaitPrimaryQueue();
 	};
