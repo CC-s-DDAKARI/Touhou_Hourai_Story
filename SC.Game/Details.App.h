@@ -27,5 +27,6 @@ namespace SC::Game::Details
 		static void OnIdle();
 
 		static LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+		static Drawing::Point<int> LPARAMToPoint( LPARAM lParam );
 	};
 }

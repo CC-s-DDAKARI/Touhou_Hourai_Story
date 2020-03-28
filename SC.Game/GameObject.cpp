@@ -238,8 +238,6 @@ GameObject::~GameObject()
 {
 	if ( !AppShutdown && pxRigidbody )
 	{
-		GlobalVar.pxRigidActor.erase( pxRigidbody );
-
 		pxRigidbody->userData = nullptr;
 		pxRigidbody->release();
 		pxRigidbody = nullptr;
@@ -490,9 +488,6 @@ void GameObject::RigidSwap( void* pxRigid )
 			pScene->pxScene->removeActor( *pxRigidbody );
 		}
 
-		// 가비지 컬렉션 목록에서 리지드바디를 제거합니다.
-		GlobalVar.pxRigidActor.erase( pxRigidbody );
-
 		// 기존의 리지드바디를 제거합니다.
 		pxRigidbody->release();
 		pxRigidbody = nullptr;
@@ -500,9 +495,6 @@ void GameObject::RigidSwap( void* pxRigid )
 
 	pxRigidbody = ( PxRigidActor* )pxRigid;
 	pxRigidbody->userData = this;
-
-	// 가비지 컬렉션 목록에 리지드바디를 추가합니다.
-	GlobalVar.pxRigidActor.insert( pxRigidbody );
 
 	// 장면에 새 리지드바디를 추가합니다.
 	if ( pScene )

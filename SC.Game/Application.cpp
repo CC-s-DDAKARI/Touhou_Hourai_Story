@@ -31,7 +31,6 @@ Application::Application( AppConfiguration appConfig )
 
 	// 내부 API 초기화
 	App::Initialize();
-	InitializeDevice();
 
 	App::Resizing += [&]( auto sender, auto size )
 	{
@@ -59,19 +58,7 @@ String Application::ToString()
 
 int Application::Start( RefPtr<Application> app )
 {
-#if !defined( _DEBUG )
-	try
-#endif
-	{
-		App::Start();
-	}
-#if !defined( _DEBUG )
-	catch ( Exception * e )
-	{
-		MessageBoxW( App::mWndHandle, e->Message.Chars, e->Name.Chars, MB_OK | MB_ICONERROR );
-		delete e;
-	}
-#endif
+	App::Start();
 
 	// 앱이 종료될 때 모든 작업이 완료된 상태인지 검사합니다.
 	WaitAllQueues();
@@ -81,7 +68,6 @@ int Application::Start( RefPtr<Application> app )
 	AppShutdown = true;
 
 	AssetBundle::Dispose();
-	GlobalVar.Release();
 
 	GC.CollectAll();
 
@@ -114,77 +100,6 @@ void Application::AppName_set( String value )
 {
 	appConfig.AppName = value;
 	SetWindowTextW( App::mWndHandle, value.Chars );
-}
-
-void Application::InitializeDevice()
-{
-	GlobalVar.InitializeComponents();
-	ShaderBuilder::Initialize();
-
-	auto pDevice = Graphics::mDevice->pDevice.Get();
-}
-
-void* __stdcall Application::WndProc( void* arg0, uint32 arg1, void* arg2, void* arg3 )
-{
-	static Drawing::Point<int> previous;
-
-	HWND hWnd = ( HWND )arg0;
-	uint32 uMsg = ( UINT )arg1;
-	WPARAM wParam = ( WPARAM )arg2;
-	LPARAM lParam = ( LPARAM )arg3;
-
-	switch ( uMsg )
-	{
-		case WM_SIZE:
-			App::mApp->ResizeBuffers( ( UINT )LOWORD( lParam ), ( UINT )HIWORD( lParam ) );
-			break;
-		case WM_MOUSEMOVE:
-		{
-			auto cur = LPARAMToPoint( lParam );
-			auto del = cur - previous;
-			previous = cur;
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseMove, UI::MouseMoveEventArgs( cur, del ) ) );
-			break;
-		}
-		case WM_LBUTTONDOWN:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, true, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_LBUTTONUP:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, false, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_RBUTTONDOWN:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, true, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_RBUTTONUP:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, false, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_MBUTTONDOWN:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, true, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_MBUTTONUP:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, false, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_XBUTTONDOWN:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, true, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_XBUTTONUP:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
-			break;
-		case WM_MOUSEWHEEL:
-			GlobalVar.scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
-			break;
-		case WM_KEYDOWN:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );
-			break;
-		case WM_KEYUP:
-			App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, false ) ) );
-			break;
-		case WM_DESTROY:
-			PostQuitMessage( 0 );
-			break;
-	}
-
-	return ( void* )DefWindowProcW( hWnd, uMsg, wParam, lParam );
 }
 
 void Application::ResizeBuffers( uint32 width, uint32 height )

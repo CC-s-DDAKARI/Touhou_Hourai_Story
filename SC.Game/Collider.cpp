@@ -96,7 +96,7 @@ void Collider::IsTrigger_set( bool value )
 
 void Collider::ReleaseShape()
 {
-	if ( !AppShutdown && mShape )
+	if ( mShape && !mActor )
 	{
 		mShape->userData = nullptr;
 		mShape->release();

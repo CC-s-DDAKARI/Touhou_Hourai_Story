@@ -64,7 +64,6 @@ namespace SC::Game
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
 
 	public:
-		void InitializeDevice();
 		static void* __stdcall WndProc( void* hWnd, uint32 uMsg, void* wParam, void* lParam );
 		void ResizeBuffers( uint32 width, uint32 height );
 

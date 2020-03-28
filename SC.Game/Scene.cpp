@@ -50,11 +50,6 @@ Scene::Scene()
 	pxSceneDesc.cudaContextManager = Physics::mCudaManager;
 	pxSceneDesc.simulationEventCallback = mSimulationEventCallback.get();
 	pxScene = Physics::mPhysics->createScene( pxSceneDesc );
-	pxScene->setSimulationEventCallback( mSimulationEventCallback.get() );
-
-	GlobalVar.globalMutex.lock();
-	GlobalVar.pxSceneList.insert( pxScene );
-	GlobalVar.globalMutex.unlock();
 
 	mpSkinnedMeshRendererQueue = new SkinnedMeshRendererQueue();
 
@@ -84,10 +79,6 @@ Scene::~Scene()
 
 	if ( !AppShutdown && pxScene )
 	{
-		GlobalVar.globalMutex.lock();
-		GlobalVar.pxSceneList.erase( pxScene );
-		GlobalVar.globalMutex.unlock();
-
 		pxScene->release();
 		pxScene = nullptr;
 	}

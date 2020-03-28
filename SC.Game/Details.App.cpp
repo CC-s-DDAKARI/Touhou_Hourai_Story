@@ -26,9 +26,6 @@ void App::Initialize()
 
 void App::Start()
 {
-	// 앱을 초기화합니다.
-	//Initialize();
-
 	// 앱에 스타트 요청을 보내고, 창을 화면에 표시합니다.
 	mApp->OnStart();
 	ShowWindow( mWndHandle, SW_SHOW );
@@ -67,6 +64,9 @@ void App::Start()
 		}
 #endif
 	}
+
+	// 앱의 모든 작업이 완료될 때까지 대기합니다.
+
 
 	// 앱이 종료될 때 패키지의 Dispose 함수를 호출합니다.
 	Disposing( nullptr );
@@ -116,11 +116,7 @@ void App::InitializePackages()
 	Physics::Initialize();
 	UISystem::Initialize();
 	GameLogic::Initialize();
-	/*
 	ShaderBuilder::Initialize();
-
-	mGameLogic = new GameLogic();
-	*/
 }
 
 void App::ResizeApp( Point<int> appResizing )
@@ -135,12 +131,69 @@ void App::OnIdle()
 
 LRESULT CALLBACK App::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
+	static Point<int> previous( -10000, -10000 );
+
 	switch ( uMsg )
 	{
 	case WM_SIZE:
 		ResizeApp( { ( int )( short )LOWORD( lParam ), ( int )( short )HIWORD( lParam ) } );
 		break;
+	case WM_MOUSEMOVE:
+	{
+		auto cur = LPARAMToPoint( lParam );
+
+		if ( previous == Point<int>( -10000, -10000 ) )
+		{
+			previous = cur;
+		}
+
+		auto del = cur - previous;
+		previous = cur;
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseMove, UI::MouseMoveEventArgs( cur, del ) ) );
+		break;
+	}
+	case WM_LBUTTONDOWN:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, true, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_LBUTTONUP:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::LeftButton, false, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_RBUTTONDOWN:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, true, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_RBUTTONUP:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::RightButton, false, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_MBUTTONDOWN:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, true, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_MBUTTONUP:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( UI::MouseButtonType::MiddleButton, false, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_XBUTTONDOWN:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, true, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_XBUTTONUP:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
+		break;
+	case WM_MOUSEWHEEL:
+		GlobalVar.scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
+		break;
+	case WM_KEYDOWN:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );
+		break;
+	case WM_KEYUP:
+		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, false ) ) );
+		break;
+	case WM_DESTROY:
+		PostQuitMessage( 0 );
+		break;
 	}
 
 	return DefWindowProcW( hWnd, uMsg, wParam, lParam );
+}
+
+Point<int> App::LPARAMToPoint( LPARAM lParam )
+{
+	return Point<int>( ( int )LOWORD( lParam ), ( int )HIWORD( lParam ) );
 }

@@ -9,12 +9,6 @@ namespace SC::Game::Details
 		Drawing::Point<double> scrollDelta;
 
 		int frameIndex = 0;
-
-		std::set<physx::PxScene*> pxSceneList;
-		std::set<physx::PxRigidActor*> pxRigidActor;
-
-		void InitializeComponents();
-		void Release();
 	};
 
 	extern tag_GlobalVar GlobalVar;

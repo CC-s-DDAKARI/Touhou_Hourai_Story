@@ -99,3 +99,17 @@ ShaderModule ShaderBuilder::TextAndRectShader_get()
 {
 	return textAndRectShader;
 }
+
+void ShaderBuilder::Dispose( object sender )
+{
+	pRootSignature_Terrain = nullptr;
+	pPipelineState_Terrain = nullptr;
+
+	pRootSignature_Skinning = nullptr;
+	pPipelineState_Skinning = nullptr;
+
+	pRootSignature_Rendering = nullptr;
+	pPipelineState_ColorShader = nullptr;
+	pPipelineState_ShadowCastShader = nullptr;
+	pPipelineState_SkyboxShader = nullptr;
+}

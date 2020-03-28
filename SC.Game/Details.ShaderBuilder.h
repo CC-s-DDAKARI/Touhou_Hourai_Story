@@ -68,6 +68,8 @@ namespace SC::Game::Details
 		static ShaderModule TextAndRectShader_get();
 
 	private:
+		static void Dispose( object sender );
+
 		static void LoadTerrainShader();
 		static void LoadSkinningShader();
 		static void LoadRenderingShader();
