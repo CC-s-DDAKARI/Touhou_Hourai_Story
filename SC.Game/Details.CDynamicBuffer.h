@@ -2,15 +2,21 @@
 
 namespace SC::Game::Details
 {
-	class CDynamicBuffer : virtual public Object
+	class CDynamicBuffer : public IUnknown
 	{
+		std::atomic<ULONG> mRefCount;
+
 		int indexOf = -1;
 		RefPtr<HeapAllocator> pAllocator;
 
 	public:
 		CDynamicBuffer( RefPtr<HeapAllocator> pAllocator, int indexOf, D3D12_GPU_VIRTUAL_ADDRESS virtualAddress, void* pBlock );
 		CDynamicBuffer( ComPtr<ID3D12Resource>&& pResource );
-		~CDynamicBuffer() override;
+		~CDynamicBuffer();
+
+		HRESULT STDMETHODCALLTYPE QueryInterface( REFIID riid, _COM_Outptr_ void** ppvObject ) override;
+		ULONG STDMETHODCALLTYPE AddRef() override;
+		ULONG STDMETHODCALLTYPE Release() override;
 
 		ComPtr<ID3D12Resource> pResource;
 		D3D12_GPU_VIRTUAL_ADDRESS VirtualAddress;

@@ -17,7 +17,7 @@ namespace SC::Game::Details
 		uint32 width = 0;
 		uint32 height = 0;
 
-		RefPtr<CShaderResourceView> ppShaderResourceViews[1];
+		ComPtr<CShaderResourceView> ppShaderResourceViews[1];
 
 	public:
 		HDRBuffer( RefPtr<CDevice>& device );

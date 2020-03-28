@@ -12,7 +12,7 @@ namespace SC::Game::Details
 		RefPtr<VisibleViewStorage> viewStorage;
 		std::map<std::string, int, std::less<>> slotMap;
 
-		RefPtr<CDynamicBuffer> uiShaderInfos[2];
+		ComPtr<CDynamicBuffer> uiShaderInfos[2];
 		uint32 uiShaderInfoOffset = 0;
 
 	public:
@@ -26,15 +26,15 @@ namespace SC::Game::Details
 		void Close();
 		void SetVisibleViewStorage( RefPtr<VisibleViewStorage>& srvStorage );
 		void SetSlotMap( const std::map<std::string, int, std::less<>>& slotMap );
-		void SetGraphicsRootShaderResources( int slot, RefPtr<CShaderResourceView>& pSRV );
+		void SetGraphicsRootShaderResources( int slot, ComPtr<CShaderResourceView>& pSRV );
 		void SetGraphicsRootShaderResources( int slot, int numViews, CShaderResourceView* const* ppSRVs );
-		void SetGraphicsRootShaderResources( int slot, int numViews, RefPtr<CShaderResourceView>* ppSRVs );
-		void SetComputeRootShaderResources( int slot, RefPtr<CShaderResourceView>& pSRV );
+		void SetGraphicsRootShaderResources( int slot, int numViews, ComPtr<CShaderResourceView>* ppSRVs );
+		void SetComputeRootShaderResources( int slot, ComPtr<CShaderResourceView>& pSRV );
 		void SetComputeRootShaderResources( int slot, int numViews, CShaderResourceView* const* ppSRVs );
-		void SetComputeRootShaderResources( int slot, int numViews, RefPtr<CShaderResourceView>* ppSRVs );
-		void SetComputeRootUnorderedAccessViews( int slot, RefPtr<CUnorderedAccessView>& pUAV );
+		void SetComputeRootShaderResources( int slot, int numViews, ComPtr<CShaderResourceView>* ppSRVs );
+		void SetComputeRootUnorderedAccessViews( int slot, ComPtr<CUnorderedAccessView>& pUAV );
 		void SetComputeRootUnorderedAccessViews( int slot, int numViews, CUnorderedAccessView* const* ppUAVs );
-		void SetComputeRootUnorderedAccessViews( int slot, int numViews, RefPtr<CUnorderedAccessView>* ppUAVs );
+		void SetComputeRootUnorderedAccessViews( int slot, int numViews, ComPtr<CUnorderedAccessView>* ppUAVs );
 		void DispatchShaderInfo( int numStructs, const tag_ShaderInfo* pShaderInfos );
 
 		CCommandQueue* pCommandQueue = nullptr;

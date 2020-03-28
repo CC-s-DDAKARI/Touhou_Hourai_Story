@@ -10,35 +10,19 @@ bool HeightMap::Lock( RefPtr<CDeviceContext>& deviceContext )
 	if ( !copySuccessFlag )
 	{
 		// 복사가 아직 완료되지 않았을 경우,
-		if ( auto pFence = Graphics::mDevice->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
+		if ( auto pFence = Graphics::mDevice->CopyQueue->pFence.Get(); pFence->GetCompletedValue() >= uploadFenceValue )
 		{
 			copySuccessFlag = true;
-			GC.Add( pUploadCommands );
-			GC.Add( pUploadHeap );
 		}
 	}
 
 	return copySuccessFlag;
 }
 
-bool HeightMap::IsValid_get()
-{
-	if ( !copySuccessFlag )
-	{
-		if ( auto pFence = Graphics::mDevice->DirectQueue[queueIndex]->pFence.Get(); pFence->GetCompletedValue() < uploadFenceValue )
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
 HeightMap::~HeightMap()
 {
-	GC.Add( pTexture2D );
-	GC.Add( pShaderResourceView );
-	GC.Add( pUploadCommands );
-	GC.Add( pUploadHeap );
+	GC::Add( GlobalVar.frameIndex, pTexture2D.Get(), 1 );
+	GC::Add( GlobalVar.frameIndex, pShaderResourceView.Get(), 1 );
 }
 
 HeightMap::HeightMap( String name, const path& filepath, uint32 width, uint32 height, int queueIndex ) : Assets( name )
@@ -106,12 +90,13 @@ void HeightMap::InitializeFrom( vector<uint8>& buffer, int queueIndex )
 	bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 	// 업로드 힙 자원을 생성합니다.
+	ComPtr<ID3D12Resource> pUploadHeap;
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };
 	HR( pDevice.CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS( &pUploadHeap ) ) );
 
 	// 실제 텍스처 자원을 생성합니다.
 	heapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-	HR( pDevice.CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS( &pTexture2D ) ) );
+	HR( pDevice.CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS( &pTexture2D ) ) );
 
 	// 업로드 힙에 텍스처 데이터를 복사합니다.
 	void* pBlock = nullptr;
@@ -125,8 +110,9 @@ void HeightMap::InitializeFrom( vector<uint8>& buffer, int queueIndex )
 	pUploadHeap->Unmap( 0, nullptr );
 
 	// 텍스처 복사 명령 할당을 위해 명령 할당기를 준비합니다.
-	HR( pDevice.CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &pUploadCommands ) ) );
-	var deviceContext = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT, pUploadCommands.Get() );
+	ComPtr<ID3D12CommandAllocator> pUploadCommands;
+	HR( pDevice.CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_COPY, IID_PPV_ARGS( &pUploadCommands ) ) );
+	var deviceContext = new CDeviceContext( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_COPY, pUploadCommands.Get() );
 
 	D3D12_TEXTURE_COPY_LOCATION dst{ };
 	auto src = dst;
@@ -143,15 +129,17 @@ void HeightMap::InitializeFrom( vector<uint8>& buffer, int queueIndex )
 
 	// 복사 명령을 추가합니다.
 	deviceContext->pCommandList->CopyTextureRegion( &dst, 0, 0, 0, &src, nullptr );
-	deviceContext->TransitionBarrier( pTexture2D.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 0 );
 
 	// 명령 목록을 닫고 명령을 카피 큐에 제출합니다.
 	deviceContext->Close();
-	Graphics::mDevice->DirectQueue[queueIndex]->Execute( deviceContext );
+	Graphics::mDevice->CopyQueue->Execute( deviceContext );
 	uploadFenceValue = Graphics::mDevice->CopyQueue->Signal();
 
 	// 셰이더 자원 서술자를 생성합니다.
 	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pTexture2D.Get(), nullptr );
+
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadHeap.Get() );
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadCommands.Get() );
 
 	this->queueIndex = queueIndex;
 }

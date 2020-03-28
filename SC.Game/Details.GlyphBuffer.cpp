@@ -376,8 +376,8 @@ void GlyphBuffer::Expand()
 	D3D12_CLEAR_VALUE clearValue{ Format };
 
 	// 완성되지 않은 프레임을 위해 이전 텍스처를 남겨둡니다.
-	GC.Add( pGlyphTexture );
-	GC.Add( pCommandAllocator );
+	GC::Add( GlobalVar.frameIndex, pGlyphTexture.Get(), 1 );
+	GC::Add( GlobalVar.frameIndex, pCommandAllocator.Get(), 1 );
 
 	HR( pDevice->CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &textureDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, IID_PPV_ARGS( &pGlyphTexture ) ) );
 	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pGlyphTexture.Get(), nullptr );

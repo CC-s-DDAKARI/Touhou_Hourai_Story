@@ -15,7 +15,7 @@ namespace SC::Game::Details
 		ComPtr<ID3D12Resource> pHDRConstants;
 		Drawing::Point<int> halfSize;
 
-		RefPtr<CUnorderedAccessView> pUnorderedAccessViews[2];
+		ComPtr<CUnorderedAccessView> pUnorderedAccessViews[2];
 
 	public:
 		HDRComputedBuffer( RefPtr<CDevice>& device );

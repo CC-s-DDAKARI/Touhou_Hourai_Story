@@ -322,9 +322,6 @@
     <ClInclude Include="..\Include\SC.Game\UI.ProgressBar.h">
       <Filter>UI.Controls</Filter>
     </ClInclude>
-    <ClInclude Include="Details.GarbageCollector.h">
-      <Filter>Details</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\SC.Game\PhysicsMaterial.h">
       <Filter>Assets</Filter>
     </ClInclude>
@@ -404,6 +401,9 @@
       <Filter>Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.GameLogic.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.GC.h">
       <Filter>Packages</Filter>
     </ClInclude>
   </ItemGroup>
@@ -667,9 +667,6 @@
     <ClCompile Include="UI.Button.cpp">
       <Filter>UI.Controls</Filter>
     </ClCompile>
-    <ClCompile Include="Details.GarbageCollector.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
     <ClCompile Include="PhysicsMaterial.cpp">
       <Filter>Assets</Filter>
     </ClCompile>
@@ -737,6 +734,9 @@
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.GameLogic.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.GC.cpp">
       <Filter>Packages</Filter>
     </ClCompile>
   </ItemGroup>

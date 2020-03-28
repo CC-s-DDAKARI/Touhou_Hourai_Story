@@ -3,6 +3,7 @@ using namespace SC::Game;
 using namespace SC::Game::Details;
 using namespace SC::Drawing;
 using namespace SC::Game::UI;
+using namespace SC::Threading;
 
 using namespace std;
 
@@ -12,13 +13,16 @@ HWND App::mWndHandle;
 AppConfiguration App::mConfiguration;
 bool App::mDiscardPresent = false;
 
-SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
-SC::Event<> App::Disposing;
-SC::Event<Point<int>> App::Resizing;
-
 ComPtr<ID3D12Fence> App::mFence;
 uint64 App::mFenceValue;
 Threading::Event App::mFenceEvent;
+
+uint64 App::mLastPending[2];
+Threading::Event App::mRenderThreadEvent;
+
+SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
+SC::Event<> App::Disposing;
+SC::Event<Point<int>> App::Resizing;
 
 void App::Initialize()
 {
@@ -30,6 +34,8 @@ void App::Initialize()
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 	HR( pDevice->CreateFence( 1, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS( &mFence ) ) );
 	mFenceValue = 1;
+
+	mRenderThreadEvent.Set();
 }
 
 void App::Start()
@@ -129,6 +135,7 @@ void App::InitializePackages()
 	UISystem::Initialize();
 	GameLogic::Initialize();
 	ShaderBuilder::Initialize();
+	GC::Initialize();
 }
 
 void App::ResizeApp( Point<int> size )
@@ -152,7 +159,56 @@ void App::ResizeApp( Point<int> size )
 
 void App::OnIdle()
 {
-	mApp->IdleProcess();
+	GlobalVar.frameIndex += 1;
+	if ( GlobalVar.frameIndex >= 2 ) GlobalVar.frameIndex = 0;
+
+	Update();
+	if ( !mDiscardPresent ) Render();
+	//mApp->IdleProcess();
+
+	GC::Collect( GlobalVar.frameIndex );
+}
+
+void App::Update()
+{
+	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
+	if ( SceneManager::mCurrentScene.Get() )
+	{
+		mRenderThreadEvent.WaitForSingleObject();
+		GameLogic::mCurrentScene = move( SceneManager::mCurrentScene );
+		mRenderThreadEvent.Set();
+	}
+
+	GameLogic::Update();
+	UISystem::Update();
+}
+
+void App::Render()
+{
+	int frameIndex = GlobalVar.frameIndex;
+
+	mRenderThreadEvent.WaitForSingleObject( 1000 );
+
+	if ( mFence->GetCompletedValue() < mLastPending[frameIndex] )
+	{
+		HR( mFence->SetEventOnCompletion( mLastPending[frameIndex], mFenceEvent.Handle ) );
+		mFenceEvent.WaitForSingleObject( 1000 );
+	}
+
+	ThreadPool::QueueUserWorkItem( [frameIndex]( object )
+		{
+			auto pCommandQueue = Graphics::mDevice->DirectQueue[0]->pCommandQueue.Get();
+
+			GameLogic::Render( frameIndex );
+			UISystem::Render( frameIndex );
+
+			// 마지막 명령 번호를 저장합니다.
+			HR( pCommandQueue->Signal( mFence.Get(), ++mFenceValue ) );
+			mLastPending[frameIndex] = mFenceValue;
+
+			mRenderThreadEvent.Set();
+		}
+	, nullptr );
 }
 
 LRESULT CALLBACK App::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )

@@ -5,15 +5,6 @@ namespace SC::Game
 	/// <summary> 게임 앱에 대한 제어 함수를 제공하며 앱의 기초 처리기에 대한 인터페이스를 제공합니다. </summary>
 	class Application : virtual public Object
 	{
-		friend class Scene;
-
-		AppConfiguration appConfig;
-		bool discardApp = false;
-
-		uint64 lastPending[2]{ };
-		RefPtr<Threading::Event> waitingHandle = new Threading::Event();
-		Threading::Event mRenderThreadEvent;
-
 	public:
 		/// <summary> <see cref="Application"/> 클래스의 새 인스턴스를 초기화합니다. </summary>
 		/// <param name="appConfig"> 앱 설정을 전달합니다. </param>
@@ -62,10 +53,5 @@ namespace SC::Game
 
 		/// <summary> 앱에서 처리하지 않은 비동기 완료 처리기 또는 이벤트 처리기에 오류가 있는 경우 발생합니다. </summary>
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
-
-	public:
-		void IdleProcess();
-		void Update();
-		void Render();
 	};
 }

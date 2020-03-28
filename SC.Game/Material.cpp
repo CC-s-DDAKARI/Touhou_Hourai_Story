@@ -6,11 +6,11 @@ using namespace std;
 
 ComPtr<ID3D12Resource> Material::pReflectionBuffer;
 Material::Reflection* Material::reflectionBufferPtr;
-RefPtr<CShaderResourceView> Material::pShaderResourceView;
+ComPtr<CShaderResourceView> Material::pShaderResourceView;
 int Material::capacity;
 int Material::reference_count;
 vector<bool> Material::locked;
-RefPtr<CShaderResourceView> Material::pNullSRV;
+ComPtr<CShaderResourceView> Material::pNullSRV;
 
 void Material::SetGraphicsRootConstantBuffers( RefPtr<CDeviceContext>& deviceContext )
 {
@@ -74,7 +74,8 @@ Material::Material( String name ) : Assets( name )
 
 Material::~Material()
 {
-	GC.Add( constantBuffer );
+	GC::Add( GlobalVar.frameIndex, constantBuffer.Get(), 1 );
+	GC::Add( GlobalVar.frameIndex, constantBuffer.Get(), 1 );
 
 	if ( --reference_count == 0 )
 	{

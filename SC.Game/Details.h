@@ -7,7 +7,7 @@
 #include "Details.CRootSignatureDesc.h"
 #include "Details.CGraphicsPipelineStateDesc.h"
 #include "Details.ShaderInfo.h"
-#include "Details.GarbageCollector.h"
+#include "Details.GC.h"
 #include "Details.ContactCallback.h"
 
 /* Core */

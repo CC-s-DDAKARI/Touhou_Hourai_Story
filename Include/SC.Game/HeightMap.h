@@ -18,10 +18,7 @@ namespace SC::Game
 		};
 
 		sc_game_export_object( ComPtr<ID3D12Resource> ) pTexture2D;
-		sc_game_export_object( RefPtr<Details::CShaderResourceView> ) pShaderResourceView;
-
-		sc_game_export_object( ComPtr<ID3D12CommandAllocator> ) pUploadCommands;
-		sc_game_export_object( ComPtr<ID3D12Resource> ) pUploadHeap;
+		sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pShaderResourceView;
 		uint64 uploadFenceValue = 0;
 
 		bool copySuccessFlag = false;
@@ -32,9 +29,6 @@ namespace SC::Game
 		uint32 height;
 
 		bool Lock( RefPtr<Details::CDeviceContext>& deviceContext );
-
-		vs_property_get( bool, IsValid );
-		bool IsValid_get();
 
 	public:
 		/// <summary> <see cref="HeightMap"/> 클래스의 새 인스턴스를 초기화합니다. </summary>

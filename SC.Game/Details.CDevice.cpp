@@ -5,7 +5,7 @@ using namespace SC::Game::Details;
 using namespace std;
 
 CDevice::CDevice( IDXGIAdapter1* pAdapter ) : Object()
-	, pAdapter( pAdapter )
+, pAdapter( pAdapter )
 {
 #if defined( _DEBUG )
 	// 응용 프로그램이 디버그 모드로 빌드되었을 경우:
@@ -67,7 +67,7 @@ ComPtr<ID3D12RootSignature> CDevice::CreateRootSignature( const D3D12_ROOT_SIGNA
 	return move( pRootSignature );
 }
 
-RefPtr<CShaderResourceView> CDevice::CreateShaderResourceView( ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC* pSRVDesc )
+ComPtr<CShaderResourceView> CDevice::CreateShaderResourceView( ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC* pSRVDesc )
 {
 	// 서술자 공간에서 다음 서술자의 위치를 조회합니다.
 	viewStorageLocker.lock();
@@ -80,7 +80,7 @@ RefPtr<CShaderResourceView> CDevice::CreateShaderResourceView( ID3D12Resource* p
 	{
 		lock_guard<mutex> lock( viewStorageLocker );
 		viewStorageChain.pop();
-		
+
 		if ( viewStorageChain.empty() )
 		{
 			storage = new ViewStorage( this );
@@ -91,7 +91,7 @@ RefPtr<CShaderResourceView> CDevice::CreateShaderResourceView( ID3D12Resource* p
 
 	// 서술자 개체를 생성합니다.
 	auto handle = storage->GetCPUHandle( lockIndex );
-	var srv = new CShaderResourceView( storage, lockIndex, handle );
+	ComPtr<CShaderResourceView> srv = new CShaderResourceView( storage, lockIndex, handle );
 
 	// 셰이더 자원 서술자를 생성합니다.
 	pDevice->CreateShaderResourceView( pResource, pSRVDesc, handle );
@@ -100,7 +100,7 @@ RefPtr<CShaderResourceView> CDevice::CreateShaderResourceView( ID3D12Resource* p
 	return move( srv );
 }
 
-RefPtr<CUnorderedAccessView> CDevice::CreateUnorderedAccessView( ID3D12Resource* pResource, const D3D12_UNORDERED_ACCESS_VIEW_DESC* pUAVDesc )
+ComPtr<CUnorderedAccessView> CDevice::CreateUnorderedAccessView( ID3D12Resource* pResource, const D3D12_UNORDERED_ACCESS_VIEW_DESC* pUAVDesc )
 {
 	// 서술자 공간에서 다음 서술자의 위치를 조회합니다.
 	viewStorageLocker.lock();
@@ -124,7 +124,7 @@ RefPtr<CUnorderedAccessView> CDevice::CreateUnorderedAccessView( ID3D12Resource*
 
 	// 서술자 개체를 생성합니다.
 	auto handle = storage->GetCPUHandle( lockIndex );
-	var srv = new CUnorderedAccessView( storage, lockIndex, handle );
+	ComPtr<CUnorderedAccessView> srv = new CUnorderedAccessView( storage, lockIndex, handle );
 
 	// 셰이더 자원 서술자를 생성합니다.
 	pDevice->CreateUnorderedAccessView( pResource, nullptr, pUAVDesc, handle );
@@ -133,7 +133,7 @@ RefPtr<CUnorderedAccessView> CDevice::CreateUnorderedAccessView( ID3D12Resource*
 	return move( srv );
 }
 
-RefPtr<CDynamicBuffer> CDevice::CreateDynamicBuffer( uint64 sizeInBytes, int alignment )
+ComPtr<CDynamicBuffer> CDevice::CreateDynamicBuffer( uint64 sizeInBytes, int alignment )
 {
 	HeapAllocator* pAlloc = nullptr;
 

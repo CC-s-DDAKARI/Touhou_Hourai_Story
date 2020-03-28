@@ -31,13 +31,13 @@ namespace SC::Game
 
 		static sc_game_export_object( ComPtr<ID3D12Resource> ) pReflectionBuffer;
 		static Reflection* reflectionBufferPtr;
-		static sc_game_export_object( RefPtr<Details::CShaderResourceView> ) pShaderResourceView;
+		static sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pShaderResourceView;
 		static int capacity;
 		static int reference_count;
 		static std::vector<bool> locked;
-		static sc_game_export_object( RefPtr<Details::CShaderResourceView> ) pNullSRV;
+		static sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pNullSRV;
 
-		sc_game_export_object( RefPtr<Details::CDynamicBuffer> ) constantBuffer;
+		sc_game_export_object( ComPtr<Details::CDynamicBuffer> ) constantBuffer;
 		int lockIndex = 0;
 
 		Reflection frameResourceReflection;

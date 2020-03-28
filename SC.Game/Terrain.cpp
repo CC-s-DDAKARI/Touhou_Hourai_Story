@@ -11,28 +11,28 @@ void Terrain::Bake( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 		if ( mHeightMap && mHeightMap->Lock( deviceContext ) )
 		{
 			deviceContext->SetComputeRootShaderResources( Slot_Terrain_HeightMap, mHeightMap->pShaderResourceView );
-		}
 
-		pCommandList.SetComputeRootShaderResourceView( ( UINT )Slot_Terrain_VertexBufferBase, mBaseMesh->vertexBuffer->pResource->GetGPUVirtualAddress() );
-		pCommandList.SetComputeRootUnorderedAccessView( ( UINT )Slot_Terrain_VertexBuffer, mVertexBuffer->pResource->GetGPUVirtualAddress() );
+			pCommandList.SetComputeRootShaderResourceView( ( UINT )Slot_Terrain_VertexBufferBase, mBaseMesh->vertexBuffer->pResource->GetGPUVirtualAddress() );
+			pCommandList.SetComputeRootUnorderedAccessView( ( UINT )Slot_Terrain_VertexBuffer, mVertexBuffer->pResource->GetGPUVirtualAddress() );
 
 #pragma pack( push, 4 )
-		struct
-		{
-			uint GridX;
-			uint GridY;
-		} grid;
+			struct
+			{
+				uint GridX;
+				uint GridY;
+			} grid;
 #pragma pack( pop )
 
-		grid.GridX = mResolution;
-		grid.GridY = mResolution;
-		pCommandList.SetComputeRoot32BitConstants( ( UINT )Slot_Terrain_Constants, 2, &grid, 0 );
-			
-		uint dispatchX = ( ( mResolution + 1 ) - 1 ) / 32 + 1;
-		uint dispatchY = dispatchX;
-		pCommandList.Dispatch( dispatchX, dispatchY, 1 );
+			grid.GridX = mResolution;
+			grid.GridY = mResolution;
+			pCommandList.SetComputeRoot32BitConstants( ( UINT )Slot_Terrain_Constants, 2, &grid, 0 );
 
-		mUpdateTerrain = false;
+			uint dispatchX = ( ( mResolution + 1 ) - 1 ) / 32 + 1;
+			uint dispatchY = dispatchX;
+			pCommandList.Dispatch( dispatchX, dispatchY, 1 );
+
+			mUpdateTerrain = false;
+		}
 	}
 }
 
@@ -46,7 +46,7 @@ void Terrain::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 Terrain::Terrain() : Component()
 {
 	mBaseMesh = Mesh::CreatePlane( "Terrain.Mesh", 1, 1, mResolution, mResolution );
-	mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * mBaseMesh->numVertex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
+	mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * mBaseMesh->numVertex, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
 	mUpdateTerrain = true;
 }
 

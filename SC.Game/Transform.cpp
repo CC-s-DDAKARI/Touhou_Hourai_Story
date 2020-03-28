@@ -32,7 +32,8 @@ Transform::~Transform()
 {
 	if ( hasBuffer )
 	{
-		GC.Add( dynamicBuffer );
+		GC::Add( GlobalVar.frameIndex, dynamicBuffer[0].Get(), 1 );
+		GC::Add( GlobalVar.frameIndex, dynamicBuffer[1].Get(), 1 );
 	}
 }
 

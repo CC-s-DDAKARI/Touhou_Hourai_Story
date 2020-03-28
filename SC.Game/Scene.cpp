@@ -351,8 +351,8 @@ void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 void Scene::PopulateSceneGraph()
 {
 	// 장면 그래프를 변경하기 전 마지막 렌더링과 동기화합니다.
-	App::mApp->mRenderThreadEvent.WaitForSingleObject();
-	App::mApp->mRenderThreadEvent.Set();
+	App::mRenderThreadEvent.WaitForSingleObject();
+	App::mRenderThreadEvent.Set();
 
 	ClearSceneGraph();
 

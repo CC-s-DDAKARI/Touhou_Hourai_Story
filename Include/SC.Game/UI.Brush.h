@@ -23,7 +23,7 @@ namespace SC::Game::UI
 		};
 #pragma pack( pop )
 
-		sc_game_export_object( RefPtr<Details::CDynamicBuffer> ) brushConstants;
+		sc_game_export_object( ComPtr<Details::CDynamicBuffer> ) brushConstants;
 
 	protected:
 		Brush( int type );

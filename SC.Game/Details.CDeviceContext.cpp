@@ -75,7 +75,7 @@ void CDeviceContext::SetSlotMap( const map<string, int, less<>>& slotMap )
 	this->slotMap = slotMap;
 }
 
-void CDeviceContext::SetGraphicsRootShaderResources( int slot, RefPtr<CShaderResourceView>& pSRV )
+void CDeviceContext::SetGraphicsRootShaderResources( int slot, ComPtr<CShaderResourceView>& pSRV )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )
@@ -146,7 +146,7 @@ void CDeviceContext::SetGraphicsRootShaderResources( int slot, int numViews, CSh
 	pCommandList->SetGraphicsRootDescriptorTable( ( UINT )slot, base );
 }
 
-void CDeviceContext::SetGraphicsRootShaderResources( int slot, int numViews, RefPtr<CShaderResourceView>* ppSRVs )
+void CDeviceContext::SetGraphicsRootShaderResources( int slot, int numViews, ComPtr<CShaderResourceView>* ppSRVs )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )
@@ -185,7 +185,7 @@ void CDeviceContext::SetGraphicsRootShaderResources( int slot, int numViews, Ref
 	pCommandList->SetGraphicsRootDescriptorTable( ( UINT )slot, base );
 }
 
-void CDeviceContext::SetComputeRootShaderResources( int slot, RefPtr<CShaderResourceView>& pSRV )
+void CDeviceContext::SetComputeRootShaderResources( int slot, ComPtr<CShaderResourceView>& pSRV )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )
@@ -256,7 +256,7 @@ void CDeviceContext::SetComputeRootShaderResources( int slot, int numViews, CSha
 	pCommandList->SetComputeRootDescriptorTable( ( UINT )slot, base );
 }
 
-void CDeviceContext::SetComputeRootShaderResources( int slot, int numViews, RefPtr<CShaderResourceView>* ppSRVs )
+void CDeviceContext::SetComputeRootShaderResources( int slot, int numViews, ComPtr<CShaderResourceView>* ppSRVs )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )
@@ -295,7 +295,7 @@ void CDeviceContext::SetComputeRootShaderResources( int slot, int numViews, RefP
 	pCommandList->SetComputeRootDescriptorTable( ( UINT )slot, base );
 }
 
-void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, RefPtr<CUnorderedAccessView>& pUAV )
+void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, ComPtr<CUnorderedAccessView>& pUAV )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )
@@ -365,7 +365,7 @@ void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, int numViews,
 	pCommandList->SetComputeRootDescriptorTable( ( UINT )slot, base );
 }
 
-void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, int numViews, RefPtr<CUnorderedAccessView>* ppUAVs )
+void CDeviceContext::SetComputeRootUnorderedAccessViews( int slot, int numViews, ComPtr<CUnorderedAccessView>* ppUAVs )
 {
 #if defined( _DEBUG )
 	if ( !viewStorage )

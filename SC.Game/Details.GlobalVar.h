@@ -13,5 +13,4 @@ namespace SC::Game::Details
 
 	extern tag_GlobalVar GlobalVar;
 	extern bool AppShutdown;
-	extern GarbageCollector GC;
 }

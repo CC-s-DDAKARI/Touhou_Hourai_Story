@@ -11,13 +11,16 @@ namespace SC::Game::Details
 		static AppConfiguration mConfiguration;
 		static bool mDiscardPresent;
 
-		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
-		static Event<> Disposing;
-		static Event<Drawing::Point<int>> Resizing;
-
 		static ComPtr<ID3D12Fence> mFence;
 		static uint64 mFenceValue;
 		static Threading::Event mFenceEvent;
+
+		static uint64 mLastPending[2];
+		static Threading::Event mRenderThreadEvent;
+
+		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
+		static Event<> Disposing;
+		static Event<Drawing::Point<int>> Resizing;
 
 	public:
 		static void Initialize();
@@ -29,6 +32,8 @@ namespace SC::Game::Details
 		static void InitializePackages();
 		static void ResizeApp( Drawing::Point<int> size );
 		static void OnIdle();
+		static void Update();
+		static void Render();
 
 		static LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 		static Drawing::Point<int> LPARAMToPoint( LPARAM lParam );

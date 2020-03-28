@@ -17,7 +17,7 @@ namespace SC::Game
 		};
 #pragma pack( pop )
 
-		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
+		std::array<sc_game_export_object( ComPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
 		RefPtr<CameraClearMode> clearMode = new CameraClearModeColor();
 
 		double aspectRatio = 0;

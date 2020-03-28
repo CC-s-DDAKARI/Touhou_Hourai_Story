@@ -219,7 +219,7 @@
     <ClCompile Include="Details.CSwapChain.cpp" />
     <ClCompile Include="Details.CUnorderedAccessView.cpp" />
     <ClCompile Include="Details.CView.cpp" />
-    <ClCompile Include="Details.GarbageCollector.cpp" />
+    <ClCompile Include="Details.GC.cpp" />
     <ClCompile Include="Details.GlyphBuffer.cpp" />
     <ClCompile Include="Details.Graphics.cpp" />
     <ClCompile Include="Details.HeapAllocator.cpp" />
@@ -381,7 +381,7 @@
     <ClInclude Include="Details.CRootSignatureDesc.h" />
     <ClInclude Include="Details.CShaderResourceView.h" />
     <ClInclude Include="Details.CUnorderedAccessView.h" />
-    <ClInclude Include="Details.GarbageCollector.h" />
+    <ClInclude Include="Details.GC.h" />
     <ClInclude Include="Details.GeometryBuffer.h" />
     <ClInclude Include="Details.GlyphRenderer.h" />
     <ClInclude Include="Details.Graphics.h" />

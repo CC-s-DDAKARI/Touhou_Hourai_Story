@@ -33,9 +33,9 @@ namespace SC::Game::Details
 		void FreeStorage( ViewStorage* pStorage );
 
 		ComPtr<ID3D12RootSignature> CreateRootSignature( const D3D12_ROOT_SIGNATURE_DESC& desc, D3D_ROOT_SIGNATURE_VERSION version = D3D_ROOT_SIGNATURE_VERSION_1_0 );
-		RefPtr<CShaderResourceView> CreateShaderResourceView( ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC* pSRVDesc );
-		RefPtr<CUnorderedAccessView> CreateUnorderedAccessView( ID3D12Resource* pResource, const D3D12_UNORDERED_ACCESS_VIEW_DESC* pUAVDesc );
-		RefPtr<CDynamicBuffer> CreateDynamicBuffer( uint64 sizeInBytes, int alignment = 0 );
+		ComPtr<CShaderResourceView> CreateShaderResourceView( ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC* pSRVDesc );
+		ComPtr<CUnorderedAccessView> CreateUnorderedAccessView( ID3D12Resource* pResource, const D3D12_UNORDERED_ACCESS_VIEW_DESC* pUAVDesc );
+		ComPtr<CDynamicBuffer> CreateDynamicBuffer( uint64 sizeInBytes, int alignment = 0 );
 
 		ComPtr<IDXGIAdapter1> pAdapter;
 		ComPtr<ID3D12Device> pDevice;

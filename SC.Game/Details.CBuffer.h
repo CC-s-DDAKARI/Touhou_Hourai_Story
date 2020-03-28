@@ -7,8 +7,6 @@ namespace SC::Game::Details
 		const D3D12_RESOURCE_STATES initialState;
 
 		RefPtr<CDevice>& deviceRef;
-		ComPtr<ID3D12CommandAllocator> pUploadCommands;
-		ComPtr<ID3D12Resource> pUploadHeap;
 		uint64 uploadFenceValue = 0;
 
 		bool copySuccessFlag = true;

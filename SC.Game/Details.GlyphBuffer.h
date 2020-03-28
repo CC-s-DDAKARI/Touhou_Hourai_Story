@@ -62,7 +62,7 @@ namespace SC::Game::Details
 		ComPtr<ID3D12Resource> pGlyphTexture;
 		ComPtr<ID3D11Resource> pGlyphTextureInterop;
 		ComPtr<ID2D1Bitmap1> pGlyphBitmap;
-		RefPtr<CShaderResourceView> pShaderResourceView;
+		ComPtr<CShaderResourceView> pShaderResourceView;
 		float lastGlyphOffset = 0;
 		
 		std::unordered_map<tag_GlyphInfo, float> allocated;

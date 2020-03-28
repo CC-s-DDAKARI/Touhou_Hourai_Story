@@ -16,8 +16,8 @@ CDeviceContextAndAllocator::CDeviceContextAndAllocator( RefPtr<CDevice>& device,
 
 CDeviceContextAndAllocator::~CDeviceContextAndAllocator()
 {
-	GC.Add( pAllocators[0] );
-	GC.Add( pAllocators[1] );
+	GC::Add( GlobalVar.frameIndex, pAllocators[0].Get(), 1 );
+	GC::Add( GlobalVar.frameIndex, pAllocators[1].Get(), 1 );
 }
 
 void CDeviceContextAndAllocator::Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pCommandAllocator, ID3D12PipelineState* pInitialPipelineState )

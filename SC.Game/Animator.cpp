@@ -19,7 +19,8 @@ Animator::Animator() : Component()
 
 Animator::~Animator()
 {
-	GC.Add( finalTransformBuffer );
+	GC::Add( GlobalVar.frameIndex, finalTransformBuffer[0].Get(), 1 );
+	GC::Add( GlobalVar.frameIndex, finalTransformBuffer[1].Get(), 1 );
 }
 
 object Animator::Clone()

@@ -14,7 +14,7 @@ Rect<double> Image::OnUpdate( Rect<double> clientRect )
 
 void Image::OnRender( RefPtr<CDeviceContext>& deviceContext )
 {
-	if ( imageSource->IsValid )
+	if ( imageSource->Lock( deviceContext ) )
 	{
 		auto pCommandList = deviceContext->pCommandList.Get();
 

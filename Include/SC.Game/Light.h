@@ -33,10 +33,10 @@ namespace SC::Game
 	private:
 		Drawing::Color lightColor;
 
-		std::array<sc_game_export_object( RefPtr<Details::CDynamicBuffer> ), 2> lightBuffer;
+		std::array<sc_game_export_object( ComPtr<Details::CDynamicBuffer> ), 2> lightBuffer;
 
 		bool shadowCast = false;
-		sc_game_export_object( RefPtr<Details::CShaderResourceView> ) pShaderResourceView;
+		sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pShaderResourceView;
 
 	protected:
 		LightConstants frameResource;
