@@ -32,11 +32,6 @@ Application::Application( AppConfiguration appConfig )
 	// 내부 API 초기화
 	App::Initialize();
 
-	App::Resizing += [&]( auto sender, auto size )
-	{
-		ResizeBuffers( ( uint )size.X, ( uint )size.Y );
-	};
-
 	// 사용한 그래픽 어댑터의 이름을 가져옵니다.
 	auto pAdapter = Graphics::mDevice->pAdapter.Get();
 	DXGI_ADAPTER_DESC1 desc;
@@ -59,9 +54,6 @@ String Application::ToString()
 int Application::Start( RefPtr<Application> app )
 {
 	App::Start();
-
-	// 앱이 종료될 때 모든 작업이 완료된 상태인지 검사합니다.
-	WaitAllQueues();
 
 	// 앱 종료 요청을 수행합니다.
 	auto ret = app->OnExit();
@@ -102,24 +94,6 @@ void Application::AppName_set( String value )
 	SetWindowTextW( App::mWndHandle, value.Chars );
 }
 
-void Application::ResizeBuffers( uint32 width, uint32 height )
-{
-	if ( width != 0 && height != 0 )
-	{
-		WaitPrimaryQueue();
-		mRenderThreadEvent.WaitForSingleObject();
-		mRenderThreadEvent.Set();
-
-		Graphics::mSwapChain->ResizeBuffers( width, height );
-
-		discardApp = false;
-	}
-	else
-	{
-		discardApp = true;
-	}
-}
-
 void Application::IdleProcess()
 {
 	GlobalVar.frameIndex += 1;
@@ -136,10 +110,10 @@ void Application::IdleProcess()
 void Application::Update()
 {
 	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
-	if ( SceneManager::currentScene.Get() )
+	if ( SceneManager::mCurrentScene.Get() )
 	{
 		mRenderThreadEvent.WaitForSingleObject();
-		GameLogic::mCurrentScene = move( SceneManager::currentScene );
+		GameLogic::mCurrentScene = move( SceneManager::mCurrentScene );
 		mRenderThreadEvent.Set();
 	}
 
@@ -174,43 +148,4 @@ void Application::Render()
 			mRenderThreadEvent.Set();
 		}
 	, nullptr );
-}
-
-void Application::WaitAllQueues()
-{
-	/*
-	RefPtr<Threading::Event> handle = new Threading::Event();
-
-	CCommandQueue* ppCommandQueues[9]
-	{
-		Graphics::mDevice->DirectQueue[0].Get(),
-		Graphics::mDevice->DirectQueue[1].Get(),
-		Graphics::mDevice->DirectQueue[2].Get(),
-		Graphics::mDevice->DirectQueue[3].Get(),
-		Graphics::mDevice->CopyQueue.Get(),
-		Graphics::mDevice->ComputeQueue[0].Get(),
-		Graphics::mDevice->ComputeQueue[1].Get(),
-		Graphics::mDevice->ComputeQueue[2].Get(),
-		Graphics::mDevice->ComputeQueue[3].Get(),
-	};
-
-	for ( int i = 0; i < ARRAYSIZE( ppCommandQueues ); ++i )
-	{
-		auto pFence = ppCommandQueues[i]->pFence.Get();
-		auto lastPending = ppCommandQueues[i]->LastPending.load();
-		if ( pFence->GetCompletedValue() < lastPending )
-		{
-			HR( pFence->SetEventOnCompletion( lastPending, handle->Handle ) );
-
-			// 최대 1초 대기합니다. 대기에 실패하였을 경우 무시합니다.
-			handle->WaitForSingleObject( 1000 );
-		}
-	}
-	*/
-}
-
-void Application::WaitPrimaryQueue()
-{
-	auto primaryQueue = Graphics::mDevice->DirectQueue[0].Get();
-	primaryQueue->WaitFor( primaryQueue->LastPending, waitingHandle );
 }

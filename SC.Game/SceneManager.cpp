@@ -5,7 +5,7 @@ using namespace SC::Threading;
 
 using namespace std;
 
-RefPtr<Scene> SceneManager::currentScene;
+RefPtr<Scene> SceneManager::mCurrentScene;
 
 void SceneManager::StartScene( RefPtr<IAsyncLoad> sceneAsyncLoad )
 {
@@ -41,10 +41,10 @@ RefPtr<IAsyncLoad> SceneManager::LoadSceneAsync( RefPtr<Scene> scene )
 
 void SceneManager::SwitchScene( RefPtr<Scene> scene )
 {
-	if ( currentScene )
+	if ( mCurrentScene )
 	{
-		currentScene->Unload();
+		mCurrentScene->Unload();
 	}
 
-	currentScene = scene;
+	mCurrentScene = scene;
 }

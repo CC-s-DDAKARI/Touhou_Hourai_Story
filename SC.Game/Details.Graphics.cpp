@@ -14,6 +14,7 @@ set<GlyphBuffer*> Graphics::mGlyphBuffers;
 void Graphics::Initialize()
 {
 	App::Disposing += Dispose;
+	App::Resizing += ResizeApp;
 
 	// 기본 그래픽 디바이스를 생성합니다.
 	mFactory = new IntegratedFactory();
@@ -28,4 +29,9 @@ void Graphics::Dispose( object sender )
 	mSwapChain = nullptr;
 	mDevice = nullptr;
 	mFactory = nullptr;
+}
+
+void Graphics::ResizeApp( object sender, Drawing::Point<int> size )
+{
+	mSwapChain->ResizeBuffers( size.X, size.Y );
 }

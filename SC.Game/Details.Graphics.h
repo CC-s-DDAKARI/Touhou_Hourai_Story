@@ -16,5 +16,6 @@ namespace SC::Game::Details
 		
 	private:
 		static void Dispose( object sender );
+		static void ResizeApp( object sender, Drawing::Point<int> size );
 	};
 }

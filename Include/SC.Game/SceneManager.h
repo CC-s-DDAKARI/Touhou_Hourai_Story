@@ -5,9 +5,10 @@ namespace SC::Game
 	/// <summary> 장면을 관리하는 클래스입니다. </summary>
 	class SceneManager abstract final : virtual public Object
 	{
+		friend class Details::App;
 		friend class Application;
 
-		static RefPtr<Scene> currentScene;
+		static RefPtr<Scene> mCurrentScene;
 		
 	public:
 		/// <summary> 정의된 장면 클래스를 불러옵니다. </summary>

@@ -99,6 +99,7 @@ namespace SC::Game
 
 	namespace Details
 	{
+		class App;
 		class GameLogic;
 		class CDeviceContext;
 	}

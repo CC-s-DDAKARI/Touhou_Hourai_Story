@@ -16,12 +16,20 @@ SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
 SC::Event<> App::Disposing;
 SC::Event<Point<int>> App::Resizing;
 
+ComPtr<ID3D12Fence> App::mFence;
+uint64 App::mFenceValue;
+Threading::Event App::mFenceEvent;
+
 void App::Initialize()
 {
 	Disposing += Dispose;
 
 	CreateWindow();
 	InitializePackages();
+
+	auto pDevice = Graphics::mDevice->pDevice.Get();
+	HR( pDevice->CreateFence( 1, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS( &mFence ) ) );
+	mFenceValue = 1;
 }
 
 void App::Start()
@@ -66,7 +74,11 @@ void App::Start()
 	}
 
 	// 앱의 모든 작업이 완료될 때까지 대기합니다.
-
+	if ( mFence->GetCompletedValue() < mFenceValue )
+	{
+		HR( mFence->SetEventOnCompletion( mFenceValue, mFenceEvent.Handle ) );
+		mFenceEvent.WaitForSingleObject( 1000 );
+	}
 
 	// 앱이 종료될 때 패키지의 Dispose 함수를 호출합니다.
 	Disposing( nullptr );
@@ -119,9 +131,23 @@ void App::InitializePackages()
 	ShaderBuilder::Initialize();
 }
 
-void App::ResizeApp( Point<int> appResizing )
+void App::ResizeApp( Point<int> size )
 {
-	Resizing( IntPtr( mWndHandle ), appResizing );
+	if ( size.X != 0 && size.Y != 0 )
+	{
+		if ( mFence->GetCompletedValue() < mFenceValue )
+		{
+			HR( mFence->SetEventOnCompletion( mFenceValue, mFenceEvent.Handle ) );
+			mFenceEvent.WaitForSingleObject( 1000 );
+		}
+
+		Resizing( IntPtr( mWndHandle ), size );
+		mDiscardPresent = false;
+	}
+	else
+	{
+		mDiscardPresent = true;
+	}
 }
 
 void App::OnIdle()
