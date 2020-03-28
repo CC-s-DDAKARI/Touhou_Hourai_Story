@@ -33,6 +33,8 @@
 #include "Details.CBuffer.h"
 #include "Details.HeapAllocator.h"
 #include "Details.CDynamicBuffer.h"
+#include "Details.UploadHeapAllocator.h"
+#include "Details.UploadHeap.h"
 
 #include "Details.TextParser.h"
 #include "Details.AssimpParser.h"

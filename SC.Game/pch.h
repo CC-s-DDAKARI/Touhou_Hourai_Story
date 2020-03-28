@@ -56,6 +56,7 @@ namespace SC::Game::Details
 	class CBuffer;
 	class HeapAllocator;
 	class CDynamicBuffer;
+	class UploadHeap;
 
 	class GeometryBuffer;
 	class HDRBuffer;

@@ -8,7 +8,7 @@ void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& devic
 {
 	if ( hasBuffer )
 	{
-		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, dynamicBuffer[frameIndex]->VirtualAddress );
+		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, dynamicBuffer[frameIndex]->GetGPUVirtualAddress() );
 	}
 }
 
@@ -16,8 +16,10 @@ void Transform::CreateBuffer()
 {
 	if ( !hasBuffer )
 	{
-		dynamicBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
-		dynamicBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		dynamicBuffer[0] = UploadHeapAllocator::Alloc( sizeof( Constants ) );
+		dynamicBuffer[1] = UploadHeapAllocator::Alloc( sizeof( Constants ) );
+		//dynamicBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		//dynamicBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
 
 		hasBuffer = true;
 	}
@@ -140,7 +142,7 @@ void Transform::Update( Time& time, Input& input )
 
 		// 값을 GPU에 출력합니다.
 		int frameIndex = GlobalVar.frameIndex;
-		auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
+		auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->GetCPUBlock();
 		XMStoreFloat4x4( &frameResource.World, world );
 		XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
 	}

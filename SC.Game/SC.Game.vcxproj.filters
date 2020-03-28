@@ -406,6 +406,12 @@
     <ClInclude Include="Details.GC.h">
       <Filter>Packages</Filter>
     </ClInclude>
+    <ClInclude Include="Details.UploadHeapAllocator.h">
+      <Filter>Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.UploadHeap.h">
+      <Filter>Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -738,6 +744,12 @@
     </ClCompile>
     <ClCompile Include="Details.GC.cpp">
       <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.UploadHeap.cpp">
+      <Filter>Details</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.UploadHeapAllocator.cpp">
+      <Filter>Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -245,6 +245,7 @@
     <ClCompile Include="Details.SkinnedMeshRendererQueue.cpp" />
     <ClCompile Include="Details.TextParser.cpp" />
     <ClCompile Include="Details.UISystem.cpp" />
+    <ClCompile Include="Details.UploadHeap.cpp" />
     <ClCompile Include="Details.ViewStorage.cpp" />
     <ClCompile Include="Details.ViewStorageException.cpp" />
     <ClCompile Include="Details.VisibleViewStorage.cpp" />
@@ -269,6 +270,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Details.UploadHeapAllocator.cpp" />
     <ClCompile Include="Vector.cpp" />
     <ClInclude Include="..\Include\SC.Game.h" />
     <ClInclude Include="..\Include\SC.Game\AnimationClip.h" />
@@ -402,6 +404,8 @@
     <ClInclude Include="Details.SkinnedMeshRendererQueue.h" />
     <ClInclude Include="Details.TextParser.h" />
     <ClInclude Include="Details.UISystem.h" />
+    <ClInclude Include="Details.UploadHeap.h" />
+    <ClInclude Include="Details.UploadHeapAllocator.h" />
     <ClInclude Include="Details.ViewStorage.h" />
     <ClInclude Include="Details.ViewStorageException.h" />
     <ClInclude Include="Details.VisibleViewStorage.h" />

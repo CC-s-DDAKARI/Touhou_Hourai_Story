@@ -137,6 +137,8 @@ ComPtr<CDynamicBuffer> CDevice::CreateDynamicBuffer( uint64 sizeInBytes, int ali
 {
 	HeapAllocator* pAlloc = nullptr;
 
+	alignment = -1;
+
 	if ( alignment == 0 )
 	{
 		if ( sizeInBytes <= 128 ) alignment = 128;
