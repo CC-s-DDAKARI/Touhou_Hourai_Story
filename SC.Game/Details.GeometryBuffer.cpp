@@ -149,6 +149,13 @@ void GeometryBuffer::ResizeBuffers( uint32 width, uint32 height )
 
 	this->width = width;
 	this->height = height;
+
+#if defined( _DEBUG )
+	pColorBuffer->SetName( L"GeometryBuffer.pColorBuffer" );
+	pNormalBuffer->SetName( L"GeometryBuffer.pNormalBuffer" );
+	pMaterialBuffer->SetName( L"GeometryBuffer.pMaterialBuffer" );
+	pDepthBuffer->SetName( L"GeometryBuffer.pDepthBuffer" );
+#endif
 }
 
 uint32 GeometryBuffer::Width_get()

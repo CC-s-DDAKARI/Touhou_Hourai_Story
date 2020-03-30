@@ -16,6 +16,10 @@ D3D12_RECT UISystem::mScissorRect;
 RefPtr<TextFormat> UISystem::mDefaultTextFormat;
 set<GlyphBuffer*> UISystem::mGlyphBuffers;
 
+bool UISystem::mDisposed;
+
+Drawing::Point<double> UISystem::mScrollDelta;
+
 void UISystem::Initialize()
 {
 	auto pDevice = Graphics::mDevice->pDevice.Get();
@@ -37,11 +41,16 @@ void UISystem::Initialize()
 	mScissorRect.top = 0;
 
 	mDefaultTextFormat = new TextFormat( "" );
+
+	mDisposed = false;
 }
 
 void UISystem::Update()
 {
 	mRootCanvas->Update( Rect<double>( 0, 0, ( double )mViewport.Width, ( double )mViewport.Height ) );
+
+	// 매 프레임 업데이트가 끝난 후 스크롤 이동량을 초기화합니다.
+	UISystem::mScrollDelta = { 0, 0 };
 }
 
 void UISystem::Render( int frameIndex )
@@ -119,4 +128,8 @@ void UISystem::Dispose( object sender )
 	mRootCanvas = nullptr;
 	mViewStorage = nullptr;
 	mDeviceContext = nullptr;
+
+	mDefaultTextFormat = nullptr;
+
+	mDisposed = true;
 }

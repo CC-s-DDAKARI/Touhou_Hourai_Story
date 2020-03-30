@@ -77,7 +77,7 @@ Scene::~Scene()
 		mFetchResults = pxScene->fetchResults( true );
 	}
 
-	if ( !AppShutdown && pxScene )
+	if ( pxScene )
 	{
 		pxScene->release();
 		pxScene = nullptr;
@@ -260,7 +260,7 @@ void Scene::Update()
 			input.cursorPos = { cursor.x, cursor.y };
 		}
 
-		input.scrollDelta = GlobalVar.scrollDelta;
+		input.scrollDelta = UISystem::mScrollDelta;
 	}
 
 	if ( !updatedSceneGraph && mThreadSceneGraph.size() )
@@ -282,12 +282,23 @@ void Scene::Update()
 	}
 	else
 	{
-		for ( auto go : mSceneGraph )
+		list<GameObject*>* sceneGraph = nullptr;
+
+		if ( mUpdatedSceneGraph )
+		{
+			sceneGraph = &mSceneGraphDispatch;
+		}
+		else
+		{
+			sceneGraph = &mSceneGraph;
+		}
+
+		for ( auto go : *sceneGraph )
 		{
 			go->Update( time, input );
 		}
 
-		for ( auto go : mSceneGraph )
+		for ( auto go : *sceneGraph )
 		{
 			go->LateUpdate( time, input );
 		}
@@ -320,7 +331,18 @@ void Scene::FixedUpdate()
 	}
 	else
 	{
-		for ( auto go : mSceneGraph )
+		list<GameObject*>* sceneGraph = nullptr;
+
+		if ( mUpdatedSceneGraph )
+		{
+			sceneGraph = &mSceneGraphDispatch;
+		}
+		else
+		{
+			sceneGraph = &mSceneGraph;
+		}
+
+		for ( auto go : *sceneGraph )
 		{
 			go->FixedUpdate( time );
 		}
@@ -350,10 +372,6 @@ void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 
 void Scene::PopulateSceneGraph()
 {
-	// 장면 그래프를 변경하기 전 마지막 렌더링과 동기화합니다.
-	App::mRenderThreadEvent.WaitForSingleObject();
-	App::mRenderThreadEvent.Set();
-
 	ClearSceneGraph();
 
 	// 장면 종속 관계를 풀어놓습니다.
@@ -364,31 +382,19 @@ void Scene::PopulateSceneGraph()
 
 	SearchComponents();
 
-	// 그래프의 렌더링 의존을 위해 레퍼런스 형식으로 저장합니다.
-	mSceneGraphBackup.resize( mSceneGraph.size() );
-	auto iter = mSceneGraph.begin();
-	for ( int i = 0, count = ( int )mSceneGraphBackup.size(); i < count; ++i )
-	{
-		mSceneGraphBackup[i] = *iter;
-		++iter;
-	}
+	mUpdatedSceneGraph = true;
 }
 
 void Scene::ClearSceneGraph()
 {
-	mSceneGraph.clear();
-	mSceneCameras.clear();
-	mSceneLights.clear();
-	mSceneTerrains.clear();
-
 	mCoreThreadSceneGraph.clear();
 	mThreadSceneGraph.clear();
-	mpSkinnedMeshRendererQueue->Clear();
+	mpSkinnedMeshRendererQueueDispatch = new SkinnedMeshRendererQueue();
 }
 
 void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )
 {
-	mSceneGraph.push_back( pGameObject );
+	mSceneGraphDispatch.push_back( pGameObject );
 
 	if ( auto t = pGameObject->GetComponent<ThreadDispatcher>(); t )
 	{
@@ -409,35 +415,35 @@ void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameOb
 void Scene::SearchComponents()
 {
 	// 특수 컴포넌트 그래프를 미리 계산합니다.
-	for ( auto i : mSceneGraph )
+	for ( auto i : mSceneGraphDispatch )
 	{
 		if ( auto t = i->GetComponent<Camera>(); t )
 		{
-			mSceneCameras.push_back( t );
+			mSceneCamerasDispatch.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Light>(); t )
 		{
-			mSceneLights.push_back( t );
+			mSceneLightsDispatch.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Animator>(); t )
 		{
-			mpSkinnedMeshRendererQueue->PushAnimator( t );
+			mpSkinnedMeshRendererQueueDispatch->PushAnimator( t );
 		}
 
 		if ( auto t = i->GetComponent<SkinnedMeshRenderer>(); t )
 		{
-			mpSkinnedMeshRendererQueue->AddRenderer( t );
+			mpSkinnedMeshRendererQueueDispatch->AddRenderer( t );
 		}
 
 		if ( auto t = i->GetComponent<Terrain>(); t )
 		{
-			mSceneTerrains.push_back( t );
+			mSceneTerrainsDispatch.push_back( t );
 		}
 	}
 
-	mpSkinnedMeshRendererQueue->PushAnimator( nullptr );
+	mpSkinnedMeshRendererQueueDispatch->PushAnimator( nullptr );
 }
 
 void Scene::UpdateAndLateUpdate( object, list<GameObject*>& batch )

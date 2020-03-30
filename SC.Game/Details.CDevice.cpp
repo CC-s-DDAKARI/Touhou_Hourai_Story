@@ -10,8 +10,9 @@ CDevice::CDevice( IDXGIAdapter1* pAdapter ) : Object()
 #if defined( _DEBUG )
 	// 응용 프로그램이 디버그 모드로 빌드되었을 경우:
 	// Direct3D SDK에서 디버그 레이어를 활성화합니다.
-	if ( ComPtr<ID3D12Debug> pDebug; SUCCEEDED( D3D12GetDebugInterface( IID_PPV_ARGS( &pDebug ) ) ) )
+	if ( ComPtr<ID3D12Debug3> pDebug; SUCCEEDED( D3D12GetDebugInterface( IID_PPV_ARGS( &pDebug ) ) ) )
 	{
+		//pDebug->SetEnableGPUBasedValidation( TRUE );
 		pDebug->EnableDebugLayer();
 	}
 #endif
@@ -34,9 +35,9 @@ CDevice::CDevice( IDXGIAdapter1* pAdapter ) : Object()
 	viewStorageChain.push( new ViewStorage( this ) );
 
 	// 초기 힙 스토리지를 생성합니다.
-	heapAllocator128 = new HeapAllocator( this, 128, 8192 );
-	heapAllocator256 = new HeapAllocator( this, 256, 4096 );
-	heapAllocator512 = new HeapAllocator( this, 512 );
+	heapAllocator128 = new HeapAllocator1( this, 128, 8192 );
+	heapAllocator256 = new HeapAllocator1( this, 256, 4096 );
+	heapAllocator512 = new HeapAllocator1( this, 512 );
 
 	InitializeInterop();
 }
@@ -135,7 +136,7 @@ ComPtr<CUnorderedAccessView> CDevice::CreateUnorderedAccessView( ID3D12Resource*
 
 ComPtr<CDynamicBuffer> CDevice::CreateDynamicBuffer( uint64 sizeInBytes, int alignment )
 {
-	HeapAllocator* pAlloc = nullptr;
+	HeapAllocator1* pAlloc = nullptr;
 
 	alignment = -1;
 

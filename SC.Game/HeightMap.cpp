@@ -21,8 +21,8 @@ bool HeightMap::Lock( RefPtr<CDeviceContext>& deviceContext )
 
 HeightMap::~HeightMap()
 {
-	GC::Add( GlobalVar.frameIndex, pTexture2D.Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, pShaderResourceView.Get(), 1 );
+	GC::Add( App::mFrameIndex, pTexture2D.Get(), 2 );
+	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
 }
 
 HeightMap::HeightMap( String name, const path& filepath, uint32 width, uint32 height, int queueIndex ) : Assets( name )

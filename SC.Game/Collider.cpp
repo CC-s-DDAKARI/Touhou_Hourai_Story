@@ -30,10 +30,7 @@ void Collider::AttachToActor( PxRigidActor* actor )
 
 Collider::~Collider()
 {
-	if ( !AppShutdown )
-	{
-		ReleaseShape();
-	}
+	ReleaseShape();
 }
 
 void Collider::Update( Time& time, Input& input )

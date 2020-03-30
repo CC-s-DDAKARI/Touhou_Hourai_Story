@@ -21,8 +21,8 @@ bool Texture2D::Lock( RefPtr<CDeviceContext>& deviceContext )
 
 Texture2D::~Texture2D()
 {
-	GC::Add( GlobalVar.frameIndex, pTexture2D.Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, pShaderResourceView.Get(), 1 );
+	GC::Add( App::mFrameIndex, pTexture2D.Get(), 2 );
+	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
 }
 
 Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, TextureFormat format, int queueIndex ) : Assets( name )
@@ -171,6 +171,12 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat forma
 
 	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadHeap.Get() );
 	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadCommands.Get() );
+
+#if defined( _DEBUG )
+	pTexture2D->SetName( L"Texture2D.pTexture2D" );
+	pUploadHeap->SetName( L"Texture2D.pUploadHeap" );
+	pUploadCommands->SetName( L"Texture2D.pUploadCommands" );
+#endif
 
 	this->width = width;
 	this->height = height;

@@ -14,9 +14,14 @@ inline RefPtr<Assets> getter( object iter )
 	return it->second;
 }
 
-void AssetBundle::Dispose()
+void AssetBundle::Dispose( object sender )
 {
 	assets.clear();
+}
+
+void AssetBundle::Initialize()
+{
+	App::Disposing += Dispose;
 }
 
 RefPtr<IEnumerator<RefPtr<Assets>>> AssetBundle::GetEnumerator()

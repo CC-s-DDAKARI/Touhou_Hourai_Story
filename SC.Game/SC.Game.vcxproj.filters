@@ -168,16 +168,7 @@
     <ClInclude Include="Details.CSwapChain.h">
       <Filter>Details</Filter>
     </ClInclude>
-    <ClInclude Include="Details.GeometryBuffer.h">
-      <Filter>Details</Filter>
-    </ClInclude>
-    <ClInclude Include="Details.GlobalVar.h">
-      <Filter>Details</Filter>
-    </ClInclude>
     <ClInclude Include="Details.HDRBuffer.h">
-      <Filter>Details</Filter>
-    </ClInclude>
-    <ClInclude Include="Details.HeapAllocator.h">
       <Filter>Details</Filter>
     </ClInclude>
     <ClInclude Include="Details.IntegratedFactory.h">
@@ -389,28 +380,43 @@
       <Filter>Assets</Filter>
     </ClInclude>
     <ClInclude Include="Details.App.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.Graphics.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.Physics.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.UISystem.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.GameLogic.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.GC.h">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClInclude>
     <ClInclude Include="Details.UploadHeapAllocator.h">
-      <Filter>Details</Filter>
+      <Filter>Details\Allocators</Filter>
     </ClInclude>
     <ClInclude Include="Details.UploadHeap.h">
-      <Filter>Details</Filter>
+      <Filter>Details\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.HeapAllocator.h">
+      <Filter>Details\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.Heap.h">
+      <Filter>Details\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.HeapAllocator1.h">
+      <Filter>Details\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.LargeHeap.h">
+      <Filter>Details\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="Details.GeometryBuffer.h">
+      <Filter>Details\Buffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -544,16 +550,7 @@
     <ClCompile Include="Details.CSwapChain.cpp">
       <Filter>Details</Filter>
     </ClCompile>
-    <ClCompile Include="Details.GeometryBuffer.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.GlobalVar.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
     <ClCompile Include="Details.HDRBuffer.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.HeapAllocator.cpp">
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.IntegratedFactory.cpp">
@@ -584,9 +581,6 @@
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.HDRComputedBuffer.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.GlyphBuffer.cpp">
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="UI.Element.cpp">
@@ -725,31 +719,49 @@
       <Filter>Assets</Filter>
     </ClCompile>
     <ClCompile Include="Details.App.cpp">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.Graphics.cpp">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.Physics.cpp">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.UISystem.cpp">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.AsyncLoad.cpp">
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.GameLogic.cpp">
-      <Filter>Packages</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.GC.cpp">
-      <Filter>Packages</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.UploadHeap.cpp">
-      <Filter>Details</Filter>
+      <Filter>Details\Packages</Filter>
     </ClCompile>
     <ClCompile Include="Details.UploadHeapAllocator.cpp">
-      <Filter>Details</Filter>
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.UploadHeap.cpp">
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.HeapAllocator.cpp">
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.Heap.cpp">
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.HeapAllocator1.cpp">
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.LargeHeap.cpp">
+      <Filter>Details\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.GlyphBuffer.cpp">
+      <Filter>Details\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.GeometryBuffer.cpp">
+      <Filter>Details\Buffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -819,8 +831,14 @@
     <Filter Include="Shaders\TerrainShader">
       <UniqueIdentifier>{8785ea73-ca1d-4e6c-8396-453765b028bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Packages">
+    <Filter Include="Details\Allocators">
+      <UniqueIdentifier>{5321f2a0-301c-4da4-a84a-4cf6e2c4062a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Details\Packages">
       <UniqueIdentifier>{36f4dd97-35aa-4b3e-b557-1ecf55721492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Details\Buffers">
+      <UniqueIdentifier>{5843a556-adf1-4b17-b863-01556982a311}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -904,9 +922,6 @@
     <None Include="HDR.hlsli">
       <Filter>Shaders\Common</Filter>
     </None>
-    <None Include="Details.GlyphBuffer.h">
-      <Filter>Details</Filter>
-    </None>
     <None Include="Common.hlsli">
       <Filter>Shaders\IntegratedUIShader</Filter>
     </None>
@@ -915,6 +930,9 @@
     </None>
     <None Include="RenderingShaderCommon.hlsli">
       <Filter>Shaders\RenderingShader</Filter>
+    </None>
+    <None Include="Details.GlyphBuffer.h">
+      <Filter>Details\Buffers</Filter>
     </None>
   </ItemGroup>
 </Project>

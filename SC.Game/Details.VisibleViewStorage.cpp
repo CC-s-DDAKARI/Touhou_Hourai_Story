@@ -35,7 +35,7 @@ int VisibleViewStorage::Lock()
 		{
 			auto pDevice = Graphics::mDevice->pDevice.Get();
 
-			GC::Add( GlobalVar.frameIndex, pDescriptorHeap.Get(), 1 );
+			GC::Add( App::mFrameIndex, pDescriptorHeap.Get(), 2 );
 
 			// 서술자 힙 개체를 다시 생성합니다.
 			D3D12_DESCRIPTOR_HEAP_DESC heapDesc{ };

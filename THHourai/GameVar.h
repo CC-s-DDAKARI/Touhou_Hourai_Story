@@ -7,5 +7,7 @@ namespace Touhou
 	public:
 		static int pickedCharacterType;
 		static RefPtr<GameObject> playableCharacter;
+
+		static void Dispose( object sender );
 	};
 }

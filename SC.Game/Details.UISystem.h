@@ -15,6 +15,10 @@ namespace SC::Game::Details
 		static RefPtr<UI::TextFormat> mDefaultTextFormat;
 		static std::set<GlyphBuffer*> mGlyphBuffers;
 
+		static bool mDisposed;
+
+		static Drawing::Point<double> mScrollDelta;
+
 	public:
 		static void Initialize();
 		static void Update();

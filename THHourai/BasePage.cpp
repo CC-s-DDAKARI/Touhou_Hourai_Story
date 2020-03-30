@@ -63,7 +63,7 @@ void BasePage::InitializeComponents()
 
 	declare_element( RelativePanel, relativePanel );
 	{
-		if ( !this->fpsText )
+		if ( !this->fpsText || !this->debugText )
 		{
 			declare_element( TextBlock, fpsText );
 			fpsText->Content = "FPS: 0\nTime: 0ms";
@@ -72,11 +72,7 @@ void BasePage::InitializeComponents()
 			fpsText->Anchor = Anchor::RightTop;
 			fpsText->AddDependencyProperty( "Panel.ZOrder=100" );
 			this->fpsText = fpsText;
-		}
-		relativePanel->Add( fpsText );
 
-		if ( !this->debugText )
-		{
 			declare_element( TextBlock, debugText );
 			debugText->AddDependencyProperty( DependencyProperty( "RelativePanel.Below=fpsText" ) );
 			debugText->Margin = 10;
@@ -84,7 +80,15 @@ void BasePage::InitializeComponents()
 			debugText->AddDependencyProperty( "Panel.ZOrder=100" );
 			fpsText->Anchor = Anchor::RightTop;
 			this->debugText = debugText;
+
+			App::Disposing += []( auto )
+			{
+				BasePage::fpsText = nullptr;
+				BasePage::debugText = nullptr;
+			};
 		}
+
+		relativePanel->Add( fpsText );
 		relativePanel->Add( debugText );
 	}
 	this->panel = relativePanel;

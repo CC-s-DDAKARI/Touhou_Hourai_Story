@@ -24,9 +24,9 @@ namespace SC::Game::Details
 		std::mutex viewStorageLocker;
 		std::queue<RefPtr<ViewStorage>> viewStorageChain;
 
-		RefPtr<HeapAllocator> heapAllocator128;  // 1MB
-		RefPtr<HeapAllocator> heapAllocator256;  // 1MB
-		RefPtr<HeapAllocator> heapAllocator512;  // 1MB
+		RefPtr<HeapAllocator1> heapAllocator128;  // 1MB
+		RefPtr<HeapAllocator1> heapAllocator256;  // 1MB
+		RefPtr<HeapAllocator1> heapAllocator512;  // 1MB
 
 		CDevice( IDXGIAdapter1* pAdapter );
 

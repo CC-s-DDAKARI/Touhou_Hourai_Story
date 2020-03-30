@@ -29,6 +29,13 @@ namespace SC::Game
 		bool firstUpdate = false;
 		bool updateSceneGraph = true;
 		bool mFetchResults = true;
+		bool mUpdatedSceneGraph = false;
+
+		std::list<GameObject*> mSceneGraphDispatch;
+		std::list<Camera*> mSceneCamerasDispatch;
+		std::list<Light*> mSceneLightsDispatch;
+		std::list<Terrain*> mSceneTerrainsDispatch;
+		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueueDispatch;
 
 		std::list<GameObject*> mSceneGraph;
 		std::list<Camera*> mSceneCameras;

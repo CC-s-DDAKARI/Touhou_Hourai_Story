@@ -4,6 +4,8 @@ namespace SC::Game::Details
 {
 	class UploadAlignedHeap
 	{
+		static constexpr const uint64 mAllocUnit = 256;
+
 	public:
 		ComPtr<ID3D12Resource> pResource;
 		D3D12_GPU_VIRTUAL_ADDRESS mStartAddress;

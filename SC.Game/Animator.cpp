@@ -8,7 +8,7 @@ void Animator::SetInput( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	if ( boneTransform.size() )
 	{
-		deviceContext->pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_BoneTransform, finalTransformBuffer[frameIndex]->VirtualAddress );
+		deviceContext->pCommandList->SetComputeRootShaderResourceView( Slot_Skinning_BoneTransform, mFinalTransformBuffer->GetGPUVirtualAddress() );
 	}
 }
 
@@ -19,8 +19,7 @@ Animator::Animator() : Component()
 
 Animator::~Animator()
 {
-	GC::Add( GlobalVar.frameIndex, finalTransformBuffer[0].Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, finalTransformBuffer[1].Get(), 1 );
+	GC::Add( App::mFrameIndex, mFinalTransformBuffer.Get(), 2 );
 }
 
 object Animator::Clone()
@@ -48,30 +47,18 @@ void Animator::Start()
 
 	if ( numBones )
 	{
-		finalTransformBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
-		finalTransformBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( tag_BoneTransform ) * numBones, -1 );
+		mFinalTransformBuffer = new LargeHeap( D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, sizeof( tag_BoneTransform ) * numBones );
 		InitializeOffset( Linked );
 	}
 	else
 	{
-		finalTransformBuffer[0] = nullptr;
-		finalTransformBuffer[1] = nullptr;
+		mFinalTransformBuffer = nullptr;
 	}
 }
 
 void Animator::Update( Time& time, Input& input )
 {
-	auto frameIndex = GlobalVar.frameIndex;
 
-	if ( finalTransformBuffer[frameIndex] )
-	{
-		auto block = ( tag_BoneTransform* )finalTransformBuffer[frameIndex]->pBlock;
-
-		for ( int i = 0, count = ( int )finalTransform.size(); i < count; ++i )
-		{
-			block[i].World = finalTransform[i].World;
-		}
-	}
 }
 
 void Animator::FixedUpdate( Time& time )
@@ -92,6 +79,13 @@ void Animator::FixedUpdate( Time& time )
 			if ( currentState.Clip->isEmpty )
 			{
 				keyframeUpdated = true;
+			}
+
+			if ( mFinalTransformBuffer )
+			{
+				auto block = ( tag_BoneTransform* )mFinalTransformBuffer->Map();
+				memcpy( block, finalTransform.data(), sizeof( tag_BoneTransform ) * finalTransform.size() );
+				mFinalTransformBuffer->Unmap();
 			}
 		}
 	}

@@ -222,7 +222,9 @@
     <ClCompile Include="Details.GC.cpp" />
     <ClCompile Include="Details.GlyphBuffer.cpp" />
     <ClCompile Include="Details.Graphics.cpp" />
+    <ClCompile Include="Details.Heap.cpp" />
     <ClCompile Include="Details.HeapAllocator.cpp" />
+    <ClCompile Include="Details.HeapAllocator1.cpp" />
     <ClCompile Include="Details.IntegratedFactory.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Details.AssimpParser.cpp" />
@@ -251,6 +253,7 @@
     <ClCompile Include="Details.VisibleViewStorage.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="HeightMap.cpp" />
+    <ClCompile Include="Details.LargeHeap.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Details.M3DParser.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -266,7 +269,6 @@
     <ClCompile Include="UI.KeyboardEventArgs.cpp" />
     <ClCompile Include="UI.RevealBrush.cpp" />
     <ClCompile Include="UnhandledErrorDetectedEventArgs.cpp" />
-    <ClCompile Include="Details.GlobalVar.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Texture2D.cpp" />
@@ -389,7 +391,10 @@
     <ClInclude Include="Details.Graphics.h" />
     <ClInclude Include="Details.h" />
     <ClInclude Include="Details.HDRComputedBuffer.h" />
+    <ClInclude Include="Details.Heap.h" />
     <ClInclude Include="Details.HeapAllocator.h" />
+    <ClInclude Include="Details.HeapAllocator1.h" />
+    <ClInclude Include="Details.LargeHeap.h" />
     <ClInclude Include="Details.M3DParser.h" />
     <ClInclude Include="Details.MDLParser.h" />
     <ClInclude Include="Details.Physics.h" />
@@ -398,7 +403,6 @@
     <ClInclude Include="Details.IntegratedFactory.h" />
     <ClInclude Include="Details.CSwapChain.h" />
     <ClInclude Include="Details.GameLogic.h" />
-    <ClInclude Include="Details.GlobalVar.h" />
     <ClInclude Include="Details.HDRBuffer.h" />
     <ClInclude Include="Details.ShaderInfo.h" />
     <ClInclude Include="Details.SkinnedMeshRendererQueue.h" />

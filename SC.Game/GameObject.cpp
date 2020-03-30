@@ -29,6 +29,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 
 		auto pxRigid = Physics::mPhysics->createRigidDynamic( gp );
 		RigidSwap( ( PxRigidActor* )pxRigid );
+		isStaticRigid = false;
 
 		// 기존 충돌체 컴포넌트가 있을 경우 추가합니다.
 		auto colliders = GetComponentsInChildren<Collider>();
@@ -99,6 +100,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 
 			auto pxRigid = Physics::mPhysics->createRigidStatic( gp );
 			RigidSwap( ( PxRigidActor* )pxRigid );
+			isStaticRigid = true;
 		}
 
 		pIsCol->AttachToActor( pxRigidbody );
@@ -109,7 +111,7 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 
 bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 {
-	if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); !AppShutdown && pIsRigid )
+	if ( Rigidbody* pIsRigid = dynamic_cast< Rigidbody* >( pComponent ); pIsRigid )
 	{
 		auto pos = transform->position;
 		auto quat = transform->rotation;
@@ -120,6 +122,7 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 
 		auto pxRigid = Physics::mPhysics->createRigidStatic( gp );
 		RigidSwap( ( PxRigidActor* )pxRigid );
+		isStaticRigid = true;
 
 		auto colliders = GetComponentsInChildren<Collider>();
 		for ( auto i : colliders )
@@ -179,7 +182,7 @@ void GameObject::OnSceneDetached( Scene* pScene )
 		i->OnSceneDetached( pScene );
 	}
 
-	if ( !AppShutdown && pxRigidbody )
+	if ( pxRigidbody )
 	{
 		pScene->pxScene->removeActor( *pxRigidbody );
 	}
@@ -236,7 +239,7 @@ GameObject::GameObject( String name ) : Assets( name )
 
 GameObject::~GameObject()
 {
-	if ( !AppShutdown && pxRigidbody )
+	if ( !GameLogic::mDisposed && pxRigidbody )
 	{
 		pxRigidbody->userData = nullptr;
 		pxRigidbody->release();

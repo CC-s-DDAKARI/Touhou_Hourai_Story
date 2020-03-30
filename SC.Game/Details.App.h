@@ -15,8 +15,11 @@ namespace SC::Game::Details
 		static uint64 mFenceValue;
 		static Threading::Event mFenceEvent;
 
+		static int mFrameIndex;
 		static uint64 mLastPending[2];
 		static Threading::Event mRenderThreadEvent;
+		static int mRenderFrameIndex;
+		static RefPtr<Scene> mRenderScene;
 
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
 		static Event<> Disposing;
@@ -34,6 +37,7 @@ namespace SC::Game::Details
 		static void OnIdle();
 		static void Update();
 		static void Render();
+		static void RenderLoop( object arg0 );
 
 		static LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 		static Drawing::Point<int> LPARAMToPoint( LPARAM lParam );

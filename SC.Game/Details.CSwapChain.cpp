@@ -56,6 +56,10 @@ void CSwapChain::ResizeBuffers( uint32 width, uint32 height )
 		pDevice->CreateRenderTargetView( ppBackBuffers[i].Get(), nullptr, handleBase );
 		RTVHandle[i] = handleBase;
 		handleBase.ptr += rtvStride;
+
+#if defined( _DEBUG )
+		ppBackBuffers[i]->SetName( String::Format( L"SwapChain buffer[{0}]", i ).Chars );
+#endif
 	}
 }
 

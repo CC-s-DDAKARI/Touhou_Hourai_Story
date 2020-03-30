@@ -15,7 +15,10 @@ namespace Touhou
 
 		static App* Instance();
 
+		static Event<> Disposing;
+
 	private:
 		static Game::AppConfiguration GetConfig();
+		static void Initialize();
 	};
 }

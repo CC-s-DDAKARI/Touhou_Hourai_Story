@@ -77,14 +77,16 @@ void OnlyScriptPage::HelpText_set( String value )
 
 void OnlyScriptPage::InitializeComponents()
 {
-	if ( !textFormatContinue )
+	if ( !textFormatContinue || !textFormatScript )
 	{
 		textFormatContinue = new TextFormat( "", 22.0 );
-	}
-
-	if ( !textFormatScript )
-	{
 		textFormatScript = new TextFormat( "", 20.0 );
+
+		App::Disposing += []( auto )
+		{
+			textFormatContinue = nullptr;
+			textFormatScript = nullptr;
+		};
 	}
 
 	declare_element( RelativePanel, relativePanel );

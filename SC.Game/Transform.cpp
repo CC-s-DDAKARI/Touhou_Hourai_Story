@@ -8,7 +8,7 @@ void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& devic
 {
 	if ( hasBuffer )
 	{
-		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, dynamicBuffer[frameIndex]->GetGPUVirtualAddress() );
+		deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_World, mConstants->GetGPUVirtualAddress() );
 	}
 }
 
@@ -16,10 +16,7 @@ void Transform::CreateBuffer()
 {
 	if ( !hasBuffer )
 	{
-		dynamicBuffer[0] = UploadHeapAllocator::Alloc( sizeof( Constants ) );
-		dynamicBuffer[1] = UploadHeapAllocator::Alloc( sizeof( Constants ) );
-		//dynamicBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
-		//dynamicBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
+		mConstants = HeapAllocator::Alloc( sizeof( Constants ) );
 
 		hasBuffer = true;
 	}
@@ -34,8 +31,7 @@ Transform::~Transform()
 {
 	if ( hasBuffer )
 	{
-		GC::Add( GlobalVar.frameIndex, dynamicBuffer[0].Get(), 1 );
-		GC::Add( GlobalVar.frameIndex, dynamicBuffer[1].Get(), 1 );
+		GC::Add( App::mFrameIndex, mConstants.Get(), 2 );
 	}
 }
 
@@ -81,7 +77,7 @@ void Transform::Update( Time& time, Input& input )
 		}
 
 		// 리지드바디가 존재할 경우 물리 계산이 완료된 리지드바디에서 위치와 회전 벡터를 가져옵니다.
-		if ( gameObject->pxRigidbody )
+		if ( gameObject->CheckRigidbody() )
 		{
 			auto globalPose = gameObject->pxRigidbody->getGlobalPose();
 
@@ -124,27 +120,26 @@ void Transform::Update( Time& time, Input& input )
 
 		hasUpdate = false;
 		updated = true;
+
+		if ( hasBuffer )
+		{
+			// 노말 계산을 위한 역전치행렬을 계산합니다.
+			auto det = XMMatrixDeterminant( world );
+
+			hasUpdate = false;
+
+			// 법선 계산을 위해 역전치 행렬을 계산합니다.
+			auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
+
+			auto& frameResource = *( Constants* )mConstants->Map();
+			XMStoreFloat4x4( &frameResource.World, world );
+			XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
+			mConstants->Unmap();
+		}
 	}
 	else
 	{
 		world = XMLoadFloat4x4( &this->world );
-	}
-
-	if ( hasBuffer )
-	{
-		// 노말 계산을 위한 역전치행렬을 계산합니다.
-		auto det = XMMatrixDeterminant( world );
-
-		hasUpdate = false;
-
-		// 법선 계산을 위해 역전치 행렬을 계산합니다.
-		auto worldInvTrp = XMMatrixTranspose( XMMatrixInverse( &det, world ) );
-
-		// 값을 GPU에 출력합니다.
-		int frameIndex = GlobalVar.frameIndex;
-		auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->GetCPUBlock();
-		XMStoreFloat4x4( &frameResource.World, world );
-		XMStoreFloat4x4( &frameResource.WorldInvTranspose, worldInvTrp );
 	}
 }
 
@@ -173,7 +168,7 @@ void Transform::Position_set( Vector3 value )
 {
 	position = value;
 
-	if ( gameObject->CheckRigidbody() )
+	if ( gameObject->pxRigidbody )
 	{
 		XMMATRIX parent = XMMatrixIdentity();
 		XMVECTOR pos;
@@ -249,7 +244,7 @@ void Transform::Rotation_set( Quaternion value )
 {
 	rotation = value;
 
-	if ( gameObject->CheckRigidbody() )
+	if ( gameObject->pxRigidbody )
 	{
 		XMMATRIX parent = XMMatrixIdentity();
 

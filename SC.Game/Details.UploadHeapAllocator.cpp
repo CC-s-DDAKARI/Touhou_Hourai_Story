@@ -15,7 +15,7 @@ UploadAlignedHeap::UploadAlignedHeap( uint64 alignment )
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };
 	D3D12_RESOURCE_DESC bufferDesc{ };
 	bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	bufferDesc.Width = alignment * 1024;
+	bufferDesc.Width = alignment * mAllocUnit;
 	bufferDesc.Height = 1;
 	bufferDesc.DepthOrArraySize = 1;
 	bufferDesc.MipLevels = 1;
@@ -36,10 +36,10 @@ UploadAlignedHeap::UploadAlignedHeap( uint64 alignment )
 	HR( pResource->Map( 0, nullptr, &pStartAddress ) );
 
 	mAlign = alignment;
-	mCount = 1024;
+	mCount = mAllocUnit;
 
 	// 힙 큐에 목록을 채웁니다.
-	for ( uint64 i = 0; i < 1024; ++i )
+	for ( uint64 i = 0; i < mAllocUnit; ++i )
 	{
 		mQueue.push( i );
 	}
@@ -97,13 +97,13 @@ uint64 UploadAlignedHeap::Expand()
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	// 이전 개체를 모두 사용 완료한 후 제거하도록 합니다.
-	GC::Add( GlobalVar.frameIndex, pResource.Get(), 100 );
+	GC::Add( App::mFrameIndex, pResource.Get(), 60 );
 
 	// 1024개의 추가 공간을 할당하여 새로운 개체를 생성합니다.
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };
 	D3D12_RESOURCE_DESC bufferDesc{ };
 	bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	bufferDesc.Width = mAlign * ( mCount + 1024 );
+	bufferDesc.Width = mAlign * ( mCount + mAllocUnit );
 	bufferDesc.Height = 1;
 	bufferDesc.DepthOrArraySize = 1;
 	bufferDesc.MipLevels = 1;
@@ -124,18 +124,20 @@ uint64 UploadAlignedHeap::Expand()
 	HR( pResource->Map( 0, nullptr, &pStartAddress ) );
 
 	// 힙 큐에 목록을 채웁니다.
-	for ( uint64 i = 1; i < 1024; ++i )
+	for ( uint64 i = 1; i < mAllocUnit; ++i )
 	{
 		mQueue.push( mCount + i );
 	}
 
 	auto index = mCount;
-	mCount += 1024;
+	mCount += mAllocUnit;
 	return index;
 }
 
 void UploadHeapAllocator::Initialize()
 {
+	App::Disposing += Dispose;
+
 	mHeapValid = true;
 }
 

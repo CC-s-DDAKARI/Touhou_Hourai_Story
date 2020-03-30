@@ -11,6 +11,7 @@ namespace SC::Game::Details
 
 		static RefPtr<VisibleViewStorage> mViewStorage;
 		static RefPtr<CDeviceContext> mDeviceContext;
+		static RefPtr<CDeviceContext> mDeviceContextCommit;
 
 		static RefPtr<GeometryBuffer> mGeometryBuffer;
 		static RefPtr<HDRBuffer> mHDRBuffer;
@@ -19,22 +20,31 @@ namespace SC::Game::Details
 		static RefPtr<Mesh> mSkyboxMesh;
 		static RefPtr<Scene> mCurrentScene;
 
+		static std::list<GameObject*> mSceneGraph;
+		static std::list<Camera*> mSceneCameras;
+		static std::list<Light*> mSceneLights;
+		static std::list<Terrain*> mSceneTerrains;
+
 		// 멀티 스레드를 위한 추가 개체입니다.
 		static std::atomic<int> mCompletedValue;
 		static int mCompletedGoal;
 		static Threading::Event mCompletedEvent;
 		static int mLightThreads;
 
+		static bool mDisposed;
+
 	public:
 		static void Initialize();
 		static void Update();
 		static void FixedUpdate();
 		static void Render( int frameIndex );
+		static void DispatchGraph();
 
 	private:
 		static void Dispose( object sender );
 		static void ResizeApp( object sender, Drawing::Point<int> size );
 
+		static void CommitBuffer( int frameIndex );
 		static void TerrainBaking( int frameIndex );
 		static void MeshSkinning( int frameIndex );
 		static void GeometryLighting( int frameIndex );

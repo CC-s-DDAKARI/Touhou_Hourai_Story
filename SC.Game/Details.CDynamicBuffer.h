@@ -7,10 +7,10 @@ namespace SC::Game::Details
 		std::atomic<ULONG> mRefCount;
 
 		int indexOf = -1;
-		RefPtr<HeapAllocator> pAllocator;
+		RefPtr<HeapAllocator1> pAllocator;
 
 	public:
-		CDynamicBuffer( RefPtr<HeapAllocator> pAllocator, int indexOf, D3D12_GPU_VIRTUAL_ADDRESS virtualAddress, void* pBlock );
+		CDynamicBuffer( RefPtr<HeapAllocator1> pAllocator, int indexOf, D3D12_GPU_VIRTUAL_ADDRESS virtualAddress, void* pBlock );
 		CDynamicBuffer( ComPtr<ID3D12Resource>&& pResource );
 		~CDynamicBuffer();
 

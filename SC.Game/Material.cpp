@@ -74,8 +74,8 @@ Material::Material( String name ) : Assets( name )
 
 Material::~Material()
 {
-	GC::Add( GlobalVar.frameIndex, constantBuffer.Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, constantBuffer.Get(), 1 );
+	GC::Add( App::mFrameIndex, constantBuffer.Get(), 2 );
+	GC::Add( App::mFrameIndex, constantBuffer.Get(), 2 );
 
 	if ( --reference_count == 0 )
 	{

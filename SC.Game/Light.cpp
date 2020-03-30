@@ -43,9 +43,9 @@ void Light::SetDepthBuffer( void* pResource )
 
 Light::~Light()
 {
-	GC::Add( GlobalVar.frameIndex, lightBuffer[0].Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, lightBuffer[1].Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, pShaderResourceView.Get(), 1 );
+	GC::Add( App::mFrameIndex, lightBuffer[0].Get(), 2 );
+	GC::Add( App::mFrameIndex, lightBuffer[1].Get(), 2 );
+	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
 }
 
 Drawing::Color Light::LightColor_get()

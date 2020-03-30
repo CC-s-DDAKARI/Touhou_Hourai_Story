@@ -58,7 +58,7 @@ void GC::Collect( int frameIndex )
 			if ( g.mType == 0 )
 			{
 				// 가비지 대상 개체의 사용이 완료되었는지 검사합니다.
-				if ( g.mFence.pFence->GetCompletedValue() >= g.mFence.mFenceValue )
+				if ( g.mFence.pFence->GetCompletedValue() > g.mFence.mFenceValue )
 				{
 					g.pUnknown = nullptr;
 
@@ -83,8 +83,10 @@ void GC::Collect( int frameIndex )
 						continue;
 					}
 				}
-
-				maxCount = i;
+				else
+				{
+					maxCount = i;
+				}
 			}
 		}
 	}

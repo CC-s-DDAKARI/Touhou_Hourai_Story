@@ -51,14 +51,7 @@ String Application::ToString()
 int Application::Start( RefPtr<Application> app )
 {
 	App::Start();
-
-	// 앱 종료 요청을 수행합니다.
-	auto ret = app->OnExit();
-	AppShutdown = true;
-
-	AssetBundle::Dispose();
-
-	return ret;
+	return 0;
 }
 
 Point<int> Application::ClientSize_get()

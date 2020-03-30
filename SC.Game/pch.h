@@ -54,9 +54,13 @@ namespace SC::Game::Details
 	class CShaderResourceView;
 	class CUnorderedAccessView;
 	class CBuffer;
-	class HeapAllocator;
 	class CDynamicBuffer;
+	class UploadHeapAllocator;
 	class UploadHeap;
+	class HeapAllocator;
+	class Heap;
+	class HeapAllocator1;
+	class LargeHeap;
 
 	class GeometryBuffer;
 	class HDRBuffer;

@@ -13,6 +13,7 @@ StepTimer GameLogic::mRenderTimer;
 
 RefPtr<VisibleViewStorage> GameLogic::mViewStorage;
 RefPtr<CDeviceContext> GameLogic::mDeviceContext;
+RefPtr<CDeviceContext> GameLogic::mDeviceContextCommit;
 
 RefPtr<GeometryBuffer> GameLogic::mGeometryBuffer;
 RefPtr<HDRBuffer> GameLogic::mHDRBuffer;
@@ -26,6 +27,8 @@ int GameLogic::mCompletedGoal;
 Threading::Event GameLogic::mCompletedEvent;
 int GameLogic::mLightThreads;
 
+bool GameLogic::mDisposed;
+
 void GameLogic::Initialize()
 {
 	App::Disposing += Dispose;
@@ -38,6 +41,7 @@ void GameLogic::Initialize()
 	// 렌더링 디바이스 컨텍스트 개체를 생성합니다.
 	mViewStorage = new VisibleViewStorage();
 	mDeviceContext = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
+	mDeviceContextCommit = new CDeviceContextAndAllocator( Graphics::mDevice, D3D12_COMMAND_LIST_TYPE_DIRECT );
 
 	// 필요한 버퍼 개체를 생성합니다.
 	mGeometryBuffer = new GeometryBuffer( Graphics::mDevice );
@@ -46,6 +50,8 @@ void GameLogic::Initialize()
 
 	// 스카이박스 메쉬 개체를 생성합니다.
 	mSkyboxMesh = Mesh::CreateCube( "skybox_mesh" );
+
+	mDisposed = false;
 }
 
 void GameLogic::Update()
@@ -63,9 +69,6 @@ void GameLogic::Update()
 		// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
 		mPhysicsTimer.Tick( FixedUpdate );
 	}
-
-	// 매 프레임 업데이트가 끝난 후 스크롤 이동량을 초기화합니다.
-	GlobalVar.scrollDelta = { 0, 0 };
 }
 
 void GameLogic::FixedUpdate()
@@ -80,7 +83,7 @@ void GameLogic::Render( int frameIndex )
 	auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 	auto directQueue1 = Graphics::mDevice->DirectQueue[1].Get();
 	auto& pCommandQueue = *directQueue->pCommandQueue.Get();
-	auto pScene = mCurrentScene.Get();
+	auto pScene = App::mRenderScene.Get();
 
 	// 렌더링을 실행하기 전 장치를 초기화합니다.
 	mDeviceContext->FrameIndex = frameIndex;
@@ -93,11 +96,12 @@ void GameLogic::Render( int frameIndex )
 
 	// 카메라 컬렉션이 존재할 경우에만 렌더링을 수행합니다.
 	auto& cameraCollection = pScene->mSceneCameras;
-	if ( !cameraCollection.empty() )
+	if ( pScene && !cameraCollection.empty() )
 	{
 		mCompletedValue = 0;
 		mCompletedGoal = 1 + 1 + Scene::NumThreadsForLight;
 
+		CommitBuffer( frameIndex );
 		TerrainBaking( frameIndex );
 		MeshSkinning( frameIndex );
 		GeometryLighting( frameIndex );
@@ -157,6 +161,19 @@ void GameLogic::Render( int frameIndex )
 		// 모든 명령 목록 기록이 완료될 때까지 대기합니다.
 		mCompletedEvent.WaitForSingleObject();
 
+		// GPU 명령 의존 관계를 작성합니다.
+		auto directQueues = Graphics::mDevice->DirectQueue;
+		auto computeQueues = Graphics::mDevice->ComputeQueue;
+
+		auto signal0 = computeQueues[0]->Signal();
+		auto signal1 = computeQueues[1]->Signal();
+
+		for ( int i = 0; i < 2; ++i )
+		{
+			directQueues[i]->pCommandQueue->Wait( computeQueues[0]->pFence.Get(), signal0 );
+			directQueues[i]->pCommandQueue->Wait( computeQueues[1]->pFence.Get(), signal1 );
+		}
+
 		// 열려있던 라이팅 디바이스 컨텍스트를 종료합니다.
 		CDeviceContext* deviceContextsForLight[4]{ };
 		for ( int i = 0; i < mLightThreads; ++i )
@@ -185,7 +202,7 @@ void GameLogic::Render( int frameIndex )
 	constexpr float clear[4]{ 0.0f };
 	pCommandList.ClearRenderTargetView( rtvHandle, clear, 0, nullptr );
 
-	if ( !cameraCollection.empty() )
+	if ( pScene && !cameraCollection.empty() )
 	{
 		// 톤 매핑 렌더링을 수행합니다.
 		ShaderBuilder::ToneMappingShader_get().SetAll( mDeviceContext );
@@ -202,8 +219,25 @@ void GameLogic::Render( int frameIndex )
 	directQueue->Execute( mDeviceContext );
 }
 
+void GameLogic::DispatchGraph()
+{
+	auto pScene = mCurrentScene.Get();
+
+	if ( pScene && pScene->mUpdatedSceneGraph )
+	{
+		pScene->mSceneGraph = move( pScene->mSceneGraphDispatch );
+		pScene->mSceneCameras = move( pScene->mSceneCamerasDispatch );
+		pScene->mSceneLights = move( pScene->mSceneLightsDispatch );
+		pScene->mSceneTerrains = move( pScene->mSceneTerrainsDispatch );
+		pScene->mpSkinnedMeshRendererQueue = move( pScene->mpSkinnedMeshRendererQueueDispatch );
+		pScene->mUpdatedSceneGraph = false;
+	}
+}
+
 void GameLogic::Dispose( object sender )
 {
+	mDisposed = true;
+
 	mCurrentScene = nullptr;
 	mSkyboxMesh = nullptr;
 
@@ -211,6 +245,7 @@ void GameLogic::Dispose( object sender )
 	mHDRBuffer = nullptr;
 	mGeometryBuffer = nullptr;
 
+	mDeviceContextCommit = nullptr;
 	mDeviceContext = nullptr;
 	mViewStorage = nullptr;
 }
@@ -223,11 +258,24 @@ void GameLogic::ResizeApp( object sender, Point<int> size )
 	mHDRComputedBuffer->ResizeBuffers( size.X, size.Y );
 }
 
+void GameLogic::CommitBuffer( int frameIndex )
+{
+	auto directQueue = Graphics::mDevice->DirectQueue[0];
+
+	mDeviceContextCommit->FrameIndex = frameIndex;
+	mDeviceContextCommit->Reset( Graphics::mDevice->DirectQueue[0].Get(), nullptr, nullptr );
+
+	HeapAllocator::Commit( frameIndex, *mDeviceContextCommit.Get() );
+
+	mDeviceContextCommit->Close();
+	directQueue->Execute( mDeviceContextCommit.Get() );
+}
+
 void GameLogic::TerrainBaking( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = mCurrentScene.Get();
+			auto pScene = App::mRenderScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForTerrain;
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
@@ -245,11 +293,7 @@ void GameLogic::TerrainBaking( int frameIndex )
 			}
 
 			mDeviceContext->Close();
-
 			computeQueue->Execute( mDeviceContext );
-			auto fenceValue = computeQueue->Signal();
-			HR( Graphics::mDevice->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
-			HR( Graphics::mDevice->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
 
 			FetchAndSetThread();
 		}
@@ -260,11 +304,11 @@ void GameLogic::MeshSkinning( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = mCurrentScene.Get();
+			auto pScene = App::mRenderScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForSkinning;
-			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
+			auto& computeQueue = Graphics::mDevice->ComputeQueue[1];
 
-			auto& skinningCollection = pScene->mpSkinnedMeshRendererQueue->GetCollections();
+			auto&& skinningCollection = pScene->mpSkinnedMeshRendererQueue.Get() ? pScene->mpSkinnedMeshRendererQueue->GetCollections() : list<SkinnedMeshRendererQueue::tag_SkinnedPair>();
 
 			mDeviceContext->FrameIndex = frameIndex;
 			mDeviceContext->Reset( computeQueue.Get(), nullptr, ShaderBuilder::pPipelineState_Skinning.Get() );
@@ -282,11 +326,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 			}
 
 			mDeviceContext->Close();
-
 			computeQueue->Execute( mDeviceContext );
-			auto fenceValue = computeQueue->Signal();
-			HR( Graphics::mDevice->DirectQueue[0]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
-			HR( Graphics::mDevice->DirectQueue[1]->pCommandQueue->Wait( computeQueue->pFence.Get(), fenceValue ) );
 
 			FetchAndSetThread();
 		}
@@ -295,7 +335,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 
 void GameLogic::GeometryLighting( int frameIndex )
 {
-	auto* pScene = mCurrentScene.Get();
+	auto* pScene = App::mRenderScene.Get();
 	int threadIndex = 0;
 
 	// 디바이스 컨텍스트 사용 전 모두 초기화합니다.
@@ -341,7 +381,7 @@ void GameLogic::GeometryLighting( int frameIndex )
 
 void GameLogic::GeometryWriting( int frameIndex )
 {
-	auto* pScene = mCurrentScene.Get();
+	auto* pScene = App::mRenderScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextForRender;
 
 	mDeviceContext->FrameIndex = frameIndex;
@@ -384,7 +424,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 
 void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Light*>& lights, int frameIndex )
 {
-	auto* pScene = mCurrentScene.Get();
+	auto* pScene = App::mRenderScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextsForLight[threadIndex];
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
 

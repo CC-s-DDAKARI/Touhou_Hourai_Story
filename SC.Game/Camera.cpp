@@ -18,8 +18,8 @@ Camera::Camera()
 
 Camera::~Camera()
 {
-	GC::Add( GlobalVar.frameIndex, dynamicBuffer[0].Get(), 1 );
-	GC::Add( GlobalVar.frameIndex, dynamicBuffer[1].Get(), 1 );
+	GC::Add( App::mFrameIndex, dynamicBuffer[0].Get(), 2 );
+	GC::Add( App::mFrameIndex, dynamicBuffer[1].Get(), 2 );
 }
 
 object Camera::Clone()
@@ -32,7 +32,7 @@ object Camera::Clone()
 
 void Camera::LateUpdate( Time& time, Input& input )
 {
-	int frameIndex = GlobalVar.frameIndex;
+	int frameIndex = App::mFrameIndex;
 	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
 
 	XMMATRIX world = XMLoadFloat4x4( &Transform->world );
@@ -111,7 +111,7 @@ void Camera::LateUpdate( Time& time, Input& input )
 
 Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
 {
-	int frameIndex = GlobalVar.frameIndex;
+	int frameIndex = App::mFrameIndex;
 
 	XMMATRIX world = XMLoadFloat4x4( &Transform->world );
 	auto det = XMMatrixDeterminant( world );

@@ -17,8 +17,11 @@ ComPtr<ID3D12Fence> App::mFence;
 uint64 App::mFenceValue;
 Threading::Event App::mFenceEvent;
 
+int App::mFrameIndex;
 uint64 App::mLastPending[2];
 Threading::Event App::mRenderThreadEvent;
+int App::mRenderFrameIndex;
+RefPtr<Scene> App::mRenderScene;
 
 SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
 SC::Event<> App::Disposing;
@@ -26,10 +29,10 @@ SC::Event<Point<int>> App::Resizing;
 
 void App::Initialize()
 {
-	Disposing += Dispose;
-
 	CreateWindow();
 	InitializePackages();
+
+	Disposing += Dispose;
 
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 	HR( pDevice->CreateFence( 1, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS( &mFence ) ) );
@@ -86,13 +89,18 @@ void App::Start()
 		mFenceEvent.WaitForSingleObject( 1000 );
 	}
 
+	auto ret = mApp->OnExit();
+
 	// 앱이 종료될 때 패키지의 Dispose 함수를 호출합니다.
 	Disposing( nullptr );
 }
 
 void App::Dispose( object sender )
 {
-
+	mRenderThreadEvent.WaitForSingleObject();
+	
+	mRenderScene = nullptr;
+	mFence = nullptr;
 }
 
 void App::CreateWindow()
@@ -136,6 +144,9 @@ void App::InitializePackages()
 	GameLogic::Initialize();
 	ShaderBuilder::Initialize();
 	GC::Initialize();
+	UploadHeapAllocator::Initialize();
+	HeapAllocator::Initialize();
+	AssetBundle::Initialize();
 }
 
 void App::ResizeApp( Point<int> size )
@@ -145,7 +156,7 @@ void App::ResizeApp( Point<int> size )
 		if ( mFence->GetCompletedValue() < mFenceValue )
 		{
 			HR( mFence->SetEventOnCompletion( mFenceValue, mFenceEvent.Handle ) );
-			mFenceEvent.WaitForSingleObject( 1000 );
+			mFenceEvent.WaitForSingleObject();
 		}
 
 		Resizing( IntPtr( mWndHandle ), size );
@@ -159,24 +170,28 @@ void App::ResizeApp( Point<int> size )
 
 void App::OnIdle()
 {
-	GlobalVar.frameIndex += 1;
-	if ( GlobalVar.frameIndex >= 2 ) GlobalVar.frameIndex = 0;
+	mFrameIndex = !mFrameIndex;
+
+	GC::Collect( mFrameIndex );
 
 	Update();
 	if ( !mDiscardPresent ) Render();
-	//mApp->IdleProcess();
-
-	GC::Collect( GlobalVar.frameIndex );
 }
 
 void App::Update()
 {
+	int frameIndex = mFrameIndex;
+
 	// 장면 전환 요청이 있을 경우 장면을 전환합니다.
 	if ( SceneManager::mCurrentScene.Get() )
 	{
-		mRenderThreadEvent.WaitForSingleObject();
+		if ( mFence->GetCompletedValue() < mLastPending[frameIndex] )
+		{
+			HR( mFence->SetEventOnCompletion( mLastPending[frameIndex], mFenceEvent.Handle ) );
+			mFenceEvent.WaitForSingleObject( 1000 );
+		}
+
 		GameLogic::mCurrentScene = move( SceneManager::mCurrentScene );
-		mRenderThreadEvent.Set();
 	}
 
 	GameLogic::Update();
@@ -185,30 +200,47 @@ void App::Update()
 
 void App::Render()
 {
-	int frameIndex = GlobalVar.frameIndex;
+	// 렌더링 완료 신호가 올 때까지 대기합니다.
+	mRenderThreadEvent.WaitForSingleObject();
 
-	mRenderThreadEvent.WaitForSingleObject( 1000 );
+	// 렌더링 매개변수를 설정합니다.
+	mRenderFrameIndex = mFrameIndex;
+	if ( mRenderScene.Get() != GameLogic::mCurrentScene.Get() )
+	{
+		mRenderScene = GameLogic::mCurrentScene;
+	}
 
+	// 게임 논리에서 장면 그래프를 제시합니다.
+	GameLogic::DispatchGraph();
+
+	// 렌더링 스레드를 실행합니다.
+	ThreadPool::QueueUserWorkItem( RenderLoop, nullptr );
+	//RenderLoop( nullptr );
+}
+
+void App::RenderLoop( object arg0 )
+{
+	// 렌더링 신호가 올 때까지 대기합니다.
+	int frameIndex = mRenderFrameIndex;
+
+	// 이전 프레임 렌더링이 완료될 때까지 대기합니다.
 	if ( mFence->GetCompletedValue() < mLastPending[frameIndex] )
 	{
 		HR( mFence->SetEventOnCompletion( mLastPending[frameIndex], mFenceEvent.Handle ) );
 		mFenceEvent.WaitForSingleObject( 1000 );
 	}
 
-	ThreadPool::QueueUserWorkItem( [frameIndex]( object )
-		{
-			auto pCommandQueue = Graphics::mDevice->DirectQueue[0]->pCommandQueue.Get();
+	auto pCommandQueue = Graphics::mDevice->DirectQueue[0]->pCommandQueue.Get();
 
-			GameLogic::Render( frameIndex );
-			UISystem::Render( frameIndex );
+	GameLogic::Render( frameIndex );
+	UISystem::Render( frameIndex );
 
-			// 마지막 명령 번호를 저장합니다.
-			HR( pCommandQueue->Signal( mFence.Get(), ++mFenceValue ) );
-			mLastPending[frameIndex] = mFenceValue;
+	// 마지막 명령 번호를 저장합니다.
+	HR( pCommandQueue->Signal( mFence.Get(), ++mFenceValue ) );
+	mLastPending[frameIndex] = mFenceValue;
 
-			mRenderThreadEvent.Set();
-		}
-	, nullptr );
+	// 렌더링 완료 신호를 전송합니다.
+	mRenderThreadEvent.Set();
 }
 
 LRESULT CALLBACK App::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -259,7 +291,7 @@ LRESULT CALLBACK App::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::MouseClick, UI::MouseClickEventArgs( HIWORD( wParam ) == XBUTTON1 ? UI::MouseButtonType::X1Button : UI::MouseButtonType::X2Button, false, LPARAMToPoint( lParam ) ) ) );
 		break;
 	case WM_MOUSEWHEEL:
-		GlobalVar.scrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
+		UISystem::mScrollDelta.Y += ( double )( short )HIWORD( wParam ) / 120.0;
 		break;
 	case WM_KEYDOWN:
 		App::mApp->Frame->ProcessEvent( new UI::DispatcherEventArgs( UI::DispatcherEventType::KeyboardEvent, UI::KeyboardEventArgs( ( KeyCode )wParam, true ) ) );

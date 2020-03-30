@@ -96,6 +96,11 @@ void LoadingPage::InitializeComponents()
 		if ( !textFormat )
 		{
 			textFormat = new TextFormat( "", 25.0 );
+
+			App::Disposing += []( auto )
+			{
+				LoadingPage::textFormat = nullptr;
+			};
 		}
 
 		declare_element( Border, loadingBarBorder );

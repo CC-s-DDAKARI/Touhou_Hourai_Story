@@ -4,6 +4,7 @@ namespace SC::Game::Details
 {
 	class SkinnedMeshRendererQueue : virtual public Object
 	{
+	public:
 		struct tag_SkinnedPair
 		{
 			Animator* pAnimator = nullptr;

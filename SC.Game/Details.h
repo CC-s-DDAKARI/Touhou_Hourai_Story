@@ -7,7 +7,6 @@
 #include "Details.CRootSignatureDesc.h"
 #include "Details.CGraphicsPipelineStateDesc.h"
 #include "Details.ShaderInfo.h"
-#include "Details.GC.h"
 #include "Details.ContactCallback.h"
 
 /* Core */
@@ -23,6 +22,8 @@
 #include "Details.Graphics.h"
 #include "Details.Physics.h"
 #include "Details.UISystem.h"
+#include "Details.ShaderBuilder.h"
+#include "Details.GC.h"
 
 /* Helper */
 #include "Details.ViewStorage.h"
@@ -31,10 +32,13 @@
 #include "Details.CShaderResourceView.h"
 #include "Details.CUnorderedAccessView.h"
 #include "Details.CBuffer.h"
-#include "Details.HeapAllocator.h"
 #include "Details.CDynamicBuffer.h"
 #include "Details.UploadHeapAllocator.h"
 #include "Details.UploadHeap.h"
+#include "Details.HeapAllocator.h"
+#include "Details.Heap.h"
+#include "Details.HeapAllocator1.h"
+#include "Details.LargeHeap.h"
 
 #include "Details.TextParser.h"
 #include "Details.AssimpParser.h"
@@ -51,6 +55,3 @@
 #include "Details.RichTextColorUnknown.h"
 
 #include "Details.SkinnedMeshRendererQueue.h"
-
-#include "Details.GlobalVar.h"
-#include "Details.ShaderBuilder.h"

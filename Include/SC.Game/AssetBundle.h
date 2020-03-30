@@ -5,11 +5,12 @@ namespace SC::Game
 	/// <summary> 게임 데이터 자산 스토리지에 대한 접근 함수를 제공합니다. </summary>
 	class AssetBundle abstract : virtual public Object
 	{
-		friend class Application;
+		friend class Details::App;
 
 		static std::multimap<String, RefPtr<Assets>> assets;
 
-		static void Dispose();
+		static void Dispose( object sender );
+		static void Initialize();
 
 	public:
 		/// <summary> 모든 자산 데이터를 단순 반복하는 열거자 개체를 가져옵니다. </summary>

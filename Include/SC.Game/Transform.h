@@ -21,7 +21,7 @@ namespace SC::Game
 		GameObject* gameObject = nullptr;
 
 		bool hasBuffer = false;
-		std::array<sc_game_export_object( ComPtr<Details::UploadHeap> ), 2> dynamicBuffer;
+		sc_game_export_object( ComPtr<Details::Heap> ) mConstants;
 
 		sc_game_export_float( XMFLOAT4X4, 16 ) world;
 		bool hasUpdate = true;

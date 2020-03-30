@@ -10,6 +10,8 @@ namespace
 	App* inst;
 }
 
+Event<> App::Disposing;
+
 App::App()
 	: Application( GetConfig() )
 {
@@ -18,6 +20,8 @@ App::App()
 
 void App::OnStart()
 {
+	Initialize();
+
 	::frame = Frame;
 
 	var textureTemp = new Texture2D( "templeBase01_diffuse", "Assets/Texture/templeBase01_diffuse.jpg" );
@@ -27,6 +31,8 @@ void App::OnStart()
 
 int App::OnExit()
 {
+	Disposing( nullptr );
+
 	return 0;
 }
 
@@ -52,4 +58,9 @@ AppConfiguration App::GetConfig()
 	config.PhysicsUpdatePerSeconds = 60;
 	config.VSync = false;
 	return config;
+}
+
+void App::Initialize()
+{
+	App::Disposing += GameVar::Dispose;
 }

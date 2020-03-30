@@ -6,6 +6,8 @@ namespace SC::Game::Details
 	{
 		const D3D12_COMMAND_LIST_TYPE type;
 
+		std::mutex mLocker;
+
 	public:
 		CCommandQueue( CDevice* device, D3D12_COMMAND_LIST_TYPE type );
 
@@ -20,6 +22,6 @@ namespace SC::Game::Details
 
 		ComPtr<ID3D12CommandQueue> pCommandQueue;
 		ComPtr<ID3D12Fence> pFence;
-		std::atomic<uint64> LastPending = 0;
+		uint64 LastPending = 0;
 	};
 }

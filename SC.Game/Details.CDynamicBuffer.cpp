@@ -4,7 +4,7 @@ using namespace SC::Game::Details;
 
 using namespace std;
 
-CDynamicBuffer::CDynamicBuffer( RefPtr<HeapAllocator> pAllocator, int indexOf, D3D12_GPU_VIRTUAL_ADDRESS virtualAddress, void* pBlock )
+CDynamicBuffer::CDynamicBuffer( RefPtr<HeapAllocator1> pAllocator, int indexOf, D3D12_GPU_VIRTUAL_ADDRESS virtualAddress, void* pBlock )
 	: indexOf( indexOf )
 	, pAllocator( pAllocator )
 	, VirtualAddress( virtualAddress )
