@@ -29,13 +29,6 @@ namespace SC::Game
 		bool firstUpdate = false;
 		bool updateSceneGraph = true;
 		bool mFetchResults = true;
-		bool mUpdatedSceneGraph = false;
-
-		std::list<GameObject*> mSceneGraphDispatch;
-		std::list<Camera*> mSceneCamerasDispatch;
-		std::list<Light*> mSceneLightsDispatch;
-		std::list<Terrain*> mSceneTerrainsDispatch;
-		sc_game_export_object( RefPtr<Details::SkinnedMeshRendererQueue> ) mpSkinnedMeshRendererQueueDispatch;
 
 		std::list<GameObject*> mSceneGraph;
 		std::list<Camera*> mSceneCameras;
@@ -59,6 +52,7 @@ namespace SC::Game
 		std::atomic<int> mCompletedValue;
 		Threading::Event mCompletedEvent;
 		int mCompletedGoal;
+		bool mIsFixedUpdate = false;
 
 #pragma region public
 	public:
@@ -157,6 +151,15 @@ namespace SC::Game
 		/// <summary> 장면이 언로드될 때 호출되는 함수입니다. </summary>
 		/// <param name="progress"> 작업의 진행률을 보고할 포인터 변수입니다. </param>
 		virtual void Unload();
+
+		/// <summary> (Visual Studio 전용) 해당 장면이 수직 동기화를 사용하는지 나타내는 값을 설정하거나 가져옵니다. </summary>
+		vs_property( bool, IsVSyncUpdate );
+
+		/// <summary> 해당 장면이 수직 동기화를 사용하는지 나타내는 값을 가져옵니다. </summary>
+		bool IsVSyncUpdate_get();
+
+		/// <summary> 해당 장면이 수직 동기화를 사용하는지 나타내는 값을 설정합니다. </summary>
+		void IsVSyncUpdate_set( bool value );
 #pragma endregion
 
 	private:

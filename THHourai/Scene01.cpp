@@ -15,7 +15,6 @@ void Scene01::Start()
 
 	var quaterViewCam = MainCamera::GetInstance();
 	quaterViewCam->AddComponent<KeyboardMovement>();
-
 	Scene::Start();
 }
 

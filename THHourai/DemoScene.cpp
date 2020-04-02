@@ -13,10 +13,12 @@ void DemoScene::Start()
 
 #if defined( _DEBUG )
 	GameVar::pickedCharacterType = 0;
-	nextScene = SceneManager::LoadSceneAsync<Scene01>();
+	nextScene = SceneManager::LoadSceneAsync<Scene00>();
 #else
 	nextScene = SceneManager::LoadSceneAsync<Scene00>();
 #endif
+
+	demoPage->HelpText = L"장면을 불러오고 있습니다.";
 
 	Scene::Start();
 }
@@ -40,6 +42,8 @@ void DemoScene::Update()
 			{
 				App::Navigate( loadingPage );
 				loadingPage->AsyncLoad = nextScene;
+
+				IsVSyncUpdate = true;
 			}
 		}
 	}

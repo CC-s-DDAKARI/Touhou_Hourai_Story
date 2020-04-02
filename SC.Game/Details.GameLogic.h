@@ -38,7 +38,6 @@ namespace SC::Game::Details
 		static void Update();
 		static void FixedUpdate();
 		static void Render( int frameIndex );
-		static void DispatchGraph();
 
 	private:
 		static void Dispose( object sender );

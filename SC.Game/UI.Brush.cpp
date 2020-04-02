@@ -13,7 +13,7 @@ Brush::Brush( int type ) : Object()
 
 Brush::~Brush()
 {
-	GC::Add( App::mFrameIndex, brushConstants.Get(), 2 );
+	GC::Add( App::mFrameIndex, brushConstants.Get(), 5 );
 }
 
 double Brush::Opacity_get()

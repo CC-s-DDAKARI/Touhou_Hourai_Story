@@ -64,7 +64,7 @@ CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_ST
 
 CBuffer::~CBuffer()
 {
-	GC::Add( App::mFrameIndex, pResource.Get(), 2 );
+	GC::Add( App::mFrameIndex, pResource.Get(), 5 );
 }
 
 bool CBuffer::Lock( RefPtr<CDeviceContext>& deviceContext, bool sync )

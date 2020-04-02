@@ -282,16 +282,7 @@ void Scene::Update()
 	}
 	else
 	{
-		list<GameObject*>* sceneGraph = nullptr;
-
-		if ( mUpdatedSceneGraph )
-		{
-			sceneGraph = &mSceneGraphDispatch;
-		}
-		else
-		{
-			sceneGraph = &mSceneGraph;
-		}
+		list<GameObject*>* sceneGraph = &mSceneGraph;
 
 		for ( auto go : *sceneGraph )
 		{
@@ -331,16 +322,7 @@ void Scene::FixedUpdate()
 	}
 	else
 	{
-		list<GameObject*>* sceneGraph = nullptr;
-
-		if ( mUpdatedSceneGraph )
-		{
-			sceneGraph = &mSceneGraphDispatch;
-		}
-		else
-		{
-			sceneGraph = &mSceneGraph;
-		}
+		list<GameObject*>* sceneGraph = &mSceneGraph;
 
 		for ( auto go : *sceneGraph )
 		{
@@ -362,6 +344,16 @@ void Scene::Unload()
 
 }
 
+bool Scene::IsVSyncUpdate_get()
+{
+	return mIsFixedUpdate;
+}
+
+void Scene::IsVSyncUpdate_set( bool value )
+{
+	mIsFixedUpdate = value;
+}
+
 void Scene::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	for ( auto go : mSceneGraph )
@@ -381,20 +373,23 @@ void Scene::PopulateSceneGraph()
 	}
 
 	SearchComponents();
-
-	mUpdatedSceneGraph = true;
 }
 
 void Scene::ClearSceneGraph()
 {
+	mSceneGraph.clear();
+	mSceneCameras.clear();
+	mSceneLights.clear();
+	mSceneTerrains.clear();
+
 	mCoreThreadSceneGraph.clear();
 	mThreadSceneGraph.clear();
-	mpSkinnedMeshRendererQueueDispatch = new SkinnedMeshRendererQueue();
+	mpSkinnedMeshRendererQueue->Clear();
 }
 
 void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameObject, int threadId )
 {
-	mSceneGraphDispatch.push_back( pGameObject );
+	mSceneGraph.push_back( pGameObject );
 
 	if ( auto t = pGameObject->GetComponent<ThreadDispatcher>(); t )
 	{
@@ -415,35 +410,35 @@ void Scene::InsertSceneGraph( list<GameObject*>& sceneGraph, GameObject* pGameOb
 void Scene::SearchComponents()
 {
 	// 특수 컴포넌트 그래프를 미리 계산합니다.
-	for ( auto i : mSceneGraphDispatch )
+	for ( auto i : mSceneGraph )
 	{
 		if ( auto t = i->GetComponent<Camera>(); t )
 		{
-			mSceneCamerasDispatch.push_back( t );
+			mSceneCameras.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Light>(); t )
 		{
-			mSceneLightsDispatch.push_back( t );
+			mSceneLights.push_back( t );
 		}
 
 		if ( auto t = i->GetComponent<Animator>(); t )
 		{
-			mpSkinnedMeshRendererQueueDispatch->PushAnimator( t );
+			mpSkinnedMeshRendererQueue->PushAnimator( t );
 		}
 
 		if ( auto t = i->GetComponent<SkinnedMeshRenderer>(); t )
 		{
-			mpSkinnedMeshRendererQueueDispatch->AddRenderer( t );
+			mpSkinnedMeshRendererQueue->AddRenderer( t );
 		}
 
 		if ( auto t = i->GetComponent<Terrain>(); t )
 		{
-			mSceneTerrainsDispatch.push_back( t );
+			mSceneTerrains.push_back( t );
 		}
 	}
 
-	mpSkinnedMeshRendererQueueDispatch->PushAnimator( nullptr );
+	mpSkinnedMeshRendererQueue->PushAnimator( nullptr );
 }
 
 void Scene::UpdateAndLateUpdate( object, list<GameObject*>& batch )

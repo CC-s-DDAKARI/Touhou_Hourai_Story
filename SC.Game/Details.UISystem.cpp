@@ -108,7 +108,7 @@ void UISystem::Render( int frameIndex )
 	// 명령 목록을 닫고 푸쉬합니다.
 	mDeviceContext->Close();
 	directQueue->Execute( mDeviceContext );
-	Graphics::mSwapChain->Present( App::mConfiguration.VSync );
+	Graphics::mSwapChain->Present( App::mConfiguration.VSync | GameLogic::mCurrentScene->IsVSyncUpdate );
 }
 
 void UISystem::ResizeApp( object sender, Point<int> size )

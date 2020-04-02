@@ -100,7 +100,7 @@ Material::Material( String name ) : Assets( name )
 
 Material::~Material()
 {
-	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 2 );
+	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 5 );
 }
 
 double Material::Ambient_get()

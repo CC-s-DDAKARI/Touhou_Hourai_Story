@@ -64,6 +64,7 @@ void GameLogic::Update()
 			mCurrentScene->Start();
 			mCurrentScene->firstUpdate = true;
 		}
+
 		mCurrentScene->Update();
 
 		// 물리 타이머 상태를 갱신합니다. 물리 타임이 지났다면 물리 연산을 실행합니다.
@@ -83,7 +84,7 @@ void GameLogic::Render( int frameIndex )
 	auto directQueue = Graphics::mDevice->DirectQueue[0].Get();
 	auto directQueue1 = Graphics::mDevice->DirectQueue[1].Get();
 	auto& pCommandQueue = *directQueue->pCommandQueue.Get();
-	auto pScene = App::mRenderScene.Get();
+	auto pScene = mCurrentScene.Get();
 
 	// 렌더링을 실행하기 전 장치를 초기화합니다.
 	mDeviceContext->FrameIndex = frameIndex;
@@ -219,21 +220,6 @@ void GameLogic::Render( int frameIndex )
 	directQueue->Execute( mDeviceContext );
 }
 
-void GameLogic::DispatchGraph()
-{
-	auto pScene = mCurrentScene.Get();
-
-	if ( pScene && pScene->mUpdatedSceneGraph )
-	{
-		pScene->mSceneGraph = move( pScene->mSceneGraphDispatch );
-		pScene->mSceneCameras = move( pScene->mSceneCamerasDispatch );
-		pScene->mSceneLights = move( pScene->mSceneLightsDispatch );
-		pScene->mSceneTerrains = move( pScene->mSceneTerrainsDispatch );
-		pScene->mpSkinnedMeshRendererQueue = move( pScene->mpSkinnedMeshRendererQueueDispatch );
-		pScene->mUpdatedSceneGraph = false;
-	}
-}
-
 void GameLogic::Dispose( object sender )
 {
 	mDisposed = true;
@@ -275,7 +261,7 @@ void GameLogic::TerrainBaking( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = App::mRenderScene.Get();
+			auto pScene = mCurrentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForTerrain;
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[0];
 
@@ -304,7 +290,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 {
 	ThreadPool::QueueUserWorkItem( [&, frameIndex]( object )
 		{
-			auto pScene = App::mRenderScene.Get();
+			auto pScene = mCurrentScene.Get();
 			auto& mDeviceContext = pScene->mDeviceContextForSkinning;
 			auto& computeQueue = Graphics::mDevice->ComputeQueue[1];
 
@@ -335,7 +321,7 @@ void GameLogic::MeshSkinning( int frameIndex )
 
 void GameLogic::GeometryLighting( int frameIndex )
 {
-	auto* pScene = App::mRenderScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	int threadIndex = 0;
 
 	// 디바이스 컨텍스트 사용 전 모두 초기화합니다.
@@ -381,7 +367,7 @@ void GameLogic::GeometryLighting( int frameIndex )
 
 void GameLogic::GeometryWriting( int frameIndex )
 {
-	auto* pScene = App::mRenderScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextForRender;
 
 	mDeviceContext->FrameIndex = frameIndex;
@@ -424,7 +410,7 @@ void GameLogic::GeometryWriting( int frameIndex )
 
 void GameLogic::RenderSceneGraphForEachThreads( object, int threadIndex, list<Light*>& lights, int frameIndex )
 {
-	auto* pScene = App::mRenderScene.Get();
+	auto* pScene = mCurrentScene.Get();
 	auto& mDeviceContext = pScene->mDeviceContextsForLight[threadIndex];
 	auto& pCommandList = *mDeviceContext->pCommandList.Get();
 

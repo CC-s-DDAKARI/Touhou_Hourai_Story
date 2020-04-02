@@ -168,9 +168,6 @@
     <ClInclude Include="Details.CSwapChain.h">
       <Filter>Details</Filter>
     </ClInclude>
-    <ClInclude Include="Details.HDRBuffer.h">
-      <Filter>Details</Filter>
-    </ClInclude>
     <ClInclude Include="Details.IntegratedFactory.h">
       <Filter>Details</Filter>
     </ClInclude>
@@ -418,6 +415,9 @@
     <ClInclude Include="Details.GeometryBuffer.h">
       <Filter>Details\Buffers</Filter>
     </ClInclude>
+    <ClInclude Include="Details.HDRBuffer.h">
+      <Filter>Details\Buffers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -548,9 +548,6 @@
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.CSwapChain.cpp">
-      <Filter>Details</Filter>
-    </ClCompile>
-    <ClCompile Include="Details.HDRBuffer.cpp">
       <Filter>Details</Filter>
     </ClCompile>
     <ClCompile Include="Details.IntegratedFactory.cpp">
@@ -761,6 +758,9 @@
       <Filter>Details\Buffers</Filter>
     </ClCompile>
     <ClCompile Include="Details.GeometryBuffer.cpp">
+      <Filter>Details\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Details.HDRBuffer.cpp">
       <Filter>Details\Buffers</Filter>
     </ClCompile>
   </ItemGroup>

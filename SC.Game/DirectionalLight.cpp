@@ -82,8 +82,8 @@ DirectionalLight::DirectionalLight()
 
 DirectionalLight::~DirectionalLight()
 {
-	GC::Add( App::mFrameIndex, pShadowDepthMap.Get(), 2 );
-	GC::Add( App::mFrameIndex, pDSVHeap.Get(), 2 );
+	GC::Add( App::mFrameIndex, pShadowDepthMap.Get(), 5 );
+	GC::Add( App::mFrameIndex, pDSVHeap.Get(), 5 );
 }
 
 object DirectionalLight::Clone()

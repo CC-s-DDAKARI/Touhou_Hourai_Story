@@ -17,9 +17,6 @@ namespace SC::Game::Details
 
 		static int mFrameIndex;
 		static uint64 mLastPending[2];
-		static Threading::Event mRenderThreadEvent;
-		static int mRenderFrameIndex;
-		static RefPtr<Scene> mRenderScene;
 
 		static Event<RefPtr<UnhandledErrorDetectedEventArgs>> UnhandledErrorDetected;
 		static Event<> Disposing;

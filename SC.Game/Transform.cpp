@@ -31,7 +31,7 @@ Transform::~Transform()
 {
 	if ( hasBuffer )
 	{
-		GC::Add( App::mFrameIndex, mConstants.Get(), 2 );
+		GC::Add( App::mFrameIndex, mConstants.Get(), 5 );
 	}
 }
 

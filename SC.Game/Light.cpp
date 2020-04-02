@@ -40,8 +40,8 @@ void Light::SetDepthBuffer( void* pResource )
 
 Light::~Light()
 {
-	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 2 );
-	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
+	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 5 );
+	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 5 );
 }
 
 void Light::Update( Time& time, Input& input )

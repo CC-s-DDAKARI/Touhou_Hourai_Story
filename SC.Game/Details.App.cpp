@@ -19,9 +19,6 @@ Threading::Event App::mFenceEvent;
 
 int App::mFrameIndex;
 uint64 App::mLastPending[2];
-Threading::Event App::mRenderThreadEvent;
-int App::mRenderFrameIndex;
-RefPtr<Scene> App::mRenderScene;
 
 SC::Event<RefPtr<UnhandledErrorDetectedEventArgs>> App::UnhandledErrorDetected;
 SC::Event<> App::Disposing;
@@ -37,8 +34,6 @@ void App::Initialize()
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 	HR( pDevice->CreateFence( 1, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS( &mFence ) ) );
 	mFenceValue = 1;
-
-	mRenderThreadEvent.Set();
 }
 
 void App::Start()
@@ -97,9 +92,6 @@ void App::Start()
 
 void App::Dispose( object sender )
 {
-	mRenderThreadEvent.WaitForSingleObject();
-	
-	mRenderScene = nullptr;
 	mFence = nullptr;
 }
 
@@ -129,7 +121,7 @@ void App::CreateWindow()
 		nullptr,
 		wcex.hInstance,
 		nullptr
-		);
+	);
 	if ( !mWndHandle )
 	{
 		throw new Exception( "SC.Game.Details.App.CreateWindow(): Windows 창을 생성하는데 실패하였습니다." );
@@ -201,28 +193,13 @@ void App::Update()
 
 void App::Render()
 {
-	// 렌더링 완료 신호가 올 때까지 대기합니다.
-	mRenderThreadEvent.WaitForSingleObject();
-
-	// 렌더링 매개변수를 설정합니다.
-	mRenderFrameIndex = mFrameIndex;
-	if ( mRenderScene.Get() != GameLogic::mCurrentScene.Get() )
-	{
-		mRenderScene = GameLogic::mCurrentScene;
-	}
-
-	// 게임 논리에서 장면 그래프를 제시합니다.
-	GameLogic::DispatchGraph();
-
 	// 렌더링 스레드를 실행합니다.
-	ThreadPool::QueueUserWorkItem( RenderLoop, nullptr );
-	//RenderLoop( nullptr );
+	RenderLoop( nullptr );
 }
 
 void App::RenderLoop( object arg0 )
 {
-	// 렌더링 신호가 올 때까지 대기합니다.
-	int frameIndex = mRenderFrameIndex;
+	auto frameIndex = mFrameIndex;
 
 	// 이전 프레임 렌더링이 완료될 때까지 대기합니다.
 	if ( mFence->GetCompletedValue() < mLastPending[frameIndex] )
@@ -239,9 +216,6 @@ void App::RenderLoop( object arg0 )
 	// 마지막 명령 번호를 저장합니다.
 	HR( pCommandQueue->Signal( mFence.Get(), ++mFenceValue ) );
 	mLastPending[frameIndex] = mFenceValue;
-
-	// 렌더링 완료 신호를 전송합니다.
-	mRenderThreadEvent.Set();
 }
 
 LRESULT CALLBACK App::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )

@@ -96,6 +96,10 @@ void HDRBuffer::ResizeBuffers( uint32 width, uint32 height )
 
 	this->width = width;
 	this->height = height;
+
+#if defined( _DEBUG )
+	pHDRBuffer->SetName( L"HDRBuffer.pHDRBuffer" );
+#endif
 }
 
 uint32 HDRBuffer::Width_get()

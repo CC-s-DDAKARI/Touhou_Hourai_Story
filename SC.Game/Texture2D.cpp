@@ -21,8 +21,8 @@ bool Texture2D::Lock( RefPtr<CDeviceContext>& deviceContext )
 
 Texture2D::~Texture2D()
 {
-	GC::Add( App::mFrameIndex, pTexture2D.Get(), 2 );
-	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
+	GC::Add( App::mFrameIndex, pTexture2D.Get(), 5 );
+	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 5 );
 }
 
 Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, TextureFormat format, int queueIndex ) : Assets( name )
