@@ -147,6 +147,7 @@ void App::InitializePackages()
 	UploadHeapAllocator::Initialize();
 	HeapAllocator::Initialize();
 	AssetBundle::Initialize();
+	Material::Initialize();
 }
 
 void App::ResizeApp( Point<int> size )

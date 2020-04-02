@@ -16,7 +16,7 @@ namespace SC::Game::Details
 		std::queue<uint64> mQueue;
 		std::mutex mLocker;
 
-		std::queue<D3D12_RANGE> mCopyRangeQueue[2];
+		std::map<uint64, uint64> mCopyRangeQueue[2];
 
 		void* pUploadAddress[2];
 

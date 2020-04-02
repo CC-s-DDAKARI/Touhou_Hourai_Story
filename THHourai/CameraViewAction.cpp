@@ -60,6 +60,12 @@ void CameraViewAction::Update( Time& time, Input& input )
 	pquat = quat;
 
 	prange = prange * ( 1 - t ) + range * distance * t;
-	Transform->Position = ( quat * Quaternion( pos, 0 ) * quat.Conjugate ).V * prange;
-	Transform->LookAt( ptarg );
+
+	auto newpos = ( quat * Quaternion( pos, 0 ) * quat.Conjugate ).V * prange;
+
+	if ( !Transform->Position.Equals( newpos ) )
+	{
+		Transform->Position = newpos;
+		Transform->LookAt( ptarg );
+	}
 }

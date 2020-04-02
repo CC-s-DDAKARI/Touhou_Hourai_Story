@@ -13,7 +13,7 @@ void DemoScene::Start()
 
 #if defined( _DEBUG )
 	GameVar::pickedCharacterType = 0;
-	nextScene = SceneManager::LoadSceneAsync<Scene00>();
+	nextScene = SceneManager::LoadSceneAsync<Scene01>();
 #else
 	nextScene = SceneManager::LoadSceneAsync<Scene00>();
 #endif

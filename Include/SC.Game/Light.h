@@ -33,13 +33,14 @@ namespace SC::Game
 	private:
 		Drawing::Color lightColor;
 
-		std::array<sc_game_export_object( ComPtr<Details::CDynamicBuffer> ), 2> lightBuffer;
+		sc_game_export_object( ComPtr<Details::Heap> ) mConstantBuffer;
 
 		bool shadowCast = false;
 		sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pShaderResourceView;
 
 	protected:
-		LightConstants frameResource;
+		LightConstants mFrameResource;
+		bool mUpdate = true;
 
 	private:
 		Light();
@@ -55,6 +56,11 @@ namespace SC::Game
 
 	public:
 		~Light() override;
+
+		/// <summary> (<see cref="Component"/> 클래스에서 상속 됨.) 컴포넌트에 대한 논리 갱신을 수행합니다. </summary>
+		/// <param name="time"> 게임 시간을 전달합니다. </param>
+		/// <param name="input"> 현재 프레임에서 입력 상태를 전달합니다. </param>
+		void Update( Time& time, Input& input ) override;
 
 		/// <summary> (Visual Studio 전용) 조명의 색을 설정하거나 가져옵니다. </summary>
 		vs_property( Drawing::Color, LightColor );

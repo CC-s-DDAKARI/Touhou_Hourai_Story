@@ -19,7 +19,9 @@ namespace SC::Game::Details
 		ULONG STDMETHODCALLTYPE Release() override;
 
 		void* Map();
+		void* Map( int frameIndex );
 		void Unmap();
+		void Unmap( int frameIndex );
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress();
 	};
 }

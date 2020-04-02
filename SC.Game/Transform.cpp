@@ -53,13 +53,7 @@ void Transform::Update( Time& time, Input& input )
 		updated = false;
 	}
 
-	bool flag = hasUpdate;
-	if ( ( gameObject && gameObject->parent && gameObject->parent->transform->updated ) || gameObject->CheckRigidbody() )
-	{
-		flag = true;
-	}
-
-	if ( flag )
+	if ( IsUpdated )
 	{
 		XMMATRIX parent = XMMatrixIdentity();
 		XMMATRIX parentInv = XMMatrixIdentity();
@@ -301,4 +295,15 @@ Vector3 Transform::ActualForward_get()
 {
 	auto actualRotation = ActualRotation;
 	return ( actualRotation * Quaternion( Vector3::Forward, 0 ) * actualRotation.Conjugate ).V;
+}
+
+bool Transform::IsUpdated_get()
+{
+	bool flag = hasUpdate;
+	if ( ( gameObject && gameObject->parent && gameObject->parent->transform->updated ) || gameObject->CheckRigidbody() )
+	{
+		flag = true;
+	}
+
+	return flag;
 }

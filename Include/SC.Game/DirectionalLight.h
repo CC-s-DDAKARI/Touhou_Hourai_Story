@@ -11,6 +11,7 @@ namespace SC::Game
 		double width = 100;
 		double height = 100;
 		double maxDepth = 1000.0;
+		bool mHasUpdate = true;
 
 	protected:
 		void ReadyBuffer() override;

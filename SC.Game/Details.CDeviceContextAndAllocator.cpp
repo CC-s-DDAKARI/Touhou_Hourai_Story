@@ -8,6 +8,11 @@ CDeviceContextAndAllocator::CDeviceContextAndAllocator( RefPtr<CDevice>& device,
 	HR( pDevice.CreateCommandAllocator( type, IID_PPV_ARGS( &pAllocators[0] ) ) );
 	HR( pDevice.CreateCommandAllocator( type, IID_PPV_ARGS( &pAllocators[1] ) ) );
 
+#if defined( _DEBUG )
+	pAllocators[0]->SetName( L"CDeviceContextAndAllocator.pAllocators[0]" );
+	pAllocators[1]->SetName( L"CDeviceContextAndAllocator.pAllocators[1]" );
+#endif
+
 	if ( pInitialPipelineState )
 	{
 		Reset( nullptr, nullptr, pInitialPipelineState );

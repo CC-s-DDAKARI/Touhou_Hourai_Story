@@ -4,25 +4,51 @@ using namespace SC::Game::Details;
 
 using namespace std;
 
-ComPtr<ID3D12Resource> Material::pReflectionBuffer;
-Material::Reflection* Material::reflectionBufferPtr;
+ComPtr<LargeHeap> Material::pReflectionBuffer;
 ComPtr<CShaderResourceView> Material::pShaderResourceView;
 int Material::capacity;
-int Material::reference_count;
 vector<bool> Material::locked;
 ComPtr<CShaderResourceView> Material::pNullSRV;
+
+void Material::Initialize()
+{
+	App::Disposing += Dispose;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{ };
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	pNullSRV = Graphics::mDevice->CreateShaderResourceView( nullptr, &srvDesc );
+
+	// 버퍼가 없을 경우 초기 버퍼를 생성합니다.
+	Realloc( 256 );
+}
+
+void Material::Dispose( object sender )
+{
+	// 전역 개체를 명시적으로 제거합니다.
+	pReflectionBuffer = nullptr;
+	pShaderResourceView = nullptr;
+	capacity = 0;
+	pNullSRV = nullptr;
+}
 
 void Material::SetGraphicsRootConstantBuffers( RefPtr<CDeviceContext>& deviceContext )
 {
 	auto pCommandList = deviceContext->pCommandList.Get();
 
-	memcpy( constantBuffer->pBlock, &frameResourceConstants, sizeof( frameResourceConstants ) );
-	memcpy( reflectionBufferPtr + lockIndex, &frameResourceReflection, sizeof( frameResourceReflection ) );
+	if ( lock_guard<mutex> lock( mLocker ); mConstantUpdated )
+	{
+		UpdateConstants();
+		mConstantUpdated = false;
+	}
 
-	pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Material, constantBuffer->VirtualAddress );
+	pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Material, mConstantBuffer->GetGPUVirtualAddress() );
 
 	CShaderResourceView* ppSRVs[3]{ };
-		
+
 	if ( diffuseMap && diffuseMap->Lock( deviceContext ) )
 	{
 		ppSRVs[0] = diffuseMap->pShaderResourceView.Get();
@@ -59,32 +85,22 @@ Material::Material( String name ) : Assets( name )
 
 	XMStoreFloat4x4( &frameResourceConstants.TexWorld, XMMatrixIdentity() );
 
+	mConstantBuffer = HeapAllocator::Alloc( sizeof( Reflection ) );
+
+	frameResourceConstants = { };
+	frameResourceConstants.Index = lockIndex;
+
 	Ambient = 1;
 	Diffuse = 1;
 	Specular = 1;
 	SpecExp = 32;
 	TexLocation = 0;
 	TexScale = 1.0;
-
-	constantBuffer = Graphics::mDevice->CreateDynamicBuffer( sizeof( Reflection ), 256 );
-
-	// 참조 횟수를 증가시킵니다.
-	++reference_count;
 }
 
 Material::~Material()
 {
-	GC::Add( App::mFrameIndex, constantBuffer.Get(), 2 );
-	GC::Add( App::mFrameIndex, constantBuffer.Get(), 2 );
-
-	if ( --reference_count == 0 )
-	{
-		// 전역 개체를 명시적으로 제거합니다.
-		pReflectionBuffer = nullptr;
-		pShaderResourceView = nullptr;
-		capacity = 0;
-		pNullSRV = nullptr;
-	}
+	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 2 );
 }
 
 double Material::Ambient_get()
@@ -95,6 +111,7 @@ double Material::Ambient_get()
 void Material::Ambient_set( double value )
 {
 	frameResourceReflection.Ambient = ( float )value;
+	UpdateReflection();
 }
 
 double Material::Diffuse_get()
@@ -105,6 +122,7 @@ double Material::Diffuse_get()
 void Material::Diffuse_set( double value )
 {
 	frameResourceReflection.Diffuse = ( float )value;
+	UpdateReflection();
 }
 
 double Material::Specular_get()
@@ -115,6 +133,7 @@ double Material::Specular_get()
 void Material::Specular_set( double value )
 {
 	frameResourceReflection.Specular = ( float )value;
+	UpdateReflection();
 }
 
 double Material::SpecExp_get()
@@ -125,6 +144,7 @@ double Material::SpecExp_get()
 void Material::SpecExp_set( double value )
 {
 	frameResourceReflection.SpecExp = ( float )value;
+	UpdateReflection();
 }
 
 RefPtr<Texture2D> Material::DiffuseMap_get()
@@ -137,6 +157,7 @@ void Material::DiffuseMap_set( RefPtr<Texture2D> value )
 	if ( ( bool )diffuseMap != ( bool )value )
 	{
 		frameResourceConstants.DiffuseMap += ( bool )value ? 1 : -1;
+		mConstantUpdated = true;
 	}
 	diffuseMap = value;
 }
@@ -151,6 +172,7 @@ void Material::DiffuseLayerMap_set( RefPtr<Texture2D> value )
 	if ( ( bool )diffuseLayerMap != ( bool )value )
 	{
 		frameResourceConstants.DiffuseMap += ( bool )value ? 1 : -1;
+		mConstantUpdated = true;
 	}
 	diffuseLayerMap = value;
 }
@@ -164,6 +186,7 @@ void Material::NormalMap_set( RefPtr<Texture2D> value )
 {
 	normalMap = value;
 	frameResourceConstants.NormalMap = ( int )( bool )value;
+	mConstantUpdated = true;
 }
 
 RenderQueueLayer Material::Layer_get()
@@ -185,6 +208,7 @@ void Material::TexLocation_set( Vector2 value )
 {
 	frameResourceConstants.TexWorld._41 = ( float )value.X;
 	frameResourceConstants.TexWorld._42 = ( float )value.Y;
+	mConstantUpdated = true;
 }
 
 Vector2 Material::TexScale_get()
@@ -196,24 +220,11 @@ void Material::TexScale_set( Vector2 value )
 {
 	frameResourceConstants.TexWorld._11 = ( float )value.X;
 	frameResourceConstants.TexWorld._22 = ( float )value.Y;
+	mConstantUpdated = true;
 }
 
 int Material::Lock( Material* ptr )
 {
-	if ( !pReflectionBuffer )
-	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{ };
-		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Texture2D.MipLevels = 1;
-
-		pNullSRV = Graphics::mDevice->CreateShaderResourceView( nullptr, &srvDesc );
-
-		// 버퍼가 없을 경우 초기 버퍼를 생성합니다.
-		return Realloc( 256 );
-	}
-
 	for ( int i = 0; i < capacity; ++i )
 	{
 		// 빈 공간을 찾았으면 그곳의 인덱스를 반환합니다.
@@ -232,21 +243,7 @@ int Material::Lock( Material* ptr )
 int Material::Realloc( int capacity )
 {
 	auto pDevice = Graphics::mDevice->pDevice.Get();
-
-	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };
-
-	D3D12_RESOURCE_DESC bufferDesc{ };
-	bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	bufferDesc.Width = sizeof( Reflection ) * 256;
-	bufferDesc.Height = 1;
-	bufferDesc.DepthOrArraySize = 1;
-	bufferDesc.MipLevels = 1;
-	bufferDesc.SampleDesc = { 1, 0 };
-	bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-	HR( pDevice->CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS( &pReflectionBuffer ) ) );
-
-	HR( pReflectionBuffer->Map( 0, nullptr, ( void** )&reflectionBufferPtr ) );
+	pReflectionBuffer = new LargeHeap( D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, sizeof( Reflection ) * capacity );
 
 	// 버퍼에 대한 셰이더 자원 서술자를 생성합니다.
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{ };
@@ -255,11 +252,33 @@ int Material::Realloc( int capacity )
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Buffer.NumElements = capacity;
 	srvDesc.Buffer.StructureByteStride = sizeof( Reflection );
-	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pReflectionBuffer.Get(), &srvDesc );
+	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pReflectionBuffer->pResource.Get(), &srvDesc );
 
 	// 캐퍼시티를 다시 설정합니다.
 	auto ret = Material::capacity;
 	locked.resize( capacity, false );
 	Material::capacity = capacity;
 	return ret;
+}
+
+void Material::UpdateReflection()
+{
+	D3D12_RANGE range;
+	
+	range.Begin = sizeof( Reflection ) * lockIndex;
+	range.End = range.Begin + sizeof( Reflection );
+
+	Reflection* pBlock = ( Reflection* )pReflectionBuffer->Map();
+	pBlock[lockIndex] = frameResourceReflection;
+	pReflectionBuffer->Unmap( range );
+}
+
+void Material::UpdateConstants()
+{
+	for ( int i = 0; i < 2; ++i )
+	{
+		auto block = mConstantBuffer->Map( i );
+		memcpy( block, &frameResourceConstants, sizeof( frameResourceConstants ) );
+		mConstantBuffer->Unmap( i );
+	}
 }

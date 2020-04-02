@@ -84,10 +84,14 @@ void* LargeHeap::Map()
 	return pUploadAddress[App::mFrameIndex];
 }
 
-void LargeHeap::Unmap( uint64 writeRange )
+void LargeHeap::Unmap( const D3D12_RANGE& range )
 {
-	if ( writeRange > mSizeInBytes ) writeRange = mSizeInBytes;
-	mWriteRange[App::mFrameIndex] = writeRange;
+	mWriteRanges[App::mFrameIndex].insert( { range.Begin, range.End } );
+}
+
+void LargeHeap::Unmap()
+{
+	Unmap( { 0, mSizeInBytes } );
 }
 
 D3D12_GPU_VIRTUAL_ADDRESS LargeHeap::GetGPUVirtualAddress()
@@ -97,26 +101,46 @@ D3D12_GPU_VIRTUAL_ADDRESS LargeHeap::GetGPUVirtualAddress()
 
 bool LargeHeap::IsCommittable( int frameIndex )
 {
-	return mWriteRange[frameIndex];
+	return mWriteRanges[frameIndex].size();
 }
 
 void LargeHeap::Commit( int frameIndex, CDeviceContext& deviceContext )
 {
-	if ( mWriteRange[frameIndex] > 0 )
+	auto pCommandList = deviceContext.pCommandList.Get();
+
+	if ( IsCommittable( frameIndex ) )
 	{
-		auto pCommandList = deviceContext.pCommandList.Get();
+		// 병합 가능한 범위를 병합합니다.
+		auto& ranges = mWriteRanges[frameIndex];
 
-		if ( mWriteRange[frameIndex] == mSizeInBytes )
+		list<D3D12_RANGE> results;
+		auto it = ranges.begin();
+		pair<UINT64, UINT64> current = *it;
+
+		while ( it != ranges.end() )
 		{
-			// 단순 복사 명령을 수행합니다.
-			pCommandList->CopyResource( pResource.Get(), pUploadHeaps[frameIndex].Get() );
+			if ( current.second >= it->first )
+			{
+				current.second = max( current.second, it->second );
+			}
+			else
+			{
+				results.push_back( { current.first, current.second } );
+				current = *it;
+			}
+
+			it++;
 		}
-		else
+		results.push_back( { current.first, current.second } );
+
+		for ( auto i : results )
 		{
-			// 영역 복사 명령을 수행합니다.
-			pCommandList->CopyBufferRegion( pResource.Get(), 0, pUploadHeaps[frameIndex].Get(), 0, mWriteRange[frameIndex] );
+			auto& item = i;
+
+			uint64 sizeInBytes = item.End - item.Begin;
+			pCommandList->CopyBufferRegion( pResource.Get(), item.Begin, pUploadHeaps[frameIndex].Get(), item.Begin, sizeInBytes );
 		}
 
-		mWriteRange[frameIndex] = 0;
+		ranges.clear();
 	}
 }

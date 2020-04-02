@@ -1,5 +1,5 @@
 # 패치 노트
-## 2020-03-26. ver 0.4.0.911
+## 2020-03-26. ver 0.4.0.1044
 * 엔진 내부 클래스의 관계를 개선했습니다.
 * HeapAllocator 클래스가 생겼습니다.
   * 이제 매 프레임 갱신되는 것이 아닌 모든 개체는 HeapAllocator에 의해 Default GPU 힙에 생성됩니다.
@@ -7,6 +7,7 @@
 * LargeHeap 클래스가 생겼습니다.
   * 정기적 갱신이 필요하지만 매 프레임 갱신하는 것이 아닌 버퍼는 LargeHeap 클래스를 사용합니다.
   * HeapAllocator에서 할당한 개체와 비슷하게 작동하지만, 단일 리소스를 사용하며 Allocator의 영향을 받지 않습니다.
+  * 단, Alloctor 클래스에 등록되어 Commit 명령을 같이 수행합니다.
 ## 2020-03-24. ver 0.3.0.778
 * Transform 컴포넌트에 ActualPosition, ActualScale, ActualRotation, ActualForward 속성이 추가되었습니다.
   * 이 속성은 렌더링 시 정확한 월드 변환 데이터를 제공합니다.

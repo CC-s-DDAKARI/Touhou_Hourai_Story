@@ -9,6 +9,7 @@ namespace SC::Game
 		friend class SkinnedMeshRenderer;
 		friend class Details::GameLogic;
 		friend class Terrain;
+		friend class Details::App;
 
 #pragma pack( push, 4 )
 		struct Constants
@@ -29,15 +30,14 @@ namespace SC::Game
 		};
 #pragma pack( pop )
 
-		static sc_game_export_object( ComPtr<ID3D12Resource> ) pReflectionBuffer;
-		static Reflection* reflectionBufferPtr;
+		static sc_game_export_object( ComPtr<Details::LargeHeap> ) pReflectionBuffer;
 		static sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pShaderResourceView;
 		static int capacity;
 		static int reference_count;
 		static std::vector<bool> locked;
 		static sc_game_export_object( ComPtr<Details::CShaderResourceView> ) pNullSRV;
 
-		sc_game_export_object( ComPtr<Details::CDynamicBuffer> ) constantBuffer;
+		sc_game_export_object( ComPtr<Details::Heap> ) mConstantBuffer;
 		int lockIndex = 0;
 
 		Reflection frameResourceReflection;
@@ -47,6 +47,12 @@ namespace SC::Game
 		RefPtr<Texture2D> diffuseLayerMap;
 		RefPtr<Texture2D> normalMap;
 		RenderQueueLayer layer = RenderQueueLayer::Default;
+
+		std::mutex mLocker;
+		bool mConstantUpdated = true;
+
+		static void Initialize();
+		static void Dispose( object sender );
 
 		void SetGraphicsRootConstantBuffers( sc_game_export_object( RefPtr<Details::CDeviceContext> )& deviceContext );
 		static void SetGraphicsRootShaderResources( sc_game_export_object( RefPtr<Details::CDeviceContext> )& deviceContext );
@@ -150,5 +156,7 @@ namespace SC::Game
 	private:
 		static int Lock( Material* ptr );
 		static int Realloc( int capacity );
+		void UpdateReflection();
+		void UpdateConstants();
 	};
 }

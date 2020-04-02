@@ -118,5 +118,11 @@ namespace SC::Game
 
 		/// <summary> 개체가 현재 바라보는 렌더링 방향을 가져옵니다. </summary>
 		Vector3 ActualForward_get();
+
+		/// <summary> (Visual Studio 전용) 개체의 변환이 현재 프레임에서 수정되었음을 나타내는 값을 가져옵니다. </summary>
+		vs_property_get( bool, IsUpdated );
+
+		/// <summary> 개체의 변환이 현재 프레임에서 수정되었음을 나타내는 값을 가져옵니다. </summary>
+		bool IsUpdated_get();
 	};
 }

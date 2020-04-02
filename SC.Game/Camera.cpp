@@ -7,19 +7,17 @@ using namespace std;
 
 void Camera::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
-	deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Camera, dynamicBuffer[frameIndex]->VirtualAddress );
+	deviceContext->pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Camera, mConstantBuffer->GetGPUVirtualAddress() );
 }
 
 Camera::Camera()
 {
-	dynamicBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
-	dynamicBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ), 256 );
+	mConstantBuffer = HeapAllocator::Alloc( sizeof( Constants ) );
 }
 
 Camera::~Camera()
 {
-	GC::Add( App::mFrameIndex, dynamicBuffer[0].Get(), 2 );
-	GC::Add( App::mFrameIndex, dynamicBuffer[1].Get(), 2 );
+	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 2 );
 }
 
 object Camera::Clone()
@@ -32,81 +30,87 @@ object Camera::Clone()
 
 void Camera::LateUpdate( Time& time, Input& input )
 {
-	int frameIndex = App::mFrameIndex;
-	auto& frameResource = *( Constants* )dynamicBuffer[frameIndex]->pBlock;
-
-	XMMATRIX world = XMLoadFloat4x4( &Transform->world );
-	auto det = XMMatrixDeterminant( world );
-	auto worldInv = XMMatrixInverse( &det, world );
-
-	double asp = aspectRatio;
-	if ( asp == 0.0 )
+	if ( Transform->IsUpdated || mHasUpdate )
 	{
-		RECT rc;
-		GetClientRect( App::mWndHandle, &rc );
-		auto wid = rc.right - rc.left;
-		auto hei = rc.bottom - rc.top;
-		asp = ( double )wid / hei;
+		auto& frameResource = *( Constants* )mConstantBuffer->Map();
+
+		XMMATRIX world = XMLoadFloat4x4( &Transform->world );
+		auto det = XMMatrixDeterminant( world );
+		auto worldInv = XMMatrixInverse( &det, world );
+
+		double asp = aspectRatio;
+		if ( asp == 0.0 )
+		{
+			RECT rc;
+			GetClientRect( App::mWndHandle, &rc );
+			auto wid = rc.right - rc.left;
+			auto hei = rc.bottom - rc.top;
+			asp = ( double )wid / hei;
+		}
+
+		auto view = worldInv;
+		auto proj = XMMatrixPerspectiveFovLH( 0.25f * 3.14f, ( float )asp, 0.1f, 1000.0f );
+		auto detProj = XMMatrixDeterminant( proj );
+
+		auto vp = view * proj;
+
+		XMStoreFloat4x4( &frameResource.ViewProj, vp );
+		XMStoreFloat4x4( &frameResource.ViewInv, world );
+		XMStoreFloat4x4( &frameResource.ProjInv, XMMatrixInverse( &detProj, proj ) );
+
+		XMVECTOR scale, rotation, trans;
+		XMMatrixDecompose( &scale, &rotation, &trans, world );
+
+		XMStoreFloat3( &frameResource.Pos, trans );
+
+		mConstantBuffer->Unmap();
+
+		// 절두체를 계산합니다.
+		XMFLOAT4X4 projection;
+		XMStoreFloat4x4( &projection, proj );
+
+		float zMin = -projection._43 / projection._33;
+		float r = 1000.0f / ( 1000.0f - zMin );
+
+		projection._33 = r;
+		projection._43 = -r * zMin;
+		proj = XMLoadFloat4x4( &projection );
+
+		XMFLOAT4X4 frustumMatrix;
+		XMStoreFloat4x4( &frustumMatrix, XMMatrixMultiply( view, proj ) );
+
+		mPlanes[0].x = frustumMatrix._14 + frustumMatrix._13;
+		mPlanes[0].y = frustumMatrix._24 + frustumMatrix._23;
+		mPlanes[0].z = frustumMatrix._34 + frustumMatrix._33;
+		mPlanes[0].w = frustumMatrix._44 + frustumMatrix._43;
+
+		mPlanes[1].x = frustumMatrix._14 - frustumMatrix._13;
+		mPlanes[1].y = frustumMatrix._24 - frustumMatrix._23;
+		mPlanes[1].z = frustumMatrix._34 - frustumMatrix._33;
+		mPlanes[1].w = frustumMatrix._44 - frustumMatrix._43;
+
+		mPlanes[2].x = frustumMatrix._14 + frustumMatrix._11;
+		mPlanes[2].y = frustumMatrix._24 + frustumMatrix._21;
+		mPlanes[2].z = frustumMatrix._34 + frustumMatrix._31;
+		mPlanes[2].w = frustumMatrix._44 + frustumMatrix._41;
+
+		mPlanes[3].x = frustumMatrix._14 - frustumMatrix._11;
+		mPlanes[3].y = frustumMatrix._24 - frustumMatrix._21;
+		mPlanes[3].z = frustumMatrix._34 - frustumMatrix._31;
+		mPlanes[3].w = frustumMatrix._44 - frustumMatrix._41;
+
+		mPlanes[4].x = frustumMatrix._14 - frustumMatrix._12;
+		mPlanes[4].y = frustumMatrix._24 - frustumMatrix._22;
+		mPlanes[4].z = frustumMatrix._34 - frustumMatrix._32;
+		mPlanes[4].w = frustumMatrix._44 - frustumMatrix._42;
+
+		mPlanes[5].x = frustumMatrix._14 + frustumMatrix._12;
+		mPlanes[5].y = frustumMatrix._24 + frustumMatrix._22;
+		mPlanes[5].z = frustumMatrix._34 + frustumMatrix._32;
+		mPlanes[5].w = frustumMatrix._44 + frustumMatrix._42;
+
+		mHasUpdate = false;
 	}
-
-	auto view = worldInv;
-	auto proj = XMMatrixPerspectiveFovLH( 0.25f * 3.14f, ( float )asp, 0.1f, 1000.0f );
-	auto detProj = XMMatrixDeterminant( proj );
-
-	auto vp = view * proj;
-
-	XMStoreFloat4x4( &frameResource.ViewProj, vp );
-	XMStoreFloat4x4( &frameResource.ViewInv, world );
-	XMStoreFloat4x4( &frameResource.ProjInv, XMMatrixInverse( &detProj, proj ) );
-	
-	XMVECTOR scale, rotation, trans;
-	XMMatrixDecompose( &scale, &rotation, &trans, world );
-
-	XMStoreFloat3( &frameResource.Pos, trans );
-
-	// 절두체를 계산합니다.
-	XMFLOAT4X4 projection;
-	XMStoreFloat4x4( &projection, proj );
-
-	float zMin = -projection._43 / projection._33;
-	float r = 1000.0f / ( 1000.0f - zMin );
-
-	projection._33 = r;
-	projection._43 = -r * zMin;
-	proj = XMLoadFloat4x4( &projection );
-
-	XMFLOAT4X4 frustumMatrix;
-	XMStoreFloat4x4( &frustumMatrix, XMMatrixMultiply( view, proj ) );
-
-	mPlanes[0].x = frustumMatrix._14 + frustumMatrix._13;
-	mPlanes[0].y = frustumMatrix._24 + frustumMatrix._23;
-	mPlanes[0].z = frustumMatrix._34 + frustumMatrix._33;
-	mPlanes[0].w = frustumMatrix._44 + frustumMatrix._43;
-
-	mPlanes[1].x = frustumMatrix._14 - frustumMatrix._13;
-	mPlanes[1].y = frustumMatrix._24 - frustumMatrix._23;
-	mPlanes[1].z = frustumMatrix._34 - frustumMatrix._33;
-	mPlanes[1].w = frustumMatrix._44 - frustumMatrix._43;
-
-	mPlanes[2].x = frustumMatrix._14 + frustumMatrix._11;
-	mPlanes[2].y = frustumMatrix._24 + frustumMatrix._21;
-	mPlanes[2].z = frustumMatrix._34 + frustumMatrix._31;
-	mPlanes[2].w = frustumMatrix._44 + frustumMatrix._41;
-
-	mPlanes[3].x = frustumMatrix._14 - frustumMatrix._11;
-	mPlanes[3].y = frustumMatrix._24 - frustumMatrix._21;
-	mPlanes[3].z = frustumMatrix._34 - frustumMatrix._31;
-	mPlanes[3].w = frustumMatrix._44 - frustumMatrix._41;
-
-	mPlanes[4].x = frustumMatrix._14 - frustumMatrix._12;
-	mPlanes[4].y = frustumMatrix._24 - frustumMatrix._22;
-	mPlanes[4].z = frustumMatrix._34 - frustumMatrix._32;
-	mPlanes[4].w = frustumMatrix._44 - frustumMatrix._42;
-
-	mPlanes[5].x = frustumMatrix._14 + frustumMatrix._12;
-	mPlanes[5].y = frustumMatrix._24 + frustumMatrix._22;
-	mPlanes[5].z = frustumMatrix._34 + frustumMatrix._32;
-	mPlanes[5].w = frustumMatrix._44 + frustumMatrix._42;
 }
 
 Ray Camera::ScreenSpaceToRay( Point<double> screenPoint )
@@ -208,4 +212,5 @@ double Camera::AspectRatio_get()
 void Camera::AspectRatio_set( double value )
 {
 	aspectRatio = value;
+	mHasUpdate = true;
 }

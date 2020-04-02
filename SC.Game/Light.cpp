@@ -4,8 +4,7 @@ using namespace SC::Game::Details;
 
 Light::Light()
 {
-	lightBuffer[0] = Graphics::mDevice->CreateDynamicBuffer( sizeof( LightConstants ) );
-	lightBuffer[1] = Graphics::mDevice->CreateDynamicBuffer( sizeof( LightConstants ) );
+	mConstantBuffer = HeapAllocator::Alloc( sizeof( LightConstants ) );
 
 	LightColor = Drawing::Color::White;
 	Diffuse = 1.0;
@@ -14,9 +13,7 @@ Light::Light()
 void Light::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
 	auto& pCommandList = *deviceContext->pCommandList.Get();
-
-	memcpy( lightBuffer[frameIndex]->pBlock, &frameResource, sizeof( frameResource ) );
-	pCommandList.SetGraphicsRootConstantBufferView( Slot_Rendering_Light, lightBuffer[frameIndex]->VirtualAddress );
+	pCommandList.SetGraphicsRootConstantBufferView( Slot_Rendering_Light, mConstantBuffer->GetGPUVirtualAddress() );
 }
 
 void Light::SetGraphicsRootShaderResources( RefPtr<CDeviceContext>& deviceContext )
@@ -43,9 +40,20 @@ void Light::SetDepthBuffer( void* pResource )
 
 Light::~Light()
 {
-	GC::Add( App::mFrameIndex, lightBuffer[0].Get(), 2 );
-	GC::Add( App::mFrameIndex, lightBuffer[1].Get(), 2 );
+	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 2 );
 	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 2 );
+}
+
+void Light::Update( Time& time, Input& input )
+{
+	if ( mUpdate )
+	{
+		auto block = mConstantBuffer->Map();
+		memcpy( block, &mFrameResource, sizeof( mFrameResource ) );
+		mConstantBuffer->Unmap();
+
+		mUpdate = false;
+	}
 }
 
 Drawing::Color Light::LightColor_get()
@@ -56,37 +64,41 @@ Drawing::Color Light::LightColor_get()
 void Light::LightColor_set( Drawing::Color value )
 {
 	lightColor = value;
-	frameResource.Color = { lightColor.R, lightColor.G, lightColor.B };
+	mFrameResource.Color = { lightColor.R, lightColor.G, lightColor.B };
+	mUpdate = true;
 }
 
 double Light::Ambient_get()
 {
-	return ( double )frameResource.Ambient;
+	return ( double )mFrameResource.Ambient;
 }
 
 void Light::Ambient_set( double value )
 {
-	frameResource.Ambient = ( float )value;
+	mFrameResource.Ambient = ( float )value;
+	mUpdate = true;
 }
 
 double Light::Diffuse_get()
 {
-	return ( double )frameResource.Diffuse;
+	return ( double )mFrameResource.Diffuse;
 }
 
 void Light::Diffuse_set( double value )
 {
-	frameResource.Diffuse = ( float )value;
+	mFrameResource.Diffuse = ( float )value;
+	mUpdate = true;
 }
 
 double Light::Specular_get()
 {
-	return ( double )frameResource.Specular;
+	return ( double )mFrameResource.Specular;
 }
 
 void Light::Specular_set( double value )
 {
-	frameResource.Specular = ( float )value;
+	mFrameResource.Specular = ( float )value;
+	mUpdate = true;
 }
 
 bool Light::IsShadowCast_get()
@@ -97,5 +109,6 @@ bool Light::IsShadowCast_get()
 void Light::IsShadowCast_set( bool value )
 {
 	shadowCast = value;
+	mFrameResource.ShadowCast = ( int )value;
 	ReadyBuffer();
 }

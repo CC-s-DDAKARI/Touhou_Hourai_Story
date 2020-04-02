@@ -17,10 +17,11 @@ namespace SC::Game
 		};
 #pragma pack( pop )
 
-		std::array<sc_game_export_object( ComPtr<Details::CDynamicBuffer> ), 2> dynamicBuffer;
+		sc_game_export_object( ComPtr<Details::Heap> ) mConstantBuffer;
 		RefPtr<CameraClearMode> clearMode = new CameraClearModeColor();
 
 		double aspectRatio = 0;
+		bool mHasUpdate = true;
 
 		sc_game_export_float( XMFLOAT4, 4 ) mPlanes[6];
 

@@ -13,7 +13,7 @@ namespace SC::Game::Details
 
 		D3D12_GPU_VIRTUAL_ADDRESS mStartAddress;
 		void* pUploadAddress[2];
-		uint64 mWriteRange[2]{ };
+		std::map<uint64, uint64> mWriteRanges[2];
 		D3D12_RESOURCE_STATES mInitialState;
 
 	public:
@@ -25,7 +25,8 @@ namespace SC::Game::Details
 		ULONG STDMETHODCALLTYPE Release() override;
 
 		void* Map();
-		void Unmap( uint64 writeRange = std::numeric_limits<uint64>::max() );
+		void Unmap( const D3D12_RANGE& range );
+		void Unmap();
 		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress();
 
 		bool IsCommittable( int frameIndex );

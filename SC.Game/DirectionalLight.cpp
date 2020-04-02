@@ -95,29 +95,35 @@ void DirectionalLight::Update( Time& time, Input& input )
 {
 	auto trp = Transform;
 
-	auto pos = trp->Position;
-	auto quat = trp->Rotation;
-	auto direction = ( quat * Quaternion( Vector3::Forward, 0 ) * quat.Conjugate ).V;
-	auto up = ( quat * Quaternion( Vector3::Up, 0 ) * quat.Conjugate ).V;
-
-	auto view = XMMatrixLookToLH(
-		XMVectorSet( ( float )pos.X, ( float )pos.Y, ( float )pos.Z, 0 ),
-		XMVectorSet( ( float )direction.X, ( float )direction.Y, ( float )direction.Z, 0 ),
-		XMVectorSet( ( float )up.X, ( float )up.Y, ( float )up.Z, 0 )
-	);
-	auto proj = XMMatrixOrthographicLH( ( float )width, ( float )height, 1.0f, ( float )maxDepth );
-
-	XMStoreFloat4x4( ( XMFLOAT4X4* )&frameResource.ViewProj, view * proj );
-
-	frameResource.DirectionalLight.Direction =
+	if ( trp->IsUpdated || mHasUpdate )
 	{
-		( float )direction.X,
-		( float )direction.Y,
-		( float )direction.Z,
-		0.0f
-	};
+		auto pos = trp->Position;
+		auto quat = trp->Rotation;
+		auto direction = ( quat * Quaternion( Vector3::Forward, 0 ) * quat.Conjugate ).V;
+		auto up = ( quat * Quaternion( Vector3::Up, 0 ) * quat.Conjugate ).V;
 
-	frameResource.ShadowCast = ( int )IsShadowCast;
+		auto view = XMMatrixLookToLH(
+			XMVectorSet( ( float )pos.X, ( float )pos.Y, ( float )pos.Z, 0 ),
+			XMVectorSet( ( float )direction.X, ( float )direction.Y, ( float )direction.Z, 0 ),
+			XMVectorSet( ( float )up.X, ( float )up.Y, ( float )up.Z, 0 )
+			);
+		auto proj = XMMatrixOrthographicLH( ( float )width, ( float )height, 1.0f, ( float )maxDepth );
+
+		XMStoreFloat4x4( ( XMFLOAT4X4* )&mFrameResource.ViewProj, view * proj );
+
+		mFrameResource.DirectionalLight.Direction =
+		{
+			( float )direction.X,
+			( float )direction.Y,
+			( float )direction.Z,
+			0.0f
+		};
+
+		mUpdate = true;
+		mHasUpdate = false;
+	}
+
+	Light::Update( time, input );
 }
 
 double DirectionalLight::MaxDepth_get()
@@ -128,6 +134,7 @@ double DirectionalLight::MaxDepth_get()
 void DirectionalLight::MaxDepth_set( double value )
 {
 	maxDepth = value;
+	mHasUpdate = true;
 }
 
 double DirectionalLight::Width_get()
@@ -138,6 +145,7 @@ double DirectionalLight::Width_get()
 void DirectionalLight::Width_set( double value )
 {
 	width = value;
+	mHasUpdate = true;
 }
 
 double DirectionalLight::Height_get()
@@ -148,4 +156,5 @@ double DirectionalLight::Height_get()
 void DirectionalLight::Height_set( double value )
 {
 	height = value;
+	mHasUpdate = true;
 }

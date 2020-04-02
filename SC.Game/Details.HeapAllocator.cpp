@@ -102,14 +102,7 @@ void AlignedHeap::Commit( int frameIndex, CDeviceContext& deviceContext )
 	if ( IsCommittable( frameIndex ) )
 	{
 		// 병합 가능한 범위를 병합합니다.
-		map<UINT64, UINT64> ranges;
-		while ( mCopyRangeQueue[frameIndex].size() )
-		{
-			auto item = mCopyRangeQueue[frameIndex].front();
-			ranges.insert( { item.Begin, item.End } );
-
-			mCopyRangeQueue[frameIndex].pop();
-		}
+		auto& ranges = mCopyRangeQueue[frameIndex];
 
 		list<D3D12_RANGE> results;
 		auto it = ranges.begin();
@@ -138,6 +131,8 @@ void AlignedHeap::Commit( int frameIndex, CDeviceContext& deviceContext )
 			uint64 sizeInBytes = item.End - item.Begin;
 			pCommandList->CopyBufferRegion( pResource.Get(), item.Begin, pUploadHeaps[frameIndex].Get(), item.Begin, sizeInBytes );
 		}
+
+		ranges.clear();
 	}
 }
 
@@ -159,7 +154,7 @@ void* AlignedHeap::GetUploadAddress( int frameIndex, uint64 index )
 void AlignedHeap::AddCopyRange( int frameIndex, const D3D12_RANGE& range )
 {
 	lock_guard<mutex> lock( mLocker );
-	mCopyRangeQueue[frameIndex].push( range );
+	mCopyRangeQueue[frameIndex][range.Begin] = range.End;
 }
 
 uint64 AlignedHeap::Expand()

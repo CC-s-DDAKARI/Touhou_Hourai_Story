@@ -54,12 +54,25 @@ void* STDMETHODCALLTYPE Heap::Map()
 	return mHeapRef->GetUploadAddress( App::mFrameIndex, mIndex );
 }
 
+void* STDMETHODCALLTYPE Heap::Map( int frameIndex )
+{
+	return mHeapRef->GetUploadAddress( frameIndex, mIndex );
+}
+
 void STDMETHODCALLTYPE Heap::Unmap()
 {
 	D3D12_RANGE range;
 	range.Begin = mIndex * mHeapRef->mAlign;
 	range.End = range.Begin + mHeapRef->mAlign;
 	mHeapRef->AddCopyRange( App::mFrameIndex, range );
+}
+
+void STDMETHODCALLTYPE Heap::Unmap( int frameIndex )
+{
+	D3D12_RANGE range;
+	range.Begin = mIndex * mHeapRef->mAlign;
+	range.End = range.Begin + mHeapRef->mAlign;
+	mHeapRef->AddCopyRange( frameIndex, range );
 }
 
 D3D12_GPU_VIRTUAL_ADDRESS Heap::GetGPUVirtualAddress()
