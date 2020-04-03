@@ -1,6 +1,8 @@
 using namespace SC;
 using namespace SC::Game::Details;
 
+using namespace std;
+
 CDeviceContextAndAllocator::CDeviceContextAndAllocator( RefPtr<CDevice>& device, D3D12_COMMAND_LIST_TYPE type, ID3D12PipelineState* pInitialPipelineState ) : CDeviceContext( device, type, nullptr, pInitialPipelineState )
 {
 	auto& pDevice = *device->pDevice.Get();
@@ -21,8 +23,8 @@ CDeviceContextAndAllocator::CDeviceContextAndAllocator( RefPtr<CDevice>& device,
 
 CDeviceContextAndAllocator::~CDeviceContextAndAllocator()
 {
-	GC::Add( App::mFrameIndex, pAllocators[0].Get(), 5 );
-	GC::Add( App::mFrameIndex, pAllocators[1].Get(), 5 );
+	GC::Add( App::mFrameIndex, move( pAllocators[0] ), 5 );
+	GC::Add( App::mFrameIndex, move( pAllocators[1] ), 5 );
 }
 
 void CDeviceContextAndAllocator::Reset( CCommandQueue* pCommandQueue, ID3D12CommandAllocator* pCommandAllocator, ID3D12PipelineState* pInitialPipelineState )

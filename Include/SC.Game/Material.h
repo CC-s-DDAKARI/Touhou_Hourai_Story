@@ -50,6 +50,7 @@ namespace SC::Game
 
 		std::mutex mLocker;
 		bool mConstantUpdated = true;
+		int mLastCapacity;
 
 		static void Initialize();
 		static void Dispose( object sender );

@@ -62,6 +62,7 @@ void Scene01::Load( RefPtr<IAsyncLoad> asyncLoad )
 			break;
 		}
 	}
+
 	Add( GameVar::playableCharacter );
 
 	/* 지형 로드 */

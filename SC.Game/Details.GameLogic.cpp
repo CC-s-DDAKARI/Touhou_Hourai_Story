@@ -256,7 +256,7 @@ void GameLogic::CommitBuffer( int frameIndex )
 	auto& blas = mCurrentScene->mSceneBLAS;
 	for ( auto i : blas )
 	{
-		i->BuildRaytracingAccelerationStructure( mDeviceContextCommit );
+		//i->BuildRaytracingAccelerationStructure( mDeviceContextCommit );
 	}
 
 	mDeviceContextCommit->Close();

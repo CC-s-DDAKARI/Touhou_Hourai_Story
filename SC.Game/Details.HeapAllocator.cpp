@@ -101,6 +101,16 @@ void AlignedHeap::Commit( int frameIndex, CDeviceContext& deviceContext )
 
 	if ( IsCommittable( frameIndex ) )
 	{
+		lock_guard<mutex> lock( mLocker );
+
+		if ( pExpandCopy )
+		{
+			// 확장 이전 데이터를 새 리소스에 전송합니다.
+			UINT64 range = pExpandCopy->GetDesc().Width;
+			pCommandList->CopyBufferRegion( pResource.Get(), 0, pExpandCopy.Get(), 0, range );
+			GC::Add( frameIndex, move( pExpandCopy ), 1000 );
+		}
+
 		// 병합 가능한 범위를 병합합니다.
 		auto& ranges = mCopyRangeQueue[frameIndex];
 
@@ -160,9 +170,20 @@ void AlignedHeap::AddCopyRange( int frameIndex, const D3D12_RANGE& range )
 uint64 AlignedHeap::Expand()
 {
 	auto pDevice = Graphics::mDevice->pDevice.Get();
+	bool copyBack = false;
 
 	// 이전 개체를 모두 사용 완료한 후 제거하도록 합니다.
-	GC::Add( App::mFrameIndex, pResource.Get(), 60 );
+	if ( !pExpandCopy )
+	{
+		pExpandCopy = move( pResource );
+		copyBack = true;
+	}
+	else
+	{
+		GC::Add( App::mFrameIndex, move( pResource ), 1000 );
+	}
+	GC::Add( App::mFrameIndex, move( pUploadHeaps[0] ), 1000 );
+	GC::Add( App::mFrameIndex, move( pUploadHeaps[1] ), 1000 );
 
 	// 1024개의 추가 공간을 할당하여 새로운 개체를 생성합니다.
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
@@ -192,8 +213,16 @@ uint64 AlignedHeap::Expand()
 	// 주소를 매핑합니다.
 	mStartAddress = pResource->GetGPUVirtualAddress();
 
+	void* pUploadAddressBack[2] = { pUploadAddress[0], pUploadAddress[1] };
 	HR( pUploadHeaps[0]->Map( 0, nullptr, &pUploadAddress[0] ) );
 	HR( pUploadHeaps[1]->Map( 0, nullptr, &pUploadAddress[1] ) );
+
+	// 커밋되지 않은 이전 업로드 데이터를 복사합니다.
+	if ( copyBack )
+	{
+		memcpy( pUploadAddress[0], pUploadAddressBack[0], mAlign * mCount );
+		memcpy( pUploadAddress[1], pUploadAddressBack[1], mAlign * mCount );
+	}
 
 	// 힙 큐에 목록을 채웁니다.
 	for ( uint64 i = 1; i < mAllocUnit; ++i )
@@ -227,7 +256,7 @@ void HeapAllocator::Commit( int frameIndex, CDeviceContext& deviceContext )
 	// 데이터를 커밋해야 할 항목이 있을 경우 리소스 배리어를 시작합니다.
 	for ( size_t i = 0; i < alignedHeapCount; ++i )
 	{
-		if ( mAlignedHeaps[i].IsCommittable( frameIndex ) )
+		if ( mAlignedHeaps[i].IsCommittable( frameIndex ) && mAlignedHeaps[i].pResource )
 		{
 			D3D12_RESOURCE_BARRIER barrier{ };
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;

@@ -2,6 +2,8 @@ using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
 
+using namespace std;
+
 CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_STATES initialState, D3D12_RESOURCE_FLAGS resourceFlags, const void* pInitialData, uint64 initialDataSize, int queueIndex ) : Object()
 , initialState( initialState )
 , deviceRef( device )
@@ -55,8 +57,8 @@ CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_ST
 		uploadFenceValue = device->CopyQueue->Signal();
 
 		// 복사 명령이 완료될 때까지 리소스를 해제하지 않습니다.
-		GC::Add( device->CopyQueue->pFence.Get(), uploadFenceValue, pUploadCommands.Get() );
-		GC::Add( device->CopyQueue->pFence.Get(), uploadFenceValue, pUploadHeap.Get() );
+		GC::Add( device->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadCommands ) );
+		GC::Add( device->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadHeap ) );
 
 		copySuccessFlag = false;
 	}
@@ -64,7 +66,7 @@ CBuffer::CBuffer( RefPtr<CDevice>& device, uint64 sizeInBytes, D3D12_RESOURCE_ST
 
 CBuffer::~CBuffer()
 {
-	GC::Add( App::mFrameIndex, pResource.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( pResource ), 5 );
 }
 
 bool CBuffer::Lock( RefPtr<CDeviceContext>& deviceContext, bool sync )

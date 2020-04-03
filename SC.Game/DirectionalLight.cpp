@@ -2,6 +2,8 @@ using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
 
+using namespace std;
+
 void DirectionalLight::ReadyBuffer()
 {
 	if ( !pShadowDepthMap )
@@ -82,8 +84,8 @@ DirectionalLight::DirectionalLight()
 
 DirectionalLight::~DirectionalLight()
 {
-	GC::Add( App::mFrameIndex, pShadowDepthMap.Get(), 5 );
-	GC::Add( App::mFrameIndex, pDSVHeap.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( pShadowDepthMap ), 5 );
+	GC::Add( App::mFrameIndex, move( pDSVHeap ), 5 );
 }
 
 object DirectionalLight::Clone()

@@ -1,6 +1,7 @@
 using namespace SC;
 using namespace SC::Game;
 using namespace SC::Game::Details;
+using namespace std;
 
 Light::Light()
 {
@@ -40,8 +41,8 @@ void Light::SetDepthBuffer( void* pResource )
 
 Light::~Light()
 {
-	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 5 );
-	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( mConstantBuffer ), 5 );
+	GC::Add( App::mFrameIndex, move( pShaderResourceView ), 5 );
 }
 
 void Light::Update( Time& time, Input& input )

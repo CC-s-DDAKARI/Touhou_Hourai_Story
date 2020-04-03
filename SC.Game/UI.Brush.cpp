@@ -2,6 +2,8 @@ using namespace SC;
 using namespace SC::Game::UI;
 using namespace SC::Game::Details;
 
+using namespace std;
+
 Brush::Brush( int type ) : Object()
 {
 	brushConstants = Graphics::mDevice->CreateDynamicBuffer( sizeof( Constants ) );
@@ -13,7 +15,7 @@ Brush::Brush( int type ) : Object()
 
 Brush::~Brush()
 {
-	GC::Add( App::mFrameIndex, brushConstants.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( brushConstants ), 5 );
 }
 
 double Brush::Opacity_get()

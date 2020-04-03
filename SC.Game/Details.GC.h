@@ -6,7 +6,7 @@ namespace SC::Game::Details
 	{
 		struct tag_Fence
 		{
-			ID3D12Fence* pFence;
+			ComPtr<ID3D12Fence> pFence;
 			uint64 mFenceValue;
 		};
 
@@ -18,20 +18,8 @@ namespace SC::Game::Details
 
 		struct tag_Garbage
 		{
-			int mType;
 			ComPtr<IUnknown> pUnknown;
-
-			union
-			{
-				tag_Fence mFence;
-				tag_FrameIndex mFrameIndex;
-			};
-
-			tag_Garbage()
-			{
-				mType = 0;
-				pUnknown = nullptr;
-			}
+			std::variant<tag_Fence, tag_FrameIndex> mVariant;
 		};
 
 		static std::mutex mLocker;
@@ -41,8 +29,8 @@ namespace SC::Game::Details
 
 	public:
 		static void Initialize();
-		static void Add( ID3D12Fence* pFence, uint64 fenceValue, IUnknown* pUnknown );
-		static void Add( int frameIndex, IUnknown* pPageable, int delay );
+		static void Add( ComPtr<ID3D12Fence> pFence, uint64 fenceValue, ComPtr<IUnknown> pUnknown );
+		static void Add( int frameIndex, ComPtr<IUnknown> pUnknown, int delay );
 		static void Collect( int frameIndex = -1 );
 
 	private:

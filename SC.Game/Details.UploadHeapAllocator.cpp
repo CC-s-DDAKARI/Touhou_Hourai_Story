@@ -97,7 +97,7 @@ uint64 UploadAlignedHeap::Expand()
 	auto pDevice = Graphics::mDevice->pDevice.Get();
 
 	// 이전 개체를 모두 사용 완료한 후 제거하도록 합니다.
-	GC::Add( App::mFrameIndex, pResource.Get(), 60 );
+	GC::Add( App::mFrameIndex, move( pResource ), 1000 );
 
 	// 1024개의 추가 공간을 할당하여 새로운 개체를 생성합니다.
 	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_UPLOAD };

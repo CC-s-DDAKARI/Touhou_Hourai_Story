@@ -19,7 +19,7 @@ Animator::Animator() : Component()
 
 Animator::~Animator()
 {
-	GC::Add( App::mFrameIndex, mFinalTransformBuffer.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( mFinalTransformBuffer ), 5 );
 }
 
 object Animator::Clone()

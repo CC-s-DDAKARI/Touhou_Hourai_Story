@@ -21,8 +21,8 @@ bool Texture2D::Lock( RefPtr<CDeviceContext>& deviceContext )
 
 Texture2D::~Texture2D()
 {
-	GC::Add( App::mFrameIndex, pTexture2D.Get(), 5 );
-	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( pTexture2D ), 5 );
+	GC::Add( App::mFrameIndex, move( pShaderResourceView ), 5 );
 }
 
 Texture2D::Texture2D( String name, void* textureData, uint32 sizeInBytes, TextureFormat format, int queueIndex ) : Assets( name )
@@ -169,14 +169,14 @@ void Texture2D::InitializeFrom( IWICBitmapDecoder* pDecoder, TextureFormat forma
 	// 셰이더 자원 서술자를 생성합니다.
 	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pTexture2D.Get(), nullptr );
 
-	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadHeap.Get() );
-	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadCommands.Get() );
-
 #if defined( _DEBUG )
 	pTexture2D->SetName( L"Texture2D.pTexture2D" );
 	pUploadHeap->SetName( L"Texture2D.pUploadHeap" );
 	pUploadCommands->SetName( L"Texture2D.pUploadCommands" );
 #endif
+
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadHeap ) );
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadCommands ) );
 
 	this->width = width;
 	this->height = height;

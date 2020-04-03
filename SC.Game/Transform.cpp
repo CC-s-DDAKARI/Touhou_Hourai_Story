@@ -3,6 +3,7 @@ using namespace SC::Game;
 using namespace SC::Game::Details;
 
 using namespace physx;
+using namespace std;
 
 void Transform::SetGraphicsRootConstantBufferView( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 {
@@ -31,7 +32,7 @@ Transform::~Transform()
 {
 	if ( hasBuffer )
 	{
-		GC::Add( App::mFrameIndex, mConstants.Get(), 5 );
+		GC::Add( App::mFrameIndex, move( mConstants ), 5 );
 	}
 }
 

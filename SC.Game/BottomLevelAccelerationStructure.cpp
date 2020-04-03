@@ -40,7 +40,7 @@ object BottomLevelAccelerationStructure::Clone()
 
 BottomLevelAccelerationStructure::~BottomLevelAccelerationStructure()
 {
-	GC::Add( App::mFrameIndex, mAccel.Get(), 4 );
+	GC::Add( App::mFrameIndex, move( mAccel ), 4 );
 }
 
 void BottomLevelAccelerationStructure::Update( Time& time, Input& input )

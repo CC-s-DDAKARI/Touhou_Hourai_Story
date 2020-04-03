@@ -39,10 +39,11 @@ void Material::SetGraphicsRootConstantBuffers( RefPtr<CDeviceContext>& deviceCon
 {
 	auto pCommandList = deviceContext->pCommandList.Get();
 
-	if ( lock_guard<mutex> lock( mLocker ); mConstantUpdated )
+	if ( mConstantUpdated || mLastCapacity != capacity )
 	{
 		UpdateConstants();
 		mConstantUpdated = false;
+		mLastCapacity = capacity;
 	}
 
 	pCommandList->SetGraphicsRootConstantBufferView( Slot_Rendering_Material, mConstantBuffer->GetGPUVirtualAddress() );
@@ -82,6 +83,7 @@ void Material::SetGraphicsRootShaderResources( RefPtr<CDeviceContext>& deviceCon
 Material::Material( String name ) : Assets( name )
 {
 	lockIndex = Lock( this );
+	mLastCapacity = capacity;
 
 	XMStoreFloat4x4( &frameResourceConstants.TexWorld, XMMatrixIdentity() );
 
@@ -100,7 +102,7 @@ Material::Material( String name ) : Assets( name )
 
 Material::~Material()
 {
-	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( mConstantBuffer ), 5 );
 }
 
 double Material::Ambient_get()
@@ -157,9 +159,9 @@ void Material::DiffuseMap_set( RefPtr<Texture2D> value )
 	if ( ( bool )diffuseMap != ( bool )value )
 	{
 		frameResourceConstants.DiffuseMap += ( bool )value ? 1 : -1;
-		mConstantUpdated = true;
 	}
 	diffuseMap = value;
+	mConstantUpdated = true;
 }
 
 RefPtr<Texture2D> Material::DiffuseLayerMap_get()
@@ -172,9 +174,9 @@ void Material::DiffuseLayerMap_set( RefPtr<Texture2D> value )
 	if ( ( bool )diffuseLayerMap != ( bool )value )
 	{
 		frameResourceConstants.DiffuseMap += ( bool )value ? 1 : -1;
-		mConstantUpdated = true;
 	}
 	diffuseLayerMap = value;
+	mConstantUpdated = true;
 }
 
 RefPtr<Texture2D> Material::NormalMap_get()

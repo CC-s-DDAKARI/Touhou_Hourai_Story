@@ -17,7 +17,7 @@ Camera::Camera()
 
 Camera::~Camera()
 {
-	GC::Add( App::mFrameIndex, mConstantBuffer.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( mConstantBuffer ), 5 );
 }
 
 object Camera::Clone()

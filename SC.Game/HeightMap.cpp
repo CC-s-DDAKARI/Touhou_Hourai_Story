@@ -21,8 +21,8 @@ bool HeightMap::Lock( RefPtr<CDeviceContext>& deviceContext )
 
 HeightMap::~HeightMap()
 {
-	GC::Add( App::mFrameIndex, pTexture2D.Get(), 5 );
-	GC::Add( App::mFrameIndex, pShaderResourceView.Get(), 5 );
+	GC::Add( App::mFrameIndex, move( pTexture2D ), 5 );
+	GC::Add( App::mFrameIndex, move( pShaderResourceView ), 5 );
 }
 
 HeightMap::HeightMap( String name, const path& filepath, uint32 width, uint32 height, int queueIndex ) : Assets( name )
@@ -138,8 +138,8 @@ void HeightMap::InitializeFrom( vector<uint8>& buffer, int queueIndex )
 	// 셰이더 자원 서술자를 생성합니다.
 	pShaderResourceView = Graphics::mDevice->CreateShaderResourceView( pTexture2D.Get(), nullptr );
 
-	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadHeap.Get() );
-	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, pUploadCommands.Get() );
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadHeap ) );
+	GC::Add( Graphics::mDevice->CopyQueue->pFence.Get(), uploadFenceValue, move( pUploadCommands ) );
 
 	this->queueIndex = queueIndex;
 }

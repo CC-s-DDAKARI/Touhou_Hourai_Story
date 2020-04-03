@@ -20,6 +20,8 @@ namespace SC::Game::Details
 
 		void* pUploadAddress[2];
 
+		ComPtr<ID3D12Resource> pExpandCopy;
+
 	public:
 		AlignedHeap( uint64 alignment );
 		AlignedHeap( AlignedHeap&& mov );
