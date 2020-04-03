@@ -9,16 +9,17 @@ namespace SC::Game
 		friend class SkinnedMeshRenderer;
 		friend class Details::GameLogic;
 		friend class Terrain;
+		friend class BottomLevelAccelerationStructure;
 
-		sc_game_export_object( RefPtr<Details::CBuffer> ) vertexBuffer;
-		sc_game_export_object( RefPtr<Details::CBuffer> ) indexBuffer;
-		int numVertex = 0;
-		int numIndex = 0;
+		sc_game_export_object( RefPtr<Details::CBuffer> ) mVertexBuffer;
+		sc_game_export_object( RefPtr<Details::CBuffer> ) mIndexBuffer;
+		int mVertexCount = 0;
+		int mIndexCount = 0;
 		bool isSkinned = false;
 
-	private:
-		Mesh( String name );
+		sc_game_export_bytes( D3D12_RAYTRACING_GEOMETRY_TRIANGLES_DESC, 48 ) mTriangleDesc;
 
+	private:
 		void DrawIndexed( RefPtr<Details::CDeviceContext>& deviceContext );
 		void DrawSkinnedIndexed( uint64 virtualAddress, RefPtr<Details::CDeviceContext>& deviceContext );
 
@@ -52,5 +53,8 @@ namespace SC::Game
 		/// <summary> 큐브 메쉬 개체를 생성합니다. </summary>
 		/// <param name="name"> 데이터 개체 이름을 제공합니다. </param>
 		static RefPtr<Mesh> CreateCube( String name );
+
+	private:
+		void Initialize( const void* pVertexBuffer, uint vertexStride, const void* pIndexBuffer, uint vertexCount, uint indexCount );
 	};
 }

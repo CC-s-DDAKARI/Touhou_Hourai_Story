@@ -12,7 +12,7 @@ void Terrain::Bake( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 		{
 			deviceContext->SetComputeRootShaderResources( Slot_Terrain_HeightMap, mHeightMap->pShaderResourceView );
 
-			pCommandList.SetComputeRootShaderResourceView( ( UINT )Slot_Terrain_VertexBufferBase, mBaseMesh->vertexBuffer->pResource->GetGPUVirtualAddress() );
+			pCommandList.SetComputeRootShaderResourceView( ( UINT )Slot_Terrain_VertexBufferBase, mBaseMesh->mVertexBuffer->pResource->GetGPUVirtualAddress() );
 			pCommandList.SetComputeRootUnorderedAccessView( ( UINT )Slot_Terrain_VertexBuffer, mVertexBuffer->pResource->GetGPUVirtualAddress() );
 
 #pragma pack( push, 4 )
@@ -46,7 +46,7 @@ void Terrain::Render( RefPtr<CDeviceContext>& deviceContext, int frameIndex )
 Terrain::Terrain() : Component()
 {
 	mBaseMesh = Mesh::CreatePlane( "Terrain.Mesh", 1, 1, mResolution, mResolution );
-	mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * mBaseMesh->numVertex, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
+	mVertexBuffer = new CBuffer( Graphics::mDevice, sizeof( Vertex ) * mBaseMesh->mVertexCount, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS );
 	mUpdateTerrain = true;
 }
 

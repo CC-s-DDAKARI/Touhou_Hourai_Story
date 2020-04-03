@@ -418,6 +418,9 @@
     <ClInclude Include="Details.HDRBuffer.h">
       <Filter>Details\Buffers</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\SC.Game\BottomLevelAccelerationStructure.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -762,6 +765,9 @@
     </ClCompile>
     <ClCompile Include="Details.HDRBuffer.cpp">
       <Filter>Details\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="BottomLevelAccelerationStructure.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

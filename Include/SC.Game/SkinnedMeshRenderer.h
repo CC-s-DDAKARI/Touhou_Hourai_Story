@@ -7,7 +7,7 @@ namespace SC::Game
 	{
 		friend class Details::GameLogic;
 
-		static RefPtr<Material> defaultMaterial;
+		static Material* mDefaultMaterial;
 		static uint64 reference_count;
 
 		RefPtr<Mesh> skinnedMesh;

@@ -6,111 +6,80 @@ using namespace std;
 
 void Mesh::DrawIndexed( RefPtr<CDeviceContext>& deviceContext )
 {
-	vertexBuffer->Lock( deviceContext );
-	indexBuffer->Lock( deviceContext );
+	mVertexBuffer->Lock( deviceContext );
 
 	auto pCommandList = deviceContext->pCommandList.Get();
 
 	D3D12_VERTEX_BUFFER_VIEW vbv{ };
-	vbv.BufferLocation = vertexBuffer->pResource->GetGPUVirtualAddress();
-	vbv.SizeInBytes = ( isSkinned ? sizeof( SkinnedVertex ) : sizeof( Vertex ) ) * numVertex;
+	vbv.BufferLocation = mVertexBuffer->pResource->GetGPUVirtualAddress();
+	vbv.SizeInBytes = ( isSkinned ? sizeof( SkinnedVertex ) : sizeof( Vertex ) ) * mVertexCount;
 	vbv.StrideInBytes = ( isSkinned ? sizeof( SkinnedVertex ) : sizeof( Vertex ) );
 
-	vertexBuffer->Lock( deviceContext );
+	mVertexBuffer->Lock( deviceContext );
 	pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	pCommandList->IASetVertexBuffers( 0, 1, &vbv );
 
-	if ( indexBuffer )
+	if ( mIndexBuffer )
 	{
+		mIndexBuffer->Lock( deviceContext );
 		D3D12_INDEX_BUFFER_VIEW ibv{ };
-		ibv.BufferLocation = indexBuffer->pResource->GetGPUVirtualAddress();
-		ibv.SizeInBytes = sizeof( uint32 ) * numIndex;
+		ibv.BufferLocation = mIndexBuffer->pResource->GetGPUVirtualAddress();
+		ibv.SizeInBytes = sizeof( uint32 ) * mIndexCount;
 		ibv.Format = DXGI_FORMAT_R32_UINT;
 
-		indexBuffer->Lock( deviceContext );
+		mIndexBuffer->Lock( deviceContext );
 		pCommandList->IASetIndexBuffer( &ibv );
-		pCommandList->DrawIndexedInstanced( ( UINT )numIndex, 1, 0, 0, 0 );
+		pCommandList->DrawIndexedInstanced( ( UINT )mIndexCount, 1, 0, 0, 0 );
 	}
 	else
 	{
-		pCommandList->DrawInstanced( ( UINT )numVertex, 1, 0, 0 );
+		pCommandList->DrawInstanced( ( UINT )mVertexCount, 1, 0, 0 );
 	}
 }
 
 void Mesh::DrawSkinnedIndexed( uint64 virtualAddress, RefPtr<CDeviceContext>& deviceContext )
 {
-	indexBuffer->Lock( deviceContext );
-
 	auto pCommandList = deviceContext->pCommandList.Get();
 
 	D3D12_VERTEX_BUFFER_VIEW vbv{ };
 	vbv.BufferLocation = virtualAddress;
-	vbv.SizeInBytes = sizeof( Vertex ) * numVertex;
+	vbv.SizeInBytes = sizeof( Vertex ) * mVertexCount;
 	vbv.StrideInBytes = sizeof( Vertex );
 
-	vertexBuffer->Lock( deviceContext );
+	mVertexBuffer->Lock( deviceContext );
 	pCommandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	pCommandList->IASetVertexBuffers( 0, 1, &vbv );
 
-	if ( indexBuffer )
+	if ( mIndexBuffer )
 	{
+		mIndexBuffer->Lock( deviceContext );
 		D3D12_INDEX_BUFFER_VIEW ibv{ };
-		ibv.BufferLocation = indexBuffer->pResource->GetGPUVirtualAddress();
-		ibv.SizeInBytes = sizeof( uint32 ) * numIndex;
+		ibv.BufferLocation = mIndexBuffer->pResource->GetGPUVirtualAddress();
+		ibv.SizeInBytes = sizeof( uint32 ) * mIndexCount;
 		ibv.Format = DXGI_FORMAT_R32_UINT;
 
-		indexBuffer->Lock( deviceContext );
+		mIndexBuffer->Lock( deviceContext );
 		pCommandList->IASetIndexBuffer( &ibv );
-		pCommandList->DrawIndexedInstanced( ( UINT )numIndex, 1, 0, 0, 0 );
+		pCommandList->DrawIndexedInstanced( ( UINT )mIndexCount, 1, 0, 0, 0 );
 	}
 	else
 	{
-		pCommandList->DrawInstanced( ( UINT )numVertex, 1, 0, 0 );
+		pCommandList->DrawInstanced( ( UINT )mVertexCount, 1, 0, 0 );
 	}
 }
 
 Mesh::Mesh( String name, const vector<Vertex>& vertexBuffer, const vector<uint32>& indexBuffer ) : Assets( name )
 {
-	this->vertexBuffer = new CBuffer(
-		Graphics::mDevice,
-		sizeof( Vertex ) * vertexBuffer.size(),
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-		D3D12_RESOURCE_FLAG_NONE,
-		vertexBuffer.data()
-	);
-
-	this->indexBuffer = new CBuffer(
-		Graphics::mDevice,
-		sizeof( uint32 ) * indexBuffer.size(),
-		D3D12_RESOURCE_STATE_INDEX_BUFFER,
-		D3D12_RESOURCE_FLAG_NONE,
-		indexBuffer.data()
-	);
-
-	this->numVertex = ( int )vertexBuffer.size();
-	this->numIndex = ( int )indexBuffer.size();
+	uint vertexCount = ( uint )vertexBuffer.size();
+	uint indexCount = ( uint )indexBuffer.size();
+	Initialize( vertexBuffer.data(), sizeof( Vertex ), indexBuffer.data(), vertexCount, indexCount );
 }
 
 Mesh::Mesh( String name, const vector<SkinnedVertex>& vertexBuffer, const vector<uint32>& indexBuffer ) : Assets( name )
 {
-	this->vertexBuffer = new CBuffer(
-		Graphics::mDevice,
-		sizeof( SkinnedVertex ) * vertexBuffer.size(),
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
-		D3D12_RESOURCE_FLAG_NONE,
-		vertexBuffer.data()
-	);
-
-	this->indexBuffer = new CBuffer(
-		Graphics::mDevice,
-		sizeof( uint32 ) * indexBuffer.size(),
-		D3D12_RESOURCE_STATE_INDEX_BUFFER,
-		D3D12_RESOURCE_FLAG_NONE,
-		indexBuffer.data()
-	);
-
-	this->numVertex = ( int )vertexBuffer.size();
-	this->numIndex = ( int )indexBuffer.size();
+	uint vertexCount = ( uint )vertexBuffer.size();
+	uint indexCount = ( uint )indexBuffer.size();
+	Initialize( vertexBuffer.data(), sizeof( SkinnedVertex ), indexBuffer.data(), vertexCount, indexCount );
 
 	isSkinned = true;
 }
@@ -310,4 +279,35 @@ RefPtr<Mesh> Mesh::CreateCube( String name )
 	};
 
 	return new Mesh( name, vertexBuffer, indexBuffer );
+}
+
+void Mesh::Initialize( const void* pVertexBuffer, uint vertexStride, const void* pIndexBuffer, uint vertexCount, uint indexCount )
+{
+	mVertexBuffer = new CBuffer(
+		Graphics::mDevice,
+		vertexStride * vertexCount,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		D3D12_RESOURCE_FLAG_NONE,
+		pVertexBuffer
+	);
+
+	mIndexBuffer = new CBuffer(
+		Graphics::mDevice,
+		sizeof( uint32 ) * indexCount,
+		D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		D3D12_RESOURCE_FLAG_NONE,
+		pIndexBuffer
+	);
+
+	mVertexCount = vertexCount;
+	mIndexCount = indexCount;
+
+	mTriangleDesc.Transform3x4 = 0;
+	mTriangleDesc.IndexFormat = DXGI_FORMAT_R32_UINT;
+	mTriangleDesc.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+	mTriangleDesc.IndexCount = mIndexCount;
+	mTriangleDesc.VertexCount = mVertexCount;
+	mTriangleDesc.IndexBuffer = mIndexBuffer->pResource->GetGPUVirtualAddress();
+	mTriangleDesc.VertexBuffer.StartAddress = mVertexBuffer->pResource->GetGPUVirtualAddress();
+	mTriangleDesc.VertexBuffer.StrideInBytes = vertexStride;
 }

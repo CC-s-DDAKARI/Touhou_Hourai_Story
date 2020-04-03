@@ -36,9 +36,10 @@ namespace SC::Game::Details
 		ComPtr<CShaderResourceView> CreateShaderResourceView( ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC* pSRVDesc );
 		ComPtr<CUnorderedAccessView> CreateUnorderedAccessView( ID3D12Resource* pResource, const D3D12_UNORDERED_ACCESS_VIEW_DESC* pUAVDesc );
 		ComPtr<CDynamicBuffer> CreateDynamicBuffer( uint64 sizeInBytes, int alignment = 0 );
+		ComPtr<ID3D12Resource> CreateBuffer( uint64 sizeInBytes, D3D12_RESOURCE_STATES initialState, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE );
 
 		ComPtr<IDXGIAdapter1> pAdapter;
-		ComPtr<ID3D12Device> pDevice;
+		ComPtr<ID3D12Device5> pDevice;
 		ComPtr<ID3D11Device> pDevice11;
 		ComPtr<ID3D11On12Device> pDevice11On12;
 		ComPtr<ID3D11DeviceContext> pDeviceContext11;

@@ -7,6 +7,7 @@ using namespace std;
 using namespace std::filesystem;
 
 multimap<String, RefPtr<Assets>> AssetBundle::assets;
+mutex AssetBundle::mLocker;
 
 inline RefPtr<Assets> getter( object iter )
 {
@@ -22,6 +23,9 @@ void AssetBundle::Dispose( object sender )
 void AssetBundle::Initialize()
 {
 	App::Disposing += Dispose;
+
+	// 기본값을 가지는 어셋 목록을 생성합니다.
+	AddItem( new Material( "default_material" ) );
 }
 
 RefPtr<IEnumerator<RefPtr<Assets>>> AssetBundle::GetEnumerator()
@@ -31,6 +35,7 @@ RefPtr<IEnumerator<RefPtr<Assets>>> AssetBundle::GetEnumerator()
 
 void AssetBundle::AddItem( RefPtr<Assets> value )
 {
+	lock_guard<mutex> lock( mLocker );
 	assets.insert( { value->Name, value } );
 }
 

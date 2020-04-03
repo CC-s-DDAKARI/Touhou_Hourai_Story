@@ -18,6 +18,7 @@ namespace SC::Game
 		using ComponentPair = std::pair<std::size_t, RefPtr<Component>>;
 		std::vector<ComponentPair> components;
 		RefPtr<Transform> transform;
+		BottomLevelAccelerationStructure* mBLAS = nullptr;
 
 		std::vector<RefPtr<GameObject>> gameObjects;
 		GameObject* parent = nullptr;

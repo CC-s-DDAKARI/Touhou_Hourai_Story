@@ -203,6 +203,7 @@
     <ClCompile Include="AssetBundle.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="BottomLevelAccelerationStructure.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="CapsuleCollider.cpp" />
     <ClCompile Include="Collider.cpp" />
@@ -284,6 +285,7 @@
     <ClInclude Include="..\Include\SC.Game\AssetBundle.h" />
     <ClInclude Include="..\Include\SC.Game\Assets.h" />
     <ClInclude Include="..\Include\SC.Game\Bone.h" />
+    <ClInclude Include="..\Include\SC.Game\BottomLevelAccelerationStructure.h" />
     <ClInclude Include="..\Include\SC.Game\BoxCollider.h" />
     <ClInclude Include="..\Include\SC.Game\Camera.h" />
     <ClInclude Include="..\Include\SC.Game\CameraClearMode.h" />

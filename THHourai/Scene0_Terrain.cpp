@@ -65,12 +65,14 @@ void Scene0_Terrain::InitializeComponents()
 	RefPtr<GameObject> test01 = new ColliderBoxVisualizer( "test01" );
 	test01->AddComponent<Rigidbody>();
 	test01->AddComponent<BoxCollider>();
+	test01->AddComponent<BottomLevelAccelerationStructure>();
 	test01->Transform->Position = Vector3( 3, 1, 3 );
 	test01->Parent = this;
 
 	test01 = new ColliderBoxVisualizer( "test02" );
 	test01->AddComponent<Rigidbody>();
 	test01->AddComponent<BoxCollider>();
+	test01->AddComponent<BottomLevelAccelerationStructure>();
 	test01->Transform->Position = Vector3( 5, 1, 3 );
 	test01->Parent = this;
 

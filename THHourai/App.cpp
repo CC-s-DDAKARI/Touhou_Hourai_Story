@@ -24,8 +24,6 @@ void App::OnStart()
 
 	::frame = Frame;
 
-	var textureTemp = new Texture2D( "templeBase01_diffuse", "Assets/Texture/templeBase01_diffuse.jpg" );
-
 	SceneManager::LoadScene<DemoScene>();
 }
 

@@ -38,7 +38,7 @@ namespace SC::Game::Details
 		void DispatchShaderInfo( int numStructs, const tag_ShaderInfo* pShaderInfos );
 
 		CCommandQueue* pCommandQueue = nullptr;
-		ComPtr<ID3D12GraphicsCommandList> pCommandList;
+		ComPtr<ID3D12GraphicsCommandList4> pCommandList;
 		bool Failure = false;
 		int FrameIndex = 0;
 

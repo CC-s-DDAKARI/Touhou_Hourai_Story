@@ -51,6 +51,12 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 	else if ( MeshRenderer* pIsMR = dynamic_cast< MeshRenderer* >( pComponent ); pIsMR )
 	{
 		transform->CreateBuffer();
+
+		if ( mBLAS )
+		{
+			mBLAS->mMeshRenderers = GetComponentsInChildren<MeshRenderer>();
+			mBLAS->InitializeBuffers();
+		}
 	}
 
 	else if ( SkinnedMeshRenderer* pIsSMR = dynamic_cast< SkinnedMeshRenderer* >( pComponent ); pIsSMR )
@@ -106,6 +112,18 @@ bool GameObject::OnAddComponent( size_t typeId, Component* pComponent )
 		pIsCol->AttachToActor( pxRigidbody );
 	}
 
+	else if ( BottomLevelAccelerationStructure* pIsBLAS = dynamic_cast< BottomLevelAccelerationStructure* >( pComponent ); pIsBLAS )
+	{
+		mBLAS = pIsBLAS;
+		mBLAS->mMeshRenderers = GetComponentsInChildren<MeshRenderer>();
+		mBLAS->InitializeBuffers();
+
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
 	return true;
 }
 
@@ -151,6 +169,16 @@ bool GameObject::OnRemoveComponent( size_t typeId, Component* pComponent )
 
 	else if ( ThreadDispatcher* pIsLight = dynamic_cast< ThreadDispatcher* >( pComponent ); pIsLight )
 	{
+		if ( pScene )
+		{
+			pScene->updateSceneGraph = true;
+		}
+	}
+
+	else if ( BottomLevelAccelerationStructure* pIsBLAS = dynamic_cast< BottomLevelAccelerationStructure* >( pComponent ); pIsBLAS )
+	{
+		mBLAS = nullptr;
+
 		if ( pScene )
 		{
 			pScene->updateSceneGraph = true;

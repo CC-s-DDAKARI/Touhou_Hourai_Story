@@ -34,6 +34,7 @@ namespace SC::Game
 		std::list<Camera*> mSceneCameras;
 		std::list<Light*> mSceneLights;
 		std::list<Terrain*> mSceneTerrains;
+		std::list<BottomLevelAccelerationStructure*> mSceneBLAS;
 
 		std::vector<RefPtr<GameObject>> mSceneGraphBackup;
 

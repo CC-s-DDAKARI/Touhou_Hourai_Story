@@ -253,6 +253,12 @@ void GameLogic::CommitBuffer( int frameIndex )
 
 	HeapAllocator::Commit( frameIndex, *mDeviceContextCommit.Get() );
 
+	auto& blas = mCurrentScene->mSceneBLAS;
+	for ( auto i : blas )
+	{
+		i->BuildRaytracingAccelerationStructure( mDeviceContextCommit );
+	}
+
 	mDeviceContextCommit->Close();
 	directQueue->Execute( mDeviceContextCommit.Get() );
 }

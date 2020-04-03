@@ -8,6 +8,7 @@ namespace SC::Game
 		friend class Details::App;
 
 		static std::multimap<String, RefPtr<Assets>> assets;
+		static std::mutex mLocker;
 
 		static void Dispose( object sender );
 		static void Initialize();

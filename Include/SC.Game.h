@@ -6,10 +6,12 @@
 #if defined( __SC_GAME_EXPORT_SYMBOL__ )
 #define sc_game_export_object( type ) type
 #define sc_game_export_float( type, alignOf ) type
+#define sc_game_export_bytes( type, sizeInBytes ) type
 #define sc_game_export_symbol __declspec( dllexport )
 #else
 #define sc_game_export_object( type ) object
 #define sc_game_export_float( type, alignOf ) std::array<float, alignOf>
+#define sc_game_export_bytes( type, sizeInBytes ) std::array<uint8, sizeInBytes>
 #define sc_game_export_symbol __declspec( dllimport )
 #endif
 
@@ -65,6 +67,7 @@ namespace SC::Game
 	class ThreadDispatcher;
 	class Terrain;
 	class TerrainCollider;
+	class BottomLevelAccelerationStructure;
 
 	namespace UI
 	{
@@ -185,6 +188,7 @@ namespace SC::Game
 #include "SC.Game/ThreadDispatcher.h"
 #include "SC.Game/Terrain.h"
 #include "SC.Game/TerrainCollider.h"
+#include "SC.Game/BottomLevelAccelerationStructure.h"
 #include "SC.Game/UI.EventDispatcher.h"
 #include "SC.Game/UI.DispatcherEventArgs.h"
 #include "SC.Game/UI.Brush.h"

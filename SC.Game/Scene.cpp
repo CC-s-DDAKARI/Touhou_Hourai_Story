@@ -381,6 +381,7 @@ void Scene::ClearSceneGraph()
 	mSceneCameras.clear();
 	mSceneLights.clear();
 	mSceneTerrains.clear();
+	mSceneBLAS.clear();
 
 	mCoreThreadSceneGraph.clear();
 	mThreadSceneGraph.clear();
@@ -435,6 +436,11 @@ void Scene::SearchComponents()
 		if ( auto t = i->GetComponent<Terrain>(); t )
 		{
 			mSceneTerrains.push_back( t );
+		}
+
+		if ( auto t = i->GetComponent<BottomLevelAccelerationStructure>(); t )
+		{
+			mSceneBLAS.push_back( t );
 		}
 	}
 

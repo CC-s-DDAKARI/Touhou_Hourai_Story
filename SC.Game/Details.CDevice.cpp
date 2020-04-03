@@ -185,6 +185,25 @@ ComPtr<CDynamicBuffer> CDevice::CreateDynamicBuffer( uint64 sizeInBytes, int ali
 	return new CDynamicBuffer( pAlloc, index, virAddr, pBlock );
 }
 
+ComPtr<ID3D12Resource> CDevice::CreateBuffer( uint64 sizeInBytes, D3D12_RESOURCE_STATES initialState, D3D12_RESOURCE_FLAGS flags )
+{
+	D3D12_HEAP_PROPERTIES heapProp{ D3D12_HEAP_TYPE_DEFAULT };
+	D3D12_RESOURCE_DESC bufferDesc{ };
+	bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	bufferDesc.Width = sizeInBytes;
+	bufferDesc.Height = 1;
+	bufferDesc.DepthOrArraySize = 1;
+	bufferDesc.MipLevels = 1;
+	bufferDesc.SampleDesc = { 1, 0 };
+	bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	bufferDesc.Flags = flags;
+
+	ComPtr<ID3D12Resource> pResource;
+	HR( pDevice->CreateCommittedResource( &heapProp, D3D12_HEAP_FLAG_NONE, &bufferDesc, initialState, nullptr, IID_PPV_ARGS( &pResource ) ) );
+
+	return move( pResource );
+}
+
 void CDevice::InitializeInterop()
 {
 	auto pCommandQueue = DirectQueue[3]->pCommandQueue.Get();

@@ -20,11 +20,6 @@ namespace SC::Game::Details
 		static RefPtr<Mesh> mSkyboxMesh;
 		static RefPtr<Scene> mCurrentScene;
 
-		static std::list<GameObject*> mSceneGraph;
-		static std::list<Camera*> mSceneCameras;
-		static std::list<Light*> mSceneLights;
-		static std::list<Terrain*> mSceneTerrains;
-
 		// 멀티 스레드를 위한 추가 개체입니다.
 		static std::atomic<int> mCompletedValue;
 		static int mCompletedGoal;
